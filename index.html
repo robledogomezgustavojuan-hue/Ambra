@@ -232,7 +232,12 @@
         </div>
         <div class="card-premium">
             <h3><i class="fas fa-chart-simple"></i> Últimas dívidas</h3>
-            <div class="table-wrapper"><table class="table-dark-premium" id="miniDebtsTable"><thead><tr><th>Credor</th><th>Descrição</th><th>Restante</th></tr></thead><tbody id="miniDebtsBody"></tbody></table></div>
+            <div class="table-wrapper">
+                <table class="table-dark-premium" id="miniDebtsTable">
+                    <thead><tr><th>Credor</th><th>Descrição</th><th>Parcela</th><th>Pendentes</th><th>Restante</th></tr></thead>
+                    <tbody id="miniDebtsBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -536,7 +541,6 @@
     function formatMoney(v) { return `R$ ${v.toFixed(2).replace('.',',')}`; }
 
     function showToast(msg, type='success') {
-        // Remove toasts anteriores para evitar acúmulo
         const existingToasts = document.querySelectorAll('.toast-msg');
         existingToasts.forEach(t => t.remove());
         let t = document.createElement('div'); t.className = 'toast-msg'; t.innerHTML = `<i class="fas ${type==='danger'?'fa-exclamation-triangle':'fa-check-circle'}"></i> ${msg}`;
@@ -570,7 +574,6 @@
     function getParcelDueDate(startDate, parcelIndex, periodicidade, excludedDays = [], holidays = []) {
         let date = new Date(startDate);
         for (let i = 0; i < parcelIndex; i++) {
-            // CORRIGIDO: uso de setMonth para periodicidade mensal
             if (periodicidade === 'mensal') {
                 date.setMonth(date.getMonth() + 1);
             } else if (periodicidade === 'semanal') {
@@ -578,7 +581,6 @@
             } else { // diario
                 date.setDate(date.getDate() + 1);
             }
-            // Ajusta finais de semana e feriados
             let dayOfWeek = date.getDay();
             let dayMonth = `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}`;
             while (excludedDays.includes(dayOfWeek) || holidays.includes(dayMonth)) {
@@ -594,7 +596,6 @@
         let debt = currentUserData.debts.find(d => d.id === debtId);
         if (!debt) return 0;
         let paid = currentUserData.payments.filter(p => p.debtId === debtId).reduce((s,p)=>s+p.amount,0);
-        // CORRIGIDO: evita saldo negativo
         return Math.max(0, debt.totalFinanciado - paid);
     }
 
@@ -612,7 +613,9 @@
     function calcTotals() {
         let totalDebt = currentUserData.debts.reduce((s,d)=>s + d.totalFinanciado, 0);
         let totalPaid = currentUserData.payments.reduce((s,p)=>s+p.amount,0);
-        return { totalDebt, totalPaid, balance: totalDebt - totalPaid, active: currentUserData.debts.length };
+        // CORRIGIDO: conta apenas dívidas com saldo > 0
+        let activeCount = currentUserData.debts.filter(d => getRemaining(d.id) > 0).length;
+        return { totalDebt, totalPaid, balance: totalDebt - totalPaid, active: activeCount };
     }
 
     function updateStatsUI() {
@@ -631,26 +634,19 @@
             if (remaining <= 0) return;
             if (debt.isParceled) {
                 let startDate = new Date(debt.originDateTime);
-                // CORRIGIDO: itera sobre todas as parcelas, não apenas a primeira encontrada
                 for (let i = 0; i < debt.parcelCount; i++) {
                     let dueDate = getParcelDueDate(startDate, i+1, debt.periodicity, debt.excludedDays || [], debt.holidays || []);
                     dueDate.setHours(0,0,0,0);
                     if (dueDate.getTime() === hoje.getTime()) {
                         let paidUpTo = currentUserData.payments.filter(p => p.debtId === debt.id).reduce((sum, p) => sum + p.amount, 0);
                         let valorParcela = debt.parcelValue;
-                        // Valor acumulado que deveria ter sido pago até esta parcela (inclusive)
                         let accumulatedDue = valorParcela * (i + 1);
-                        // O quanto já foi pago além das parcelas anteriores
-                        let paidForPrevious = valorParcela * i;
                         let remainingForThis = Math.max(0, accumulatedDue - paidUpTo);
-                        // Se ainda há algo devido para esta parcela
                         if (remainingForThis > 0) {
-                            // Limita ao valor de uma parcela
                             let valorParcelaDevido = Math.min(valorParcela, remainingForThis);
                             total += valorParcelaDevido;
                             detalhes.push({ texto: `${debt.title} (${debt.credor}) - parcela ${i+1}: ${formatMoney(valorParcelaDevido)}` });
                         }
-                        // Não usar break, pois podem haver múltiplas parcelas vencendo no mesmo dia (atraso acumulado)
                     }
                 }
             } else {
@@ -682,13 +678,21 @@
     function renderMiniDebts() {
         let tbody = document.getElementById('miniDebtsBody');
         tbody.innerHTML = '';
-        if(currentUserData.debts.length === 0) { tbody.innerHTML = '<tr><td colspan="3">Nenhuma dívida</td></tr>'; return; }
-        currentUserData.debts.slice(0,3).forEach(d => {
+        // Mostra apenas dívidas ativas (saldo > 0) até 3
+        let activeDebts = currentUserData.debts.filter(d => getRemaining(d.id) > 0).slice(0,3);
+        if(activeDebts.length === 0) { tbody.innerHTML = '<tr><td colspan="5">Nenhuma dívida ativa</td></tr>'; return; }
+        activeDebts.forEach(d => {
             let remaining = getRemaining(d.id);
             let row = tbody.insertRow();
             row.insertCell(0).innerText = d.credor;
             row.insertCell(1).innerText = d.title;
-            row.insertCell(2).innerHTML = remaining<=0 ? '<span style="color:#10b981">Quitado</span>' : formatMoney(remaining);
+            // Parcela: valor se parcelado, senão "À vista"
+            let parcelaInfo = d.isParceled ? formatMoney(d.parcelValue) : 'À vista';
+            row.insertCell(2).innerHTML = parcelaInfo;
+            // Pendentes
+            row.insertCell(3).innerHTML = getParcelasPendentes(d);
+            // Restante
+            row.insertCell(4).innerHTML = remaining<=0 ? '<span style="color:#10b981">Quitado</span>' : formatMoney(remaining);
         });
     }
 
@@ -879,7 +883,6 @@
         });
     }
 
-    // Função de renderização com debounce para evitar múltiplas chamadas consecutivas
     function scheduleRender() {
         clearTimeout(renderTimeout);
         renderTimeout = setTimeout(() => renderAll(), 80);
@@ -942,7 +945,6 @@
     function startListening() {
         if (!auth.currentUser) return;
         const uid = auth.currentUser.uid;
-        // Garante que listeners anteriores sejam removidos
         if (unsubscribeDebts) { unsubscribeDebts(); unsubscribeDebts = null; }
         if (unsubscribePayments) { unsubscribePayments(); unsubscribePayments = null; }
 
@@ -1431,7 +1433,6 @@
             const userRef = db.collection('users').doc(uid);
             const userDoc = await userRef.get();
             if (!userDoc.exists) return;
-            // CORRIGIDO: só atualiza senha se o campo não estiver vazio
             if (newPass && newPass.trim() !== '') {
                 if (newPass.length < 6) { showToast('Senha deve ter no mínimo 6 caracteres', 'danger'); return; }
                 if (newPass !== confirmPass) { showToast('Senhas não coincidem', 'danger'); return; }
@@ -1476,6 +1477,13 @@
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
             let activeNav = Array.from(document.querySelectorAll('.nav-item')).find(btn => btn.dataset.section === sectionId);
             if(activeNav) activeNav.classList.add('active');
+        }
+        document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => setActiveSection(btn.dataset.section)));
+        document.getElementById('goToPaymentsBtn').addEventListener('click', () => setActiveSection('sectionPayments'));
+    };
+</script>
+</body>
+</html>av.classList.add('active');
         }
         document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => setActiveSection(btn.dataset.section)));
         document.getElementById('goToPaymentsBtn').addEventListener('click', () => setActiveSection('sectionPayments'));
