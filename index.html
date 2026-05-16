@@ -499,7 +499,7 @@
     let currentUserData = { debts: [], payments: [] };
     let unsubscribeDebts = null;
     let unsubscribePayments = null;
-    let renderTimeout = null; // Debounce para evitar múltiplos renderAll
+    let renderTimeout = null;
 
     // ========== FUNÇÕES AUXILIARES ==========
     function applyDateMask(input) {
@@ -686,12 +686,9 @@
             let row = tbody.insertRow();
             row.insertCell(0).innerText = d.credor;
             row.insertCell(1).innerText = d.title;
-            // Parcela: valor se parcelado, senão "À vista"
             let parcelaInfo = d.isParceled ? formatMoney(d.parcelValue) : 'À vista';
             row.insertCell(2).innerHTML = parcelaInfo;
-            // Pendentes
             row.insertCell(3).innerHTML = getParcelasPendentes(d);
-            // Restante
             row.insertCell(4).innerHTML = remaining<=0 ? '<span style="color:#10b981">Quitado</span>' : formatMoney(remaining);
         });
     }
@@ -1479,6 +1476,11 @@
             if(activeNav) activeNav.classList.add('active');
         }
         document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => setActiveSection(btn.dataset.section)));
+        document.getElementById('goToPaymentsBtn').addEventListener('click', () => setActiveSection('sectionPayments'));
+    };
+</script>
+</body>
+</html>);
         document.getElementById('goToPaymentsBtn').addEventListener('click', () => setActiveSection('sectionPayments'));
     };
 </script>
