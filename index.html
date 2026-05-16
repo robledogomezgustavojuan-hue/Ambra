@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <style>
+        /* ========== RESET E GLOBAL ========== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #0B0605;
@@ -23,6 +24,7 @@
             width: 100%;
             max-width: 100vw;
         }
+        /* ANIMAÇÕES */
         @keyframes borderGlowCard {
             0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3), 0 10px 30px rgba(0,0,0,0.55); border-color: rgba(255,255,255,0.2); }
             50% { box-shadow: 0 0 0 3px rgba(255,255,255,0.6), 0 0 15px 2px rgba(255,122,26,0.4), 0 10px 30px rgba(0,0,0,0.55); border-color: rgba(255,255,255,0.5); }
@@ -312,9 +314,9 @@
             <h3><i class="fas fa-table-list"></i> Lista de dívidas (ativas)</h3>
             <div class="table-wrapper">
                 <table class="table-dark-premium" id="fullDebtsTable">
-                    <thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Restante</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Vencimento</th><th></th></tr></thead>
+                    <thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Restante</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Vencimento</th><th></th></td></thead>
                     <tbody id="debtsTableBody"></tbody>
-                </tr>
+                </table>
             </div>
         </div>
     </div>
@@ -369,6 +371,7 @@
             </div>
             <button id="registerPaymentAction" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-check-circle"></i> Registrar pagamento</button>
         </div>
+
         <div class="card-premium">
             <h3>Histórico de pagamentos</h3>
             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1rem;">
@@ -675,7 +678,7 @@
         let tbody = document.getElementById('debtsTableBody');
         tbody.innerHTML = '';
         let activeDebts = currentUserData.debts.filter(d => getRemaining(d.id) > 0);
-        if(activeDebts.length === 0) { tbody.innerHTML = '<tr><td colspan="12">Nenhuma dívida ativa. As quitadas foram removidas da lista. </td></tr>'; return; }
+        if(activeDebts.length === 0) { tbody.innerHTML = '<tr><td colspan="12">Nenhuma dívida ativa. As quitadas foram removidas da lista. <tr></tr>'; return; }
         activeDebts.forEach(d => {
             let remaining = getRemaining(d.id);
             let row = tbody.insertRow();
@@ -838,7 +841,7 @@
             monthlyData[key].paid += pagos;
         });
         let sortedMonths = Object.keys(monthlyData).sort();
-        let tableHtml = '<table class="month-table"><thead><tr><th>Mês</th><th>Total criado (R$)</th><th>Total pago (R$)</th><th>Qtd dívidas</th><tr></thead><tbody>';
+        let tableHtml = '<table class="month-table"><thead><tr><th>Mês</th><th>Total criado (R$)</th><th>Total pago (R$)</th><th>Qtd dívidas</th></tr></thead><tbody>';
         sortedMonths.forEach(month => {
             let data = monthlyData[month];
             tableHtml += `<tr><td>${month}</td><td>${formatMoney(data.total)}</td><td>${formatMoney(data.paid)}</td><td>${data.count}</td></tr>`;
