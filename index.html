@@ -6,7 +6,7 @@
     <title>ÂMBRA | Controle de Dívidas</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Firebase SDKs (versão compat) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -148,14 +148,18 @@
         @media (max-width: 680px) { .value-large { font-size: 28px; } .stat-block { padding: 0.8rem; } .today-debt-value { font-size: 1.6rem; } }
         .avatar-top { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid #FF7A1A; margin-bottom: 8px; }
         .user-name-top { font-size: 1.2rem; font-weight: 600; margin-bottom: 12px; }
-        .modal-aura { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-aura {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
+            display: none; align-items: center; justify-content: center;
+            z-index: 2000;
+        }
         .modal-aura.active { display: flex; }
-        .modal-inner { background: #16100F; border-radius: 40px; max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.8rem; border: 1px solid rgba(255,122,26,0.3); }
-        .admin-tabs { display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; }
-        .admin-tab { padding: 0.5rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 500; }
-        .admin-tab.active { border-bottom-color: #FF7A1A; color: #FF7A1A; }
-        .admin-panel { display: none; }
-        .admin-panel.active { display: block; }
+        .modal-inner {
+            background: #16100F; border-radius: 40px; max-width: 500px;
+            width: 95%; max-height: 90vh; overflow-y: auto;
+            padding: 1.8rem; border: 1px solid rgba(255,122,26,0.3);
+        }
         .avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #0a0a0a; border: 2px solid #FF7A1A; margin-bottom: 12px; }
         .diagram-card { background: rgba(0,0,0,0.3); border-radius: 24px; padding: 1rem; margin: 1rem 0; }
         .diagram-stat { display: flex; justify-content: space-between; margin: 8px 0; padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -203,7 +207,6 @@
         <div class="user-name-top"><span id="userNameDisplay" class="badge-amber"></span></div>
         <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
             <button id="editProfileBtn" class="btn-outline-light"><i class="fas fa-user-edit"></i> Perfil</button>
-            <button id="openAdminBtn" class="btn-outline-light" style="display: none;"><i class="fas fa-crown"></i> Admin</button>
             <button id="openHistoryAnalyticsBtn" class="btn-outline-light"><i class="fas fa-chart-line"></i> Análises</button>
             <button id="logoutDashBtn" class="btn-outline-light"><i class="fas fa-sign-out-alt"></i> Sair</button>
         </div>
@@ -375,7 +378,7 @@
             </div>
             <div class="table-wrapper">
                 <table class="table-dark-premium">
-                    <thead><tr><th>Data/Hora</th><th>Credor</th><th>Valor</th><th>Método</th><th>Chave utilizada</th><th></th></tr></thead>
+                    <thead><tr><th>Data/Hora</th><th>Credor</th><th>Valor</th><th>Método</th><th>Chave utilizada</th><th></th></table></thead>
                     <tbody id="paymentsHistoryBody"></tbody>
                 </table>
             </div>
@@ -439,32 +442,6 @@
     </div>
 </div>
 
-<!-- MODAL ADMIN -->
-<div id="adminModal" class="modal-aura">
-    <div class="modal-inner">
-        <div style="display: flex; justify-content: space-between;"><h2><i class="fas fa-crown"></i> Painel do Administrador</h2><span id="closeAdminModalBtn" style="font-size: 28px; cursor: pointer;">&times;</span></div>
-        <div class="admin-tabs">
-            <div class="admin-tab active" data-tab="stats">📊 Dashboard</div>
-            <div class="admin-tab" data-tab="users">👥 Usuários</div>
-        </div>
-        <div id="adminStatsPanel" class="admin-panel active">
-            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px,1fr));">
-                <div class="stat-block"><div class="text-muted">Total Usuários</div><div class="value-large" id="statTotalUsers">0</div></div>
-                <div class="stat-block"><div class="text-muted">Total Dívidas</div><div class="value-large" id="statTotalDebtsAdmin">0</div></div>
-                <div class="stat-block"><div class="text-muted">Total Pagamentos</div><div class="value-large" id="statTotalPaymentsAdmin">0</div></div>
-                <div class="stat-block"><div class="text-muted">Valor Bruto (R$)</div><div class="value-large" id="statTotalBruto">0,00</div></div>
-                <div class="stat-block"><div class="text-muted">Valor Pago (R$)</div><div class="value-large" id="statTotalPagoAdmin">0,00</div></div>
-                <div class="stat-block"><div class="text-muted">Saldo Devedor (R$)</div><div class="value-large" id="statTotalDevedorAdmin">0,00</div></div>
-            </div>
-            <div style="display: flex; gap:1rem; flex-wrap:wrap;"><div style="flex:1"><canvas id="adminUserGrowthChart"></canvas></div><div style="flex:1"><canvas id="adminDebtsGrowthChart"></canvas></div></div>
-        </div>
-        <div id="adminUsersPanel" class="admin-panel">
-            <div style="display: flex; gap: 12px; margin-bottom: 1rem;"><input type="text" id="searchUserInput" placeholder="Buscar por nome ou e-mail..."><button id="exportUsersBtn" class="btn-amber btn-sm" style="padding: 8px 16px;">📎 CSV</button></div>
-            <div id="usersListContainer" class="table-wrapper">Carregando...</div>
-        </div>
-    </div>
-</div>
-
 <!-- MODAL EDITAR PERFIL -->
 <div id="profileModal" class="modal-aura">
     <div class="modal-inner">
@@ -512,7 +489,6 @@
     // ========== VARIÁVEIS GLOBAIS ==========
     let currentUser = null;
     let currentUserData = { debts: [], payments: [] };
-    let isAdmin = false;
     let unsubscribeDebts = null;
     let unsubscribePayments = null;
 
@@ -598,7 +574,7 @@
         return date;
     }
 
-    // ========== FUNÇÕES DE CÁLCULO (baseadas nos dados atuais) ==========
+    // ========== FUNÇÕES DE CÁLCULO ==========
     function getRemaining(debtId) {
         let debt = currentUserData.debts.find(d => d.id === debtId);
         if (!debt) return 0;
@@ -685,7 +661,7 @@
         document.getElementById('statActiveCount').innerText = active;
     }
 
-    // ========== RENDERIZAÇÃO DAS TELAS (usando currentUserData) ==========
+    // ========== RENDERIZAÇÃO (usando currentUserData) ==========
     function renderMiniDebts() {
         let tbody = document.getElementById('miniDebtsBody');
         tbody.innerHTML = '';
@@ -702,7 +678,7 @@
         let tbody = document.getElementById('debtsTableBody');
         tbody.innerHTML = '';
         let activeDebts = currentUserData.debts.filter(d => getRemaining(d.id) > 0);
-        if(activeDebts.length === 0) { tbody.innerHTML = '<tr><td colspan="12">Nenhuma dívida ativa. As quitadas foram removidas da lista. </td></td>'; return; }
+        if(activeDebts.length === 0) { tbody.innerHTML = '<tr><td colspan="12">Nenhuma dívida ativa. As quitadas foram removidas da lista. </td></tr>'; return; }
         activeDebts.forEach(d => {
             let remaining = getRemaining(d.id);
             let row = tbody.insertRow();
@@ -779,7 +755,7 @@
         let tbody = document.getElementById('fullHistoryBody');
         tbody.innerHTML = '';
         if (currentUserData.debts.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="11">Nenhuma dívida registrada. <tr></table>'; return;
+            tbody.innerHTML = '<tr><td colspan="11">Nenhuma dívida registrada. <tr></tr>'; return;
         }
         currentUserData.debts.forEach(d => {
             let remaining = getRemaining(d.id);
@@ -806,7 +782,6 @@
             delBtn.onclick = async () => {
                 if(confirm(`Excluir permanentemente a dívida "${d.title}"? Isso também removerá todos os pagamentos associados.`)) {
                     await db.collection('debts').doc(d.id).delete();
-                    // os pagamentos serão excluídos em cascata via regras ou manualmente
                     showToast('Dívida excluída permanentemente', 'danger');
                 }
             };
@@ -863,7 +838,7 @@
             let data = monthlyData[month];
             tableHtml += `<tr><td>${month}</td><td>${formatMoney(data.total)}</td><td>${formatMoney(data.paid)}</td><td>${data.count}</td></tr>`;
         });
-        tableHtml += '</tbody></table>';
+        tableHtml += '</tbody></td>';
         document.getElementById('monthlyEvolutionTable').innerHTML = tableHtml;
     }
 
@@ -885,13 +860,9 @@
         try {
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
             const uid = userCredential.user.uid;
-            // Verifica se é o primeiro usuário (admin)
-            const usersSnapshot = await db.collection('users').get();
-            const role = usersSnapshot.empty ? 'admin' : 'user';
             await db.collection('users').doc(uid).set({
                 username: username,
                 email: email,
-                role: role,
                 avatar: null,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
@@ -919,7 +890,6 @@
             if (unsubscribeDebts) unsubscribeDebts();
             if (unsubscribePayments) unsubscribePayments();
             currentUser = null;
-            isAdmin = false;
             document.getElementById('dashboardApp').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('loginUser').value = '';
@@ -931,7 +901,6 @@
     function startListening() {
         if (!auth.currentUser) return;
         const uid = auth.currentUser.uid;
-        // Escutar dívidas
         if (unsubscribeDebts) unsubscribeDebts();
         unsubscribeDebts = db.collection('debts').where('userId', '==', uid).onSnapshot(snapshot => {
             const debts = [];
@@ -939,7 +908,6 @@
             currentUserData.debts = debts;
             renderAll();
         });
-        // Escutar pagamentos
         if (unsubscribePayments) unsubscribePayments();
         unsubscribePayments = db.collection('payments').where('userId', '==', uid).onSnapshot(snapshot => {
             const payments = [];
@@ -947,12 +915,9 @@
             currentUserData.payments = payments;
             renderAll();
         });
-        // Buscar dados do usuário para role e avatar
         db.collection('users').doc(uid).get().then(doc => {
             if (doc.exists) {
                 const userData = doc.data();
-                isAdmin = userData.role === 'admin';
-                document.getElementById('openAdminBtn').style.display = isAdmin ? 'inline-flex' : 'none';
                 document.getElementById('userNameDisplay').innerText = userData.username;
                 if (userData.avatar) document.getElementById('userAvatarImg').src = userData.avatar;
                 renderAll();
@@ -973,21 +938,6 @@
             document.getElementById('loginScreen').style.display = 'flex';
         }
     });
-
-    // ========== FUNÇÕES DE CADASTRO DE DÍVIDAS E PAGAMENTOS (Firebase) ==========
-    async function addDebtFirebase(debtData) {
-        const uid = auth.currentUser?.uid;
-        if (!uid) throw new Error('Usuário não autenticado');
-        await db.collection('debts').add({ userId: uid, ...debtData });
-        showToast('Dívida adicionada com sucesso!', 'success');
-    }
-
-    async function addPaymentFirebase(paymentData) {
-        const uid = auth.currentUser?.uid;
-        if (!uid) throw new Error('Usuário não autenticado');
-        await db.collection('payments').add({ userId: uid, ...paymentData });
-        showToast('Pagamento registrado com sucesso!', 'success');
-    }
 
     // ========== FUNÇÕES DE PERFIL E AVATAR ==========
     function updateUserAvatarInUI() {
@@ -1058,119 +1008,24 @@
         reader.readAsDataURL(file);
     }
 
-    // ========== FUNÇÕES ADMIN (simplificadas para demo) ==========
-    async function loadAdminStats() {
-        if (!isAdmin) return;
-        const usersSnapshot = await db.collection('users').get();
-        const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        let totalDebtsCount = 0, totalPaymentsCount = 0, totalBruto = 0, totalPago = 0;
-        let userDates = [];
-        for (const user of users) {
-            const debtsSnap = await db.collection('debts').where('userId', '==', user.id).get();
-            const paymentsSnap = await db.collection('payments').where('userId', '==', user.id).get();
-            totalDebtsCount += debtsSnap.size;
-            totalPaymentsCount += paymentsSnap.size;
-            debtsSnap.forEach(d => totalBruto += d.data().totalFinanciado);
-            paymentsSnap.forEach(p => totalPago += p.data().amount);
-            if (debtsSnap.docs[0]) userDates.push(new Date(debtsSnap.docs[0].data().originDateTime));
-            else userDates.push(new Date());
-        }
-        const totalDevedor = totalBruto - totalPago;
-        document.getElementById('statTotalUsers').innerHTML = users.length;
-        document.getElementById('statTotalDebtsAdmin').innerHTML = totalDebtsCount;
-        document.getElementById('statTotalPaymentsAdmin').innerHTML = totalPaymentsCount;
-        document.getElementById('statTotalBruto').innerHTML = totalBruto.toFixed(2);
-        document.getElementById('statTotalPagoAdmin').innerHTML = totalPago.toFixed(2);
-        document.getElementById('statTotalDevedorAdmin').innerHTML = totalDevedor.toFixed(2);
-
-        const months = {};
-        userDates.forEach(d => { const key = `${d.getFullYear()}-${d.getMonth()+1}`; months[key] = (months[key]||0)+1; });
-        const sorted = Object.keys(months).sort();
-        new Chart(document.getElementById('adminUserGrowthChart'), { type:'line', data:{ labels:sorted, datasets:[{ label:'Novos Usuários', data:sorted.map(m=>months[m]), borderColor:'#FF7A1A', fill:false }] } });
-
-        const allDebts = [];
-        for (const user of users) {
-            const debtsSnap = await db.collection('debts').where('userId', '==', user.id).get();
-            debtsSnap.forEach(d => { if(d.data().originDateTime) allDebts.push(new Date(d.data().originDateTime)); });
-        }
-        const debtsMonths = {};
-        allDebts.forEach(d => { const key = `${d.getFullYear()}-${d.getMonth()+1}`; debtsMonths[key] = (debtsMonths[key]||0)+1; });
-        const debtsSorted = Object.keys(debtsMonths).sort();
-        new Chart(document.getElementById('adminDebtsGrowthChart'), { type:'bar', data:{ labels:debtsSorted, datasets:[{ label:'Dívidas Criadas', data:debtsSorted.map(m=>debtsMonths[m]), backgroundColor:'#FF7A1A' }] } });
+    // ========== FUNÇÕES DE DÍVIDAS E PAGAMENTOS (Firebase) ==========
+    async function addDebtFirebase(debtData) {
+        const uid = auth.currentUser?.uid;
+        if (!uid) throw new Error('Usuário não autenticado');
+        await db.collection('debts').add({ userId: uid, ...debtData });
+        showToast('Dívida adicionada com sucesso!', 'success');
     }
 
-    async function loadUsersList(searchTerm='') {
-        const container = document.getElementById('usersListContainer');
-        let usersSnapshot = await db.collection('users').get();
-        let users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if(searchTerm) {
-            searchTerm = searchTerm.toLowerCase();
-            users = users.filter(u => u.username.toLowerCase().includes(searchTerm) || (u.email && u.email.toLowerCase().includes(searchTerm)));
-        }
-        container.innerHTML = '';
-        for(const user of users) {
-            const debtsSnap = await db.collection('debts').where('userId', '==', user.id).get();
-            const paymentsSnap = await db.collection('payments').where('userId', '==', user.id).get();
-            const div = document.createElement('div');
-            div.className = 'stat-block';
-            div.style.marginBottom = '10px';
-            div.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
-                    <div><strong>${user.username}</strong> ${user.role === 'admin' ? '👑' : ''}<br><small>${user.email || ''}</small><br><small>Dívidas: ${debtsSnap.size} | Pagamentos: ${paymentsSnap.size}</small></div>
-                    <div>
-                        <button class="btn-outline-light reset-pw" data-user="${user.id}" data-email="${user.email}" style="margin-right: 5px;"><i class="fas fa-key"></i> Reset Senha</button>
-                        <button class="btn-outline-light view-details" data-user="${user.username}" data-debts='${JSON.stringify(debtsSnap.docs.map(d=>d.data()))}' style="margin-right: 5px;"><i class="fas fa-eye"></i> Ver</button>
-                        ${user.id !== auth.currentUser.uid ? `<button class="btn-outline-light del-user" data-user-id="${user.id}"><i class="fas fa-trash"></i> Excluir</button>` : ''}
-                    </div>
-                </div>
-            `;
-            container.appendChild(div);
-        }
-        document.querySelectorAll('.reset-pw').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const email = btn.dataset.email;
-                if(confirm(`Resetar senha do usuário ${email} para "123456"?`)) {
-                    // Nota: resetar senha via Firebase requer ação do usuário ou função de admin. Para simplificar, enviaremos e-mail de redefinição.
-                    await auth.sendPasswordResetEmail(email);
-                    showToast(`E-mail de redefinição enviado para ${email}`);
-                }
-            });
-        });
-        document.querySelectorAll('.view-details').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const username = btn.dataset.user;
-                const debts = JSON.parse(btn.dataset.debts);
-                let msg = `Usuário: ${username}\nDívidas: ${debts.length}\n\nÚltimas dívidas:\n`;
-                debts.slice(0,3).forEach(d => msg += `- ${d.title}: ${formatMoney(d.totalCapital)}\n`);
-                alert(msg);
-            });
-        });
-        document.querySelectorAll('.del-user').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const userId = btn.dataset.userId;
-                if(confirm(`Excluir usuário e todos os seus dados?`)) {
-                    // Excluir documentos do usuário
-                    const debtsSnap = await db.collection('debts').where('userId', '==', userId).get();
-                    debtsSnap.forEach(doc => doc.ref.delete());
-                    const paymentsSnap = await db.collection('payments').where('userId', '==', userId).get();
-                    paymentsSnap.forEach(doc => doc.ref.delete());
-                    await db.collection('users').doc(userId).delete();
-                    // Não é possível excluir a conta do Firebase Authentication diretamente sem função Cloud. Para simplificar, apenas removemos os dados.
-                    showToast('Usuário removido (dados excluídos)');
-                    loadUsersList(document.getElementById('searchUserInput').value);
-                }
-            });
-        });
-    }
-
-    function exportUsersCSV() {
-        // simplificado – não implementado para evitar complexidade
-        alert('Exportação CSV será implementada em versão futura');
+    async function addPaymentFirebase(paymentData) {
+        const uid = auth.currentUser?.uid;
+        if (!uid) throw new Error('Usuário não autenticado');
+        await db.collection('payments').add({ userId: uid, ...paymentData });
+        showToast('Pagamento registrado com sucesso!', 'success');
     }
 
     // ========== EVENTOS E INICIALIZAÇÃO ==========
     window.onload = () => {
-        // Máscaras e listeners de UI (mesmo código anterior)
+        // Máscaras e listeners de UI
         const dateInput = document.getElementById('customDateInput');
         const timeInput = document.getElementById('customTimeInput');
         const lumpSumDateInput = document.getElementById('lumpSumDate');
@@ -1267,7 +1122,7 @@
         paymentMethodSelect.onchange = togglePixFields;
         togglePixFields();
 
-        // Botão criar dívida (Firebase)
+        // Botão criar dívida
         document.getElementById('createDebtBtn').onclick = async () => {
             let title = document.getElementById('newTitle').value;
             let credor = document.getElementById('newCredor').value;
@@ -1569,29 +1424,6 @@
             document.getElementById('calcQtdPercent').value = '';
             document.getElementById('calcResultBox').innerHTML = '';
         };
-
-        // Admin Modal
-        const adminModal = document.getElementById('adminModal');
-        document.getElementById('openAdminBtn').onclick = () => {
-            if (!isAdmin) return;
-            adminModal.classList.add('active');
-            loadAdminStats();
-            loadUsersList('');
-        };
-        document.getElementById('closeAdminModalBtn').onclick = () => adminModal.classList.remove('active');
-        window.onclick = (e) => { if (e.target === adminModal) adminModal.classList.remove('active'); };
-        document.querySelectorAll('.admin-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                const target = tab.dataset.tab;
-                document.getElementById('adminStatsPanel').classList.toggle('active', target === 'stats');
-                document.getElementById('adminUsersPanel').classList.toggle('active', target === 'users');
-                if (target === 'users') loadUsersList(document.getElementById('searchUserInput').value);
-            });
-        });
-        document.getElementById('searchUserInput').addEventListener('input', (e) => loadUsersList(e.target.value));
-        document.getElementById('exportUsersBtn').addEventListener('click', exportUsersCSV);
 
         // Perfil
         document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
