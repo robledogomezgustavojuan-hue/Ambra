@@ -314,7 +314,7 @@
             <h3><i class="fas fa-table-list"></i> Lista de dívidas (ativas)</h3>
             <div class="table-wrapper">
                 <table class="table-dark-premium" id="fullDebtsTable">
-                    <thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Restante</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Vencimento</th><th></th></td></thead>
+                    <thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Restante</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Vencimento</th><th></th></tr></thead>
                     <tbody id="debtsTableBody"></tbody>
                 </table>
             </div>
@@ -494,6 +494,7 @@
     let currentUserData = { debts: [], payments: [] };
     let unsubscribeDebts = null;
     let unsubscribePayments = null;
+    let renderTimeout = null; // Debounce para evitar múltiplos renderAll
 
     // ========== FUNÇÕES AUXILIARES ==========
     function applyDateMask(input) {
@@ -535,6 +536,9 @@
     function formatMoney(v) { return `R$ ${v.toFixed(2).replace('.',',')}`; }
 
     function showToast(msg, type='success') {
+        // Remove toasts anteriores para evitar acúmulo
+        const existingToasts = document.querySelectorAll('.toast-msg');
+        existingToasts.forEach(t => t.remove());
         let t = document.createElement('div'); t.className = 'toast-msg'; t.innerHTML = `<i class="fas ${type==='danger'?'fa-exclamation-triangle':'fa-check-circle'}"></i> ${msg}`;
         document.body.appendChild(t); setTimeout(()=>t.classList.add('show'),10);
         setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, 2800);
@@ -565,9 +569,16 @@
 
     function getParcelDueDate(startDate, parcelIndex, periodicidade, excludedDays = [], holidays = []) {
         let date = new Date(startDate);
-        let addDays = { diario: 1, semanal: 7, mensal: 30 }[periodicidade] || 30;
         for (let i = 0; i < parcelIndex; i++) {
-            date.setDate(date.getDate() + addDays);
+            // CORRIGIDO: uso de setMonth para periodicidade mensal
+            if (periodicidade === 'mensal') {
+                date.setMonth(date.getMonth() + 1);
+            } else if (periodicidade === 'semanal') {
+                date.setDate(date.getDate() + 7);
+            } else { // diario
+                date.setDate(date.getDate() + 1);
+            }
+            // Ajusta finais de semana e feriados
             let dayOfWeek = date.getDay();
             let dayMonth = `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}`;
             while (excludedDays.includes(dayOfWeek) || holidays.includes(dayMonth)) {
@@ -583,7 +594,8 @@
         let debt = currentUserData.debts.find(d => d.id === debtId);
         if (!debt) return 0;
         let paid = currentUserData.payments.filter(p => p.debtId === debtId).reduce((s,p)=>s+p.amount,0);
-        return debt.totalFinanciado - paid;
+        // CORRIGIDO: evita saldo negativo
+        return Math.max(0, debt.totalFinanciado - paid);
     }
 
     function getParcelasPendentes(debt) {
@@ -619,20 +631,26 @@
             if (remaining <= 0) return;
             if (debt.isParceled) {
                 let startDate = new Date(debt.originDateTime);
+                // CORRIGIDO: itera sobre todas as parcelas, não apenas a primeira encontrada
                 for (let i = 0; i < debt.parcelCount; i++) {
                     let dueDate = getParcelDueDate(startDate, i+1, debt.periodicity, debt.excludedDays || [], debt.holidays || []);
                     dueDate.setHours(0,0,0,0);
                     if (dueDate.getTime() === hoje.getTime()) {
                         let paidUpTo = currentUserData.payments.filter(p => p.debtId === debt.id).reduce((sum, p) => sum + p.amount, 0);
-                        let parcelValue = debt.parcelValue;
-                        let parcelTotal = parcelValue * (i+1);
-                        if (paidUpTo < parcelTotal) {
-                            let valorParcelaDevido = parcelValue;
-                            if (paidUpTo > parcelValue * i) valorParcelaDevido = parcelValue - (paidUpTo - (parcelValue * i));
+                        let valorParcela = debt.parcelValue;
+                        // Valor acumulado que deveria ter sido pago até esta parcela (inclusive)
+                        let accumulatedDue = valorParcela * (i + 1);
+                        // O quanto já foi pago além das parcelas anteriores
+                        let paidForPrevious = valorParcela * i;
+                        let remainingForThis = Math.max(0, accumulatedDue - paidUpTo);
+                        // Se ainda há algo devido para esta parcela
+                        if (remainingForThis > 0) {
+                            // Limita ao valor de uma parcela
+                            let valorParcelaDevido = Math.min(valorParcela, remainingForThis);
                             total += valorParcelaDevido;
                             detalhes.push({ texto: `${debt.title} (${debt.credor}) - parcela ${i+1}: ${formatMoney(valorParcelaDevido)}` });
                         }
-                        break;
+                        // Não usar break, pois podem haver múltiplas parcelas vencendo no mesmo dia (atraso acumulado)
                     }
                 }
             } else {
@@ -664,7 +682,7 @@
     function renderMiniDebts() {
         let tbody = document.getElementById('miniDebtsBody');
         tbody.innerHTML = '';
-        if(currentUserData.debts.length === 0) { tbody.innerHTML = '<tr><td colspan="3">Nenhuma dívida<\/td><\/tr>'; return; }
+        if(currentUserData.debts.length === 0) { tbody.innerHTML = '<tr><td colspan="3">Nenhuma dívida</td></tr>'; return; }
         currentUserData.debts.slice(0,3).forEach(d => {
             let remaining = getRemaining(d.id);
             let row = tbody.insertRow();
@@ -678,7 +696,7 @@
         let tbody = document.getElementById('debtsTableBody');
         tbody.innerHTML = '';
         let activeDebts = currentUserData.debts.filter(d => getRemaining(d.id) > 0);
-        if(activeDebts.length === 0) { tbody.innerHTML = '<tr><td colspan="12">Nenhuma dívida ativa. As quitadas foram removidas da lista. <tr></tr>'; return; }
+        if(activeDebts.length === 0) { tbody.innerHTML = '<tr><td colspan="12">Nenhuma dívida ativa. As quitadas foram removidas da lista.</td></tr>'; return; }
         activeDebts.forEach(d => {
             let remaining = getRemaining(d.id);
             let row = tbody.insertRow();
@@ -718,7 +736,7 @@
         if(start && end) { let s=new Date(start), e=new Date(end); e.setHours(23,59,59); filtered = filtered.filter(p=>{let d=new Date(p.date); return d>=s && d<=e;}); }
         let tbody = document.getElementById('paymentsHistoryBody');
         tbody.innerHTML = '';
-        if(filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="6">Nenhum pagamento<\/td><\/tr>'; return; }
+        if(filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="6">Nenhum pagamento</td></tr>'; return; }
         filtered.sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(p => {
             let row = tbody.insertRow();
             row.insertCell(0).innerText = new Date(p.date).toLocaleString('pt-BR');
@@ -762,7 +780,7 @@
         let tbody = document.getElementById('fullHistoryBody');
         tbody.innerHTML = '';
         if (currentUserData.debts.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="11">Nenhuma dívida registrada. <tr></tr>'; return;
+            tbody.innerHTML = '<tr><td colspan="11">Nenhuma dívida registrada.</td></tr>'; return;
         }
         currentUserData.debts.forEach(d => {
             let remaining = getRemaining(d.id);
@@ -861,6 +879,12 @@
         });
     }
 
+    // Função de renderização com debounce para evitar múltiplas chamadas consecutivas
+    function scheduleRender() {
+        clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => renderAll(), 80);
+    }
+
     function renderAll() {
         if (!currentUser) return;
         updateStatsUI();
@@ -906,8 +930,8 @@
 
     function logoutFirebase() {
         auth.signOut().then(() => {
-            if (unsubscribeDebts) unsubscribeDebts();
-            if (unsubscribePayments) unsubscribePayments();
+            if (unsubscribeDebts) { unsubscribeDebts(); unsubscribeDebts = null; }
+            if (unsubscribePayments) { unsubscribePayments(); unsubscribePayments = null; }
             currentUser = null;
             document.getElementById('dashboardApp').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'flex';
@@ -918,26 +942,28 @@
     function startListening() {
         if (!auth.currentUser) return;
         const uid = auth.currentUser.uid;
-        if (unsubscribeDebts) unsubscribeDebts();
+        // Garante que listeners anteriores sejam removidos
+        if (unsubscribeDebts) { unsubscribeDebts(); unsubscribeDebts = null; }
+        if (unsubscribePayments) { unsubscribePayments(); unsubscribePayments = null; }
+
         unsubscribeDebts = db.collection('debts').where('userId', '==', uid).onSnapshot(snapshot => {
             const debts = [];
             snapshot.forEach(doc => debts.push({ id: doc.id, ...doc.data() }));
             currentUserData.debts = debts;
-            renderAll();
+            scheduleRender();
         });
-        if (unsubscribePayments) unsubscribePayments();
         unsubscribePayments = db.collection('payments').where('userId', '==', uid).onSnapshot(snapshot => {
             const payments = [];
             snapshot.forEach(doc => payments.push({ id: doc.id, ...doc.data() }));
             currentUserData.payments = payments;
-            renderAll();
+            scheduleRender();
         });
         db.collection('users').doc(uid).get().then(doc => {
             if (doc.exists) {
                 const userData = doc.data();
                 document.getElementById('userNameDisplay').innerText = userData.username;
                 if (userData.avatar) document.getElementById('userAvatarImg').src = userData.avatar;
-                renderAll();
+                scheduleRender();
             }
         });
     }
@@ -949,8 +975,8 @@
             document.getElementById('dashboardApp').style.display = 'block';
             startListening();
         } else {
-            if (unsubscribeDebts) unsubscribeDebts();
-            if (unsubscribePayments) unsubscribePayments();
+            if (unsubscribeDebts) { unsubscribeDebts(); unsubscribeDebts = null; }
+            if (unsubscribePayments) { unsubscribePayments(); unsubscribePayments = null; }
             document.getElementById('dashboardApp').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'flex';
         }
@@ -1313,7 +1339,9 @@
 
         document.getElementById('applyFilterBtn').onclick = () => {
             let s = document.getElementById('filterStart').value, e = document.getElementById('filterEnd').value;
-            if(s && e) renderPaymentsHistory(s,e); else renderPaymentsHistory();
+            if(s && e) renderPaymentsHistory(s,e);
+            else if (!s && !e) renderPaymentsHistory();
+            else alert('Preencha ambas as datas (início e fim) ou deixe ambas em branco para ver tudo.');
         };
         document.getElementById('resetFilterBtn').onclick = () => {
             document.getElementById('filterStart').value = ''; document.getElementById('filterEnd').value = ''; renderPaymentsHistory();
@@ -1403,7 +1431,8 @@
             const userRef = db.collection('users').doc(uid);
             const userDoc = await userRef.get();
             if (!userDoc.exists) return;
-            if (newPass) {
+            // CORRIGIDO: só atualiza senha se o campo não estiver vazio
+            if (newPass && newPass.trim() !== '') {
                 if (newPass.length < 6) { showToast('Senha deve ter no mínimo 6 caracteres', 'danger'); return; }
                 if (newPass !== confirmPass) { showToast('Senhas não coincidem', 'danger'); return; }
                 await auth.currentUser.updatePassword(newPass);
