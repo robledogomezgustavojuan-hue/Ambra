@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.85, user-scalable=yes, viewport-fit=cover">
-    <title>ÂMBRA | Controle de Dívidas & Metas</title>
+    <title>ÂMBRA | Controle de Dívidas & Compromissos</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -426,19 +426,19 @@
         </div>
     </div>
 
-    <!-- METAS -->
+    <!-- COMPROMISSOS MENSAIS RECORRENTES -->
     <div id="sectionGoals" class="section-page">
         <div class="card-premium">
-            <h3><i class="fas fa-bullseye"></i> Resumo de Metas do Mês</h3>
+            <h3><i class="fas fa-bullseye"></i> Resumo de Compromissos Mensais</h3>
             <div class="stats-grid">
                 <div class="stat-block"><div class="text-muted">Total necessário</div><div class="value-large" id="goalsTotalNeeded">R$ 0</div></div>
                 <div class="stat-block"><div class="text-muted">Já poupado</div><div class="value-large" id="goalsTotalSaved">R$ 0</div></div>
                 <div class="stat-block"><div class="text-muted">Ainda falta</div><div class="value-large" id="goalsRemaining">R$ 0</div></div>
-                <div class="stat-block"><div class="text-muted">Metas ativas</div><div class="value-large" id="goalsCount">0</div></div>
+                <div class="stat-block"><div class="text-muted">Compromissos ativos</div><div class="value-large" id="goalsCount">0</div></div>
             </div>
         </div>
         <div class="card-premium">
-            <h3><i class="fas fa-plus-circle"></i> Nova meta mensal</h3>
+            <h3><i class="fas fa-plus-circle"></i> Novo compromisso mensal</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 12px;">
                 <input type="text" id="newGoalName" placeholder="Nome (ex: Aluguel)">
                 <input type="number" id="newGoalValue" placeholder="Valor total (R$)" step="0.01">
@@ -453,7 +453,7 @@
                 </select>
             </div>
             <div class="switch-container" style="margin-top: 12px;">
-                <span class="switch-label">Essa meta é recorrente?</span>
+                <span class="switch-label">Esse compromisso é recorrente?</span>
                 <label class="switch"><input type="checkbox" id="goalRecurrent"><span class="slider"></span></label>
             </div>
             <div id="parcelamentoExtraFields" style="display: none;" class="extra-fields">
@@ -466,15 +466,15 @@
                 <label>Quantidade total de parcelas</label>
                 <input type="number" id="goalTotalParcels" placeholder="Número de parcelas" step="1">
             </div>
-            <button id="createGoalBtn" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-plus"></i> Criar meta</button>
+            <button id="createGoalBtn" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-plus"></i> Criar compromisso</button>
         </div>
         <div class="card-premium">
-            <h3><i class="fas fa-list-check"></i> Metas ativas</h3>
+            <h3><i class="fas fa-list-check"></i> Compromissos ativos</h3>
             <div id="goalsList"></div>
         </div>
         <div class="card-premium">
             <h3><i class="fas fa-history"></i> Histórico de depósitos do mês</h3>
-            <div class="table-wrapper"><table class="table-dark-premium"><thead><tr><th>Data</th><th>Meta</th><th>Valor</th><th>Forma</th><th>Banco destino</th><th></th></tr></thead><tbody id="goalDepositsHistoryBody"></tbody></table></div>
+            <div class="table-wrapper"><table class="table-dark-premium"><thead><tr><th>Data</th><th>Compromisso</th><th>Valor</th><th>Forma</th><th>Banco destino</th><th></th></tr></thead><tbody id="goalDepositsHistoryBody"></tbody></table></div>
         </div>
     </div>
 </div>
@@ -505,6 +505,17 @@
             </select>
         </div>
         <div id="depositOtherBankDiv" style="display:none;"><label>Qual banco?</label><input type="text" id="depositOtherBank" placeholder="Nome do banco"></div>
+        <label style="margin-top: 12px;">Data do depósito</label>
+        <div class="radio-group" id="depositDateGroup">
+            <div class="radio-option active" data-value="now">🕒 Agora</div>
+            <div class="radio-option" data-value="custom">📅 Outra data/hora</div>
+        </div>
+        <div id="customDepositDateDiv" style="display: none; margin: 12px 0;">
+            <div style="display: flex; gap: 12px;">
+                <input type="text" id="depositDateCustom" placeholder="dd/mm/aaaa" maxlength="10" style="flex:1">
+                <input type="text" id="depositTimeCustom" placeholder="hh:mm:ss" maxlength="8" style="flex:1">
+            </div>
+        </div>
         <button id="saveDepositBtn" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-save"></i> Salvar depósito</button>
     </div>
 </div>
@@ -531,7 +542,7 @@
     <button class="nav-item" data-section="sectionDashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
     <button class="nav-item" data-section="sectionDebts"><i class="fas fa-file-invoice"></i><span>Dívidas</span></button>
     <button class="nav-item" data-section="sectionPayments"><i class="fas fa-history"></i><span>Pagamentos</span></button>
-    <button class="nav-item" data-section="sectionGoals"><i class="fas fa-bullseye"></i><span>Metas</span></button>
+    <button class="nav-item" data-section="sectionGoals"><i class="fas fa-bullseye"></i><span>Compromissos</span></button>
     <button class="nav-item" data-section="sectionHistoryAnalytics"><i class="fas fa-chart-line"></i><span>Análises</span></button>
     <button class="nav-item" data-section="sectionCalculator"><i class="fas fa-calculator"></i><span>Juros</span></button>
 </div>
@@ -587,7 +598,6 @@
         return date;
     }
 
-    // Dívidas (mantidas)
     function getParcelDueDate(startDate, parcelIndex, periodicidade, excludedDays=[], holidays=[]) {
         let date = new Date(startDate);
         for(let i=0;i<parcelIndex;i++) {
@@ -771,7 +781,7 @@
         });
     }
 
-    // Metas (atualizado)
+    // Compromissos (atualizado)
     function getGoalSaved(goalId) { return currentUserData.goalDeposits.filter(d=>d.goalId===goalId).reduce((s,d)=>s+d.amount,0); }
     function getGoalRemaining(goal) { return Math.max(0, goal.valorTotal - getGoalSaved(goal.id)); }
     function getGoalProgress(goal) { let saved=getGoalSaved(goal.id); return Math.min(100,(saved/goal.valorTotal)*100); }
@@ -799,8 +809,17 @@
     function renderGoals() {
         let container=document.getElementById('goalsList'); container.innerHTML='';
         let activeGoals=currentUserData.goals.filter(g=>getGoalRemaining(g)>0);
-        if(activeGoals.length===0) { container.innerHTML='<p>Nenhuma meta ativa no momento.</p>'; return; }
-        activeGoals.forEach(goal=>{
+        if(activeGoals.length===0) { container.innerHTML='<p>Nenhum compromisso ativo no momento.</p>'; return; }
+
+        // Ordenar: atrasados primeiro (menor valor pendente primeiro), depois no prazo (mesmo critério)
+        let hoje = new Date(); hoje.setHours(0,0,0,0);
+        let atrasados = activeGoals.filter(g => getGoalDaysRemaining(g) < 0);
+        let noPrazo = activeGoals.filter(g => getGoalDaysRemaining(g) >= 0);
+        atrasados.sort((a,b) => getGoalRemaining(a) - getGoalRemaining(b));
+        noPrazo.sort((a,b) => getGoalRemaining(a) - getGoalRemaining(b));
+        let sortedGoals = [...atrasados, ...noPrazo];
+
+        sortedGoals.forEach(goal=>{
             let saved=getGoalSaved(goal.id), remaining=getGoalRemaining(goal), progress=getGoalProgress(goal);
             let daysRemaining=getGoalDaysRemaining(goal), suggestedDaily=getGoalSuggestedDaily(goal);
             let dueDate=new Date(goal.vencimento+'T00:00:00'), isAtrasado=daysRemaining<0;
@@ -824,7 +843,7 @@
                     <span class="goal-due ${daysClass}"><i class="far fa-calendar-alt"></i> ${dueDate.toLocaleDateString('pt-BR')} (${daysText})</span>
                 </div>
                 <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${progress.toFixed(1)}%;"></div></div>
-                <div class="goal-amounts"><span>Poupado: ${formatMoney(saved)}</span><span>Falta: ${formatMoney(remaining)}</span><span>Meta: ${formatMoney(goal.valorTotal)}</span></div>
+                <div class="goal-amounts"><span>Poupado: ${formatMoney(saved)}</span><span>Falta: ${formatMoney(remaining)}</span><span>Compromisso: ${formatMoney(goal.valorTotal)}</span></div>
                 <div class="goal-suggestion">Sugestão: guardar <strong>${formatMoney(suggestedDaily)}/dia</strong> para cumprir no prazo.</div>
                 ${extraInfo}
                 <div style="display:flex;gap:10px;margin-top:10px;">
@@ -844,15 +863,21 @@
         });
         document.querySelectorAll('.openDepositModal').forEach(btn=>btn.addEventListener('click',()=>{
             document.getElementById('depositGoalId').value=btn.dataset.goalid;
-            document.getElementById('depositGoalInfo').innerText=`Meta: ${btn.dataset.name}`;
+            document.getElementById('depositGoalInfo').innerText=`Compromisso: ${btn.dataset.name}`;
             document.getElementById('depositAmount').value=''; document.getElementById('depositMethod').value='Pix';
             document.getElementById('depositBank').value='Itaú'; 
             document.getElementById('infinityPayTypeDiv').style.display='none';
             document.getElementById('depositOtherBankDiv').style.display='none';
+            // Resetar data do depósito
+            document.querySelectorAll('#depositDateGroup .radio-option').forEach(o=>o.classList.remove('active'));
+            document.querySelector('#depositDateGroup .radio-option[data-value="now"]').classList.add('active');
+            document.getElementById('customDepositDateDiv').style.display='none';
+            document.getElementById('depositDateCustom').value='';
+            document.getElementById('depositTimeCustom').value='';
             document.getElementById('depositModal').classList.add('active');
         }));
         document.querySelectorAll('.deleteGoalBtn').forEach(btn=>btn.addEventListener('click',async()=>{
-            if(confirm('Excluir esta meta?')) { await db.collection('monthlyGoals').doc(btn.dataset.goalid).delete(); showToast('Meta removida','danger'); }
+            if(confirm('Excluir este compromisso?')) { await db.collection('monthlyGoals').doc(btn.dataset.goalid).delete(); showToast('Compromisso removido','danger'); }
         }));
     }
     function renderGoalDepositsHistory() {
@@ -860,7 +885,7 @@
         let deposits=[...currentUserData.goalDeposits].sort((a,b)=>new Date(b.date)-new Date(a.date));
         if(deposits.length===0) { tbody.innerHTML='<tr><td colspan="6">Nenhum depósito registrado</td></tr>'; return; }
         deposits.forEach(dep=>{
-            let goal=currentUserData.goals.find(g=>g.id===dep.goalId); let goalName=goal?goal.nome:'Meta desconhecida';
+            let goal=currentUserData.goals.find(g=>g.id===dep.goalId); let goalName=goal?goal.nome:'Compromisso desconhecido';
             let row=tbody.insertRow();
             row.insertCell(0).innerText=new Date(dep.date).toLocaleString('pt-BR'); row.insertCell(1).innerText=goalName;
             row.insertCell(2).innerText=formatMoney(dep.amount); row.insertCell(3).innerText=dep.method; row.insertCell(4).innerText=dep.bank||'—';
@@ -881,7 +906,6 @@
         document.getElementById('goalsCount').innerText=activeCount;
     }
 
-    // Renovação automática de metas recorrentes
     async function autoRenewRecurringGoals() {
         if (!currentUser) return;
         let hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -889,7 +913,6 @@
             if (!goal.recorrente) continue;
             let vencDate = new Date(goal.vencimento+'T00:00:00');
             if (vencDate < hoje && !goal.renovada) {
-                // Verifica se já existe uma meta para o próximo mês com mesmo nome e categoria
                 let nextMonth = new Date(vencDate);
                 nextMonth.setMonth(nextMonth.getMonth() + 1);
                 let nextVencStr = nextMonth.toISOString().slice(0,10);
@@ -911,7 +934,6 @@
                         } : {})
                     });
                 }
-                // Marca como renovada (evita repetir)
                 await db.collection('monthlyGoals').doc(goal.id).update({ renovada: true });
             }
         }
@@ -924,7 +946,6 @@
         autoRenewRecurringGoals(); 
     }
 
-    // Render geral
     function scheduleRender() { clearTimeout(renderTimeout); renderTimeout=setTimeout(()=>renderAll(),80); }
     function renderAll() {
         if(!currentUser) return;
@@ -932,7 +953,6 @@
         updateTodayDebtCard(); renderFullHistory(); updateStaticDiagrams(); updateUserAvatarInUI(); renderGoalsAll();
     }
 
-    // Auth e Firestore
     async function registerWithFirebase(email,password,username) {
         try {
             const uc=await auth.createUserWithEmailAndPassword(email,password);
@@ -974,7 +994,6 @@
         }
     });
 
-    // Eventos
     window.onload=()=>{
         const dateInput=document.getElementById('customDateInput'), timeInput=document.getElementById('customTimeInput'), lumpSumDateInput=document.getElementById('lumpSumDate');
         if(dateInput) dateInput.addEventListener('input',function(){applyDateMask(this);});
@@ -992,7 +1011,6 @@
         };
         document.getElementById('logoutDashBtn').onclick=()=>logoutFirebase();
 
-        // Dívidas
         const radioOptions=document.querySelectorAll('#dateRadioGroup .radio-option'), customDateDiv=document.getElementById('customDateTimeDiv');
         function setDateMode(value) { customDateDiv.style.display=value==='today'?'none':'block'; radioOptions.forEach(opt=>opt.classList.toggle('active',opt.dataset.value===value)); }
         radioOptions.forEach(opt=>opt.addEventListener('click',()=>setDateMode(opt.dataset.value))); setDateMode('today');
@@ -1049,7 +1067,6 @@
             document.querySelectorAll('.exclude-day:checked').forEach(cb=>cb.checked=false); parcelToggle.checked=false; noDueDateToggle.checked=false; toggleParcelFields(); togglePixFields(); setDateMode('today');
         };
 
-        // Pagamentos (mantido)
         const debtSelect=document.getElementById('debtSelectPayment'), selectedDebtInfoDiv=document.getElementById('selectedDebtInfo'), paymentMethodInfoDiv=document.getElementById('paymentMethodInfo'), pixChangeDiv=document.getElementById('pixChangeDiv'), parcelQtyInput=document.getElementById('parcelQty'), paymentAmountInput=document.getElementById('paymentAmount'), useDifferentPixToggle=document.getElementById('useDifferentPixToggle'), differentPixFields=document.getElementById('differentPixFields'), newPixKeyType=document.getElementById('newPixKeyType'), newPixKeyValue=document.getElementById('newPixKeyValue');
         function updateSelectedDebtInfo(){
             const debtId=debtSelect.value; let debt=currentUserData.debts.find(d=>d.id===debtId);
@@ -1100,7 +1117,6 @@
         document.getElementById('applyFilterBtn').onclick=()=>{ let s=document.getElementById('filterStart').value, e=document.getElementById('filterEnd').value; if(s&&e) renderPaymentsHistory(s,e); else if(!s&&!e) renderPaymentsHistory(); else alert('Preencha ambas as datas ou deixe ambas em branco.'); };
         document.getElementById('resetFilterBtn').onclick=()=>{ document.getElementById('filterStart').value=''; document.getElementById('filterEnd').value=''; renderPaymentsHistory(); };
 
-        // Calculadora
         const calcTypeOptions=document.querySelectorAll('#calcTypeGroup .radio-option'), calcParcelaDiv=document.getElementById('calcParcelaDiv'), calcPercentualDiv=document.getElementById('calcPercentualDiv');
         calcTypeOptions.forEach(opt=>opt.addEventListener('click',()=>{ calcTypeOptions.forEach(o=>o.classList.remove('active')); opt.classList.add('active'); calcParcelaDiv.style.display=opt.dataset.value==='parcela'?'block':'none'; calcPercentualDiv.style.display=opt.dataset.value==='percentual'?'block':'none'; }));
         document.getElementById('calcInterestBtn').onclick=()=>{
@@ -1118,7 +1134,6 @@
         };
         document.getElementById('resetCalculatorBtn').onclick=()=>{ ['calcCapitalParcela','calcParcelVal','calcQtd','calcCapitalPercent','calcInterestPercent','calcQtdPercent'].forEach(id=>document.getElementById(id).value=''); document.getElementById('calcResultBox').innerHTML=''; };
 
-        // Perfil
         document.getElementById('editProfileBtn').addEventListener('click',()=>{
             const uid=auth.currentUser?.uid; if(!uid) return;
             db.collection('users').doc(uid).get().then(doc=>{ if(doc.exists){ const ud=doc.data(); document.getElementById('profileUsername').value=ud.username; document.getElementById('profileEmail').value=ud.email; document.getElementById('profilePassword').value=''; document.getElementById('profileConfirmPassword').value=''; document.getElementById('profileModal').classList.add('active'); } });
@@ -1140,7 +1155,7 @@
         });
         window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('depositModal')) document.getElementById('depositModal').classList.remove('active'); };
 
-        // Metas (eventos atualizados)
+        // Compromissos (eventos atualizados)
         document.getElementById('newGoalDueDate').addEventListener('input',function(){applyDateMask(this);});
         const goalCategorySelect = document.getElementById('newGoalCategory');
         const parcelamentoExtraFields = document.getElementById('parcelamentoExtraFields');
@@ -1173,11 +1188,12 @@
                 goalData.totalParcels = totalParcels;
             }
             await db.collection('monthlyGoals').add(goalData);
-            showToast('Meta criada!');
+            showToast('Compromisso criado!');
             ['newGoalName','newGoalValue','newGoalDueDate','goalDebtBank','goalTotalDebtValue','goalMonthlyParcel','goalTotalParcels'].forEach(id=> { let el = document.getElementById(id); if(el) el.value = ''; });
             document.getElementById('goalRecurrent').checked = false;
             parcelamentoExtraFields.style.display = 'none';
         };
+
         // Modal depósito
         document.getElementById('closeDepositModalBtn').addEventListener('click',()=>document.getElementById('depositModal').classList.remove('active'));
         const depositBankSelect = document.getElementById('depositBank');
@@ -1195,6 +1211,25 @@
                 depositOtherBankDiv.style.display = 'none';
             }
         });
+
+        // Data do depósito
+        const depositDateOptions = document.querySelectorAll('#depositDateGroup .radio-option');
+        const customDepositDateDiv = document.getElementById('customDepositDateDiv');
+        const depositDateCustom = document.getElementById('depositDateCustom');
+        const depositTimeCustom = document.getElementById('depositTimeCustom');
+        function setDepositDateMode(value) {
+            customDepositDateDiv.style.display = value === 'custom' ? 'block' : 'none';
+            depositDateOptions.forEach(opt => opt.classList.toggle('active', opt.dataset.value === value));
+            if (value === 'custom' && !depositDateCustom.value) {
+                const now = new Date();
+                depositDateCustom.value = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+                depositTimeCustom.value = now.toTimeString().slice(0,8);
+            }
+        }
+        depositDateOptions.forEach(opt => opt.addEventListener('click', () => setDepositDateMode(opt.dataset.value)));
+        if (depositDateCustom) depositDateCustom.addEventListener('input', function() { applyDateMask(this); });
+        if (depositTimeCustom) depositTimeCustom.addEventListener('input', function() { applyTimeMask(this); });
+
         document.getElementById('saveDepositBtn').onclick=async()=>{
             let goalId=document.getElementById('depositGoalId').value, amount=parseFloat(document.getElementById('depositAmount').value);
             if(isNaN(amount)||amount<=0) { alert('Valor inválido'); return; }
@@ -1206,16 +1241,35 @@
                 bank=document.getElementById('depositOtherBank').value.trim();
                 if(!bank) { alert('Informe o nome do banco'); return; }
             }
-            await db.collection('goalDeposits').add({userId:auth.currentUser.uid,goalId,amount,method,bank,date:firebase.firestore.FieldValue.serverTimestamp()});
-            showToast('Depósito registrado!'); document.getElementById('depositModal').classList.remove('active');
+            // Data do depósito
+            let depositDate = null;
+            const depositDateMode = document.querySelector('#depositDateGroup .radio-option.active').dataset.value;
+            if (depositDateMode === 'now') {
+                depositDate = new Date();
+            } else {
+                const ds = depositDateCustom.value;
+                const ts = depositTimeCustom.value;
+                if (!ds) { alert('Informe a data do depósito no formato dd/mm/aaaa'); return; }
+                depositDate = parseCustomDateTime(ds, ts);
+                if (!depositDate) { alert('Data/hora inválida. Use dd/mm/aaaa e hh:mm:ss'); return; }
+            }
+            await db.collection('goalDeposits').add({
+                userId:auth.currentUser.uid,
+                goalId, amount, method, bank,
+                date: depositDate ? depositDate.toISOString() : firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showToast('Depósito registrado!'); 
+            document.getElementById('depositModal').classList.remove('active');
+            // Resetar campos de data
+            depositDateCustom.value = '';
+            depositTimeCustom.value = '';
+            setDepositDateMode('now');
         };
 
-        // Análises
         document.getElementById('openHistoryAnalyticsBtn').addEventListener('click',()=>setActiveSection('sectionHistoryAnalytics'));
         document.getElementById('applyAnalyticsFilter').addEventListener('click',()=>updateStaticDiagrams());
         document.getElementById('resetAnalyticsFilter').addEventListener('click',()=>{ document.getElementById('analyticsStartDate').value=''; document.getElementById('analyticsEndDate').value=''; updateStaticDiagrams(); });
 
-        // Navegação
         function setActiveSection(sectionId) {
             document.querySelectorAll('.section-page').forEach(s=>s.classList.remove('active-page'));
             document.getElementById(sectionId).classList.add('active-page');
