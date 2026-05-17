@@ -174,6 +174,7 @@
         .goal-suggestion { font-size: 0.75rem; color: #FFB066; margin-top: 8px; }
         .deposit-history { margin-top: 10px; font-size: 0.75rem; color: rgba(255,255,255,0.5); }
         .deposit-history-item { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; }
+        .extra-fields { margin-top: 12px; padding: 12px; background: rgba(255,122,26,0.05); border-radius: 20px; border: 1px solid rgba(255,122,26,0.2); }
     </style>
 </head>
 <body>
@@ -435,7 +436,6 @@
                 <div class="stat-block"><div class="text-muted">Ainda falta</div><div class="value-large" id="goalsRemaining">R$ 0</div></div>
                 <div class="stat-block"><div class="text-muted">Metas ativas</div><div class="value-large" id="goalsCount">0</div></div>
             </div>
-            <button id="renewGoalsBtn" class="btn-outline-light" style="margin-top: 10px;"><i class="fas fa-redo-alt"></i> Renovar metas do mês passado</button>
         </div>
         <div class="card-premium">
             <h3><i class="fas fa-plus-circle"></i> Nova meta mensal</h3>
@@ -444,10 +444,27 @@
                 <input type="number" id="newGoalValue" placeholder="Valor total (R$)" step="0.01">
                 <input type="text" id="newGoalDueDate" placeholder="Vencimento (dd/mm/aaaa)" maxlength="10">
                 <select id="newGoalCategory">
-                    <option value="Moradia">Moradia</option><option value="Utilidades">Utilidades</option>
-                    <option value="Serviços">Serviços</option><option value="Saúde">Saúde</option>
-                    <option value="Educação">Educação</option><option value="Lazer">Lazer</option><option value="Outros">Outros</option>
+                    <option value="Aluguel de casa">Aluguel de casa</option>
+                    <option value="Fatura de luz">Fatura de luz</option>
+                    <option value="Fatura de internet">Fatura de internet</option>
+                    <option value="Fatura da água">Fatura da água</option>
+                    <option value="Corte de grama área externa">Corte de grama área externa</option>
+                    <option value="Parcelamento de conta de dívida">Parcelamento de conta de dívida</option>
                 </select>
+            </div>
+            <div class="switch-container" style="margin-top: 12px;">
+                <span class="switch-label">Essa meta é recorrente?</span>
+                <label class="switch"><input type="checkbox" id="goalRecurrent"><span class="slider"></span></label>
+            </div>
+            <div id="parcelamentoExtraFields" style="display: none;" class="extra-fields">
+                <label>Nome do banco ou da dívida</label>
+                <input type="text" id="goalDebtBank" placeholder="Banco ou referência">
+                <label>Valor total da dívida</label>
+                <input type="number" id="goalTotalDebtValue" placeholder="R$" step="0.01">
+                <label>Valor da parcela mensal</label>
+                <input type="number" id="goalMonthlyParcel" placeholder="R$" step="0.01">
+                <label>Quantidade total de parcelas</label>
+                <input type="number" id="goalTotalParcels" placeholder="Número de parcelas" step="1">
             </div>
             <button id="createGoalBtn" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-plus"></i> Criar meta</button>
         </div>
@@ -472,7 +489,21 @@
         <label>Forma de transferência</label>
         <select id="depositMethod"><option value="Pix">Pix</option><option value="TED">TED</option><option value="DOC">DOC</option><option value="Dinheiro">Dinheiro</option><option value="Outro">Outro</option></select>
         <label>Banco destino</label>
-        <select id="depositBank"><option value="Itaú">Itaú</option><option value="Infinity Pay">Infinity Pay</option><option value="PagBank">PagBank</option><option value="NuBank">NuBank</option><option value="Pic Pay">Pic Pay</option><option value="Outro">Outro</option></select>
+        <select id="depositBank">
+            <option value="Itaú">Itaú</option>
+            <option value="Infinity Pay">Infinity Pay</option>
+            <option value="PagBank">PagBank</option>
+            <option value="NuBank">NuBank</option>
+            <option value="Pic Pay">Pic Pay</option>
+            <option value="Outro">Outro</option>
+        </select>
+        <div id="infinityPayTypeDiv" style="display:none; margin-top:12px;">
+            <label>Tipo de conta Infinity Pay</label>
+            <select id="infinityPayType">
+                <option value="CPF">CPF</option>
+                <option value="CNPJ">CNPJ</option>
+            </select>
+        </div>
         <div id="depositOtherBankDiv" style="display:none;"><label>Qual banco?</label><input type="text" id="depositOtherBank" placeholder="Nome do banco"></div>
         <button id="saveDepositBtn" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-save"></i> Salvar depósito</button>
     </div>
@@ -556,7 +587,7 @@
         return date;
     }
 
-    // Dívidas
+    // Dívidas (mantidas)
     function getParcelDueDate(startDate, parcelIndex, periodicidade, excludedDays=[], holidays=[]) {
         let date = new Date(startDate);
         for(let i=0;i<parcelIndex;i++) {
@@ -740,7 +771,7 @@
         });
     }
 
-    // Metas
+    // Metas (atualizado)
     function getGoalSaved(goalId) { return currentUserData.goalDeposits.filter(d=>d.goalId===goalId).reduce((s,d)=>s+d.amount,0); }
     function getGoalRemaining(goal) { return Math.max(0, goal.valorTotal - getGoalSaved(goal.id)); }
     function getGoalProgress(goal) { let saved=getGoalSaved(goal.id); return Math.min(100,(saved/goal.valorTotal)*100); }
@@ -754,6 +785,17 @@
         if(days<=0) return remaining;
         return remaining/days;
     }
+    function getGoalParcelInfo(goal) {
+        if (goal.categoria !== 'Parcelamento de conta de dívida') return null;
+        let totalParcelas = goal.totalParcels || 0;
+        let valorParcela = goal.monthlyParcel || 0;
+        let totalPago = getGoalSaved(goal.id);
+        let parcelasPagas = Math.floor(totalPago / valorParcela);
+        let parcelasRestantes = Math.max(0, totalParcelas - parcelasPagas);
+        let valorRestante = Math.max(0, goal.valorTotal - totalPago);
+        return { totalParcelas, valorParcela, parcelasPagas, parcelasRestantes, valorRestante };
+    }
+
     function renderGoals() {
         let container=document.getElementById('goalsList'); container.innerHTML='';
         let activeGoals=currentUserData.goals.filter(g=>getGoalRemaining(g)>0);
@@ -764,6 +806,17 @@
             let dueDate=new Date(goal.vencimento+'T00:00:00'), isAtrasado=daysRemaining<0;
             let daysText=isAtrasado?`${Math.abs(daysRemaining)} dias de atraso`:`${daysRemaining} dias restantes`;
             let daysClass=isAtrasado?'atrasado':'';
+            let parcelInfo = getGoalParcelInfo(goal);
+            let extraInfo = '';
+            if (parcelInfo) {
+                extraInfo = `
+                <div style="margin-top: 6px; font-size:0.8rem;">
+                    <div>Parcelas pagas: ${parcelInfo.parcelasPagas} / ${parcelInfo.totalParcelas}</div>
+                    <div>Parcelas restantes: ${parcelInfo.parcelasRestantes}</div>
+                    <div>Valor restante: ${formatMoney(parcelInfo.valorRestante)}</div>
+                    <div>Valor da parcela: ${formatMoney(parcelInfo.valorParcela)}</div>
+                </div>`;
+            }
             let card=document.createElement('div'); card.className='goal-card';
             card.innerHTML=`
                 <div class="goal-header">
@@ -773,6 +826,7 @@
                 <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${progress.toFixed(1)}%;"></div></div>
                 <div class="goal-amounts"><span>Poupado: ${formatMoney(saved)}</span><span>Falta: ${formatMoney(remaining)}</span><span>Meta: ${formatMoney(goal.valorTotal)}</span></div>
                 <div class="goal-suggestion">Sugestão: guardar <strong>${formatMoney(suggestedDaily)}/dia</strong> para cumprir no prazo.</div>
+                ${extraInfo}
                 <div style="display:flex;gap:10px;margin-top:10px;">
                     <button class="btn-amber btn-sm openDepositModal" data-goalid="${goal.id}" data-name="${goal.nome}" style="padding:8px 16px;font-size:0.8rem;"><i class="fas fa-plus"></i> Depósito</button>
                     <button class="btn-outline-light btn-sm deleteGoalBtn" data-goalid="${goal.id}" style="padding:8px 16px;font-size:0.8rem;"><i class="fas fa-trash"></i></button>
@@ -792,7 +846,9 @@
             document.getElementById('depositGoalId').value=btn.dataset.goalid;
             document.getElementById('depositGoalInfo').innerText=`Meta: ${btn.dataset.name}`;
             document.getElementById('depositAmount').value=''; document.getElementById('depositMethod').value='Pix';
-            document.getElementById('depositBank').value='Itaú'; document.getElementById('depositOtherBankDiv').style.display='none';
+            document.getElementById('depositBank').value='Itaú'; 
+            document.getElementById('infinityPayTypeDiv').style.display='none';
+            document.getElementById('depositOtherBankDiv').style.display='none';
             document.getElementById('depositModal').classList.add('active');
         }));
         document.querySelectorAll('.deleteGoalBtn').forEach(btn=>btn.addEventListener('click',async()=>{
@@ -824,7 +880,49 @@
         document.getElementById('goalsRemaining').innerHTML=formatMoney(remaining);
         document.getElementById('goalsCount').innerText=activeCount;
     }
-    function renderGoalsAll() { updateGoalsSummary(); renderGoals(); renderGoalDepositsHistory(); }
+
+    // Renovação automática de metas recorrentes
+    async function autoRenewRecurringGoals() {
+        if (!currentUser) return;
+        let hoje = new Date(); hoje.setHours(0,0,0,0);
+        for (let goal of currentUserData.goals) {
+            if (!goal.recorrente) continue;
+            let vencDate = new Date(goal.vencimento+'T00:00:00');
+            if (vencDate < hoje && !goal.renovada) {
+                // Verifica se já existe uma meta para o próximo mês com mesmo nome e categoria
+                let nextMonth = new Date(vencDate);
+                nextMonth.setMonth(nextMonth.getMonth() + 1);
+                let nextVencStr = nextMonth.toISOString().slice(0,10);
+                let exists = currentUserData.goals.some(g => g.nome === goal.nome && g.categoria === goal.categoria && g.vencimento === nextVencStr);
+                if (!exists) {
+                    await db.collection('monthlyGoals').add({
+                        userId: currentUser.uid,
+                        nome: goal.nome,
+                        valorTotal: goal.valorTotal,
+                        vencimento: nextVencStr,
+                        categoria: goal.categoria,
+                        recorrente: true,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        ...(goal.categoria === 'Parcelamento de conta de dívida' ? {
+                            debtBank: goal.debtBank || '',
+                            totalDebtValue: goal.totalDebtValue || goal.valorTotal,
+                            monthlyParcel: goal.monthlyParcel || 0,
+                            totalParcels: goal.totalParcels || 0
+                        } : {})
+                    });
+                }
+                // Marca como renovada (evita repetir)
+                await db.collection('monthlyGoals').doc(goal.id).update({ renovada: true });
+            }
+        }
+    }
+
+    function renderGoalsAll() { 
+        updateGoalsSummary(); 
+        renderGoals(); 
+        renderGoalDepositsHistory(); 
+        autoRenewRecurringGoals(); 
+    }
 
     // Render geral
     function scheduleRender() { clearTimeout(renderTimeout); renderTimeout=setTimeout(()=>renderAll(),80); }
@@ -951,7 +1049,7 @@
             document.querySelectorAll('.exclude-day:checked').forEach(cb=>cb.checked=false); parcelToggle.checked=false; noDueDateToggle.checked=false; toggleParcelFields(); togglePixFields(); setDateMode('today');
         };
 
-        // Pagamentos
+        // Pagamentos (mantido)
         const debtSelect=document.getElementById('debtSelectPayment'), selectedDebtInfoDiv=document.getElementById('selectedDebtInfo'), paymentMethodInfoDiv=document.getElementById('paymentMethodInfo'), pixChangeDiv=document.getElementById('pixChangeDiv'), parcelQtyInput=document.getElementById('parcelQty'), paymentAmountInput=document.getElementById('paymentAmount'), useDifferentPixToggle=document.getElementById('useDifferentPixToggle'), differentPixFields=document.getElementById('differentPixFields'), newPixKeyType=document.getElementById('newPixKeyType'), newPixKeyValue=document.getElementById('newPixKeyValue');
         function updateSelectedDebtInfo(){
             const debtId=debtSelect.value; let debt=currentUserData.debts.find(d=>d.id===debtId);
@@ -1042,34 +1140,74 @@
         });
         window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('depositModal')) document.getElementById('depositModal').classList.remove('active'); };
 
-        // Metas
+        // Metas (eventos atualizados)
         document.getElementById('newGoalDueDate').addEventListener('input',function(){applyDateMask(this);});
+        const goalCategorySelect = document.getElementById('newGoalCategory');
+        const parcelamentoExtraFields = document.getElementById('parcelamentoExtraFields');
+        goalCategorySelect.addEventListener('change', ()=>{
+            parcelamentoExtraFields.style.display = goalCategorySelect.value === 'Parcelamento de conta de dívida' ? 'block' : 'none';
+        });
         document.getElementById('createGoalBtn').onclick=async()=>{
-            let nome=document.getElementById('newGoalName').value, valor=document.getElementById('newGoalValue').value, venc=document.getElementById('newGoalDueDate').value, cat=document.getElementById('newGoalCategory').value;
+            let nome=document.getElementById('newGoalName').value, valor=document.getElementById('newGoalValue').value, venc=document.getElementById('newGoalDueDate').value, cat=goalCategorySelect.value;
+            let recorrente = document.getElementById('goalRecurrent').checked;
             if(!nome||!valor||!venc) { alert('Preencha todos os campos'); return; }
             let vencObj=parseCustomDateTime(venc,''); if(!vencObj) { alert('Data de vencimento inválida. Use dd/mm/aaaa'); return; }
-            await db.collection('monthlyGoals').add({userId:auth.currentUser.uid,nome,valorTotal:parseFloat(valor),vencimento:vencObj.toISOString().slice(0,10),categoria:cat,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-            showToast('Meta criada!'); document.getElementById('newGoalName').value=''; document.getElementById('newGoalValue').value=''; document.getElementById('newGoalDueDate').value='';
+            let goalData = {
+                userId:auth.currentUser.uid,
+                nome, valorTotal:parseFloat(valor), vencimento:vencObj.toISOString().slice(0,10),
+                categoria:cat, recorrente,
+                createdAt:firebase.firestore.FieldValue.serverTimestamp()
+            };
+            if (cat === 'Parcelamento de conta de dívida') {
+                let debtBank = document.getElementById('goalDebtBank').value.trim();
+                let totalDebt = parseFloat(document.getElementById('goalTotalDebtValue').value);
+                let monthlyParcel = parseFloat(document.getElementById('goalMonthlyParcel').value);
+                let totalParcels = parseInt(document.getElementById('goalTotalParcels').value);
+                if(!debtBank || isNaN(totalDebt) || isNaN(monthlyParcel) || isNaN(totalParcels)) {
+                    alert('Preencha todos os campos do parcelamento.');
+                    return;
+                }
+                goalData.debtBank = debtBank;
+                goalData.totalDebtValue = totalDebt;
+                goalData.monthlyParcel = monthlyParcel;
+                goalData.totalParcels = totalParcels;
+            }
+            await db.collection('monthlyGoals').add(goalData);
+            showToast('Meta criada!');
+            ['newGoalName','newGoalValue','newGoalDueDate','goalDebtBank','goalTotalDebtValue','goalMonthlyParcel','goalTotalParcels'].forEach(id=> { let el = document.getElementById(id); if(el) el.value = ''; });
+            document.getElementById('goalRecurrent').checked = false;
+            parcelamentoExtraFields.style.display = 'none';
         };
+        // Modal depósito
         document.getElementById('closeDepositModalBtn').addEventListener('click',()=>document.getElementById('depositModal').classList.remove('active'));
-        document.getElementById('depositBank').addEventListener('change',function(){ document.getElementById('depositOtherBankDiv').style.display=this.value==='Outro'?'block':'none'; });
+        const depositBankSelect = document.getElementById('depositBank');
+        const infinityPayTypeDiv = document.getElementById('infinityPayTypeDiv');
+        const depositOtherBankDiv = document.getElementById('depositOtherBankDiv');
+        depositBankSelect.addEventListener('change', function(){
+            if (this.value === 'Infinity Pay') {
+                infinityPayTypeDiv.style.display = 'block';
+                depositOtherBankDiv.style.display = 'none';
+            } else if (this.value === 'Outro') {
+                infinityPayTypeDiv.style.display = 'none';
+                depositOtherBankDiv.style.display = 'block';
+            } else {
+                infinityPayTypeDiv.style.display = 'none';
+                depositOtherBankDiv.style.display = 'none';
+            }
+        });
         document.getElementById('saveDepositBtn').onclick=async()=>{
             let goalId=document.getElementById('depositGoalId').value, amount=parseFloat(document.getElementById('depositAmount').value);
             if(isNaN(amount)||amount<=0) { alert('Valor inválido'); return; }
-            let method=document.getElementById('depositMethod').value, bank=document.getElementById('depositBank').value;
-            if(bank==='Outro') { bank=document.getElementById('depositOtherBank').value.trim(); if(!bank) { alert('Informe o nome do banco'); return; } }
+            let method=document.getElementById('depositMethod').value, bank=depositBankSelect.value;
+            if(bank==='Infinity Pay') {
+                let tipo = document.getElementById('infinityPayType').value;
+                bank = `Infinity Pay (${tipo})`;
+            } else if(bank==='Outro') {
+                bank=document.getElementById('depositOtherBank').value.trim();
+                if(!bank) { alert('Informe o nome do banco'); return; }
+            }
             await db.collection('goalDeposits').add({userId:auth.currentUser.uid,goalId,amount,method,bank,date:firebase.firestore.FieldValue.serverTimestamp()});
             showToast('Depósito registrado!'); document.getElementById('depositModal').classList.remove('active');
-        };
-        document.getElementById('renewGoalsBtn').onclick=async()=>{
-            if(!confirm('Isso recriará as metas do mês passado com os mesmos valores, categorias e vencimento para o mesmo dia do próximo mês. Continuar?')) return;
-            let metasAnteriores=currentUserData.goals.filter(g=>getGoalDaysRemaining(g)<0);
-            if(metasAnteriores.length===0) metasAnteriores=currentUserData.goals;
-            for(let g of metasAnteriores) {
-                let oldDate=new Date(g.vencimento+'T00:00:00'), newDate=new Date(oldDate); newDate.setMonth(newDate.getMonth()+1);
-                await db.collection('monthlyGoals').add({userId:auth.currentUser.uid,nome:g.nome,valorTotal:g.valorTotal,vencimento:newDate.toISOString().slice(0,10),categoria:g.categoria,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-            }
-            showToast('Metas renovadas!');
         };
 
         // Análises
