@@ -992,9 +992,14 @@
     async function seedDefaultNames() {
         if (!auth.currentUser) return;
         const uid = auth.currentUser.uid;
+        // Busca todos os nomes já existentes para este usuário
         const snapshot = await db.collection('userGoalNames').where('userId','==',uid).get();
-        if (snapshot.empty) {
-            for (let name of DEFAULT_GOAL_NAMES) {
+        const existingNames = [];
+        snapshot.forEach(doc => existingNames.push(doc.data().nome));
+        
+        // Adiciona cada nome padrão que ainda não existir
+        for (let name of DEFAULT_GOAL_NAMES) {
+            if (!existingNames.includes(name)) {
                 await db.collection('userGoalNames').add({ userId: uid, nome: name });
             }
         }
