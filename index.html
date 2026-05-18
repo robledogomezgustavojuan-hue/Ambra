@@ -185,6 +185,12 @@
         .select-with-gear { display: flex; gap: 8px; align-items: center; }
         .select-with-gear select { margin-bottom: 0; flex: 1; }
         .select-with-gear button { height: 48px; width: 48px; padding: 0; border-radius: 22px; display: flex; align-items: center; justify-content: center; }
+        /* Sub-abas internas */
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .sub-tab { padding: 8px 16px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s; }
+        .sub-tab.active { background: #FF7A1A; color: black; border-color: #FF7A1A; font-weight: 600; }
+        .sub-section { display: none; }
+        .sub-section.active-section { display: block; }
     </style>
 </head>
 <body>
@@ -224,7 +230,6 @@
         <div class="user-name-top"><span id="userNameDisplay" class="badge-amber"></span></div>
         <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
             <button id="editProfileBtn" class="btn-outline-light"><i class="fas fa-user-edit"></i> Perfil</button>
-            <button id="openHistoryAnalyticsBtn" class="btn-outline-light"><i class="fas fa-chart-line"></i> Análises</button>
             <button id="logoutDashBtn" class="btn-outline-light"><i class="fas fa-sign-out-alt"></i> Sair</button>
         </div>
     </div>
@@ -243,197 +248,211 @@
                 <div class="today-debt-value" id="todayTotalValue">R$ 0,00</div>
                 <div class="today-debt-details" id="todayDebtDetails"></div>
             </div>
-            <button class="today-debt-btn" id="goToPaymentsBtn"><i class="fas fa-arrow-right"></i> Registrar pagamento</button>
+            <button class="today-debt-btn" id="goToPaymentsBtn"><i class="fas fa-arrow-right"></i> Pagamentos</button>
         </div>
         <div class="card-premium">
             <h3><i class="fas fa-chart-simple"></i> Últimas dívidas</h3>
             <div class="table-wrapper"><table class="table-dark-premium" id="miniDebtsTable"><thead><tr><th>Credor</th><th>Descrição</th><th>Parcela</th><th>Pendentes</th><th>Restante</th></tr></thead><tbody id="miniDebtsBody"></tbody></table></div>
         </div>
+        <div class="card-premium">
+            <h3><i class="fas fa-bullseye"></i> Compromissos do mês</h3>
+            <div id="dashboardGoalsSummary"></div>
+        </div>
     </div>
 
-    <!-- DÍVIDAS -->
+    <!-- DÍVIDAS (unificada) -->
     <div id="sectionDebts" class="section-page">
-        <div class="card-premium">
-            <h3><i class="fas fa-hand-holding-usd"></i> Registrar nova dívida</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 12px;">
-                <input type="text" id="newTitle" placeholder="Descrição da dívida">
-                <input type="text" id="newCredor" placeholder="Nome ou referência do credor">
-                <input type="number" id="newCapital" placeholder="Valor total do empréstimo (R$)" step="0.01">
-            </div>
-            <label style="margin-top: 8px;">Qual vai ser a forma de pagamento?</label>
-            <select id="paymentMethodSelect">
-                <option value="Dinheiro">Dinheiro</option><option value="Pix">Pix</option>
-                <option value="Débito">Débito</option><option value="Crédito">Crédito</option>
-                <option value="Boleto">Boleto</option><option value="Transação bancária">Transação bancária</option>
-            </select>
-            <div id="pixFields" style="display: none;">
-                <label>Tipo de chave Pix</label>
-                <select id="pixKeyTypeSelect">
-                    <option>Telefone</option><option>CPF</option><option>CNPJ</option>
-                    <option>Celular</option><option>E-mail</option><option>Chave aleatória</option>
-                    <option>QR Code</option>
+        <div class="sub-tabs">
+            <button class="sub-tab active" data-subsection="subRegistrar">📝 Registrar</button>
+            <button class="sub-tab" data-subsection="subLista">📋 Lista</button>
+            <button class="sub-tab" data-subsection="subPagamentos">💳 Pagamentos</button>
+            <button class="sub-tab" data-subsection="subHistorico">📊 Histórico</button>
+            <button class="sub-tab" data-subsection="subJuros">🧮 Juros</button>
+        </div>
+        <!-- Registrar -->
+        <div id="subRegistrar" class="sub-section active-section">
+            <div class="card-premium">
+                <h3><i class="fas fa-hand-holding-usd"></i> Registrar nova dívida</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 12px;">
+                    <input type="text" id="newTitle" placeholder="Descrição da dívida">
+                    <input type="text" id="newCredor" placeholder="Nome ou referência do credor">
+                    <input type="number" id="newCapital" placeholder="Valor total do empréstimo (R$)" step="0.01">
+                </div>
+                <label style="margin-top: 8px;">Qual vai ser a forma de pagamento?</label>
+                <select id="paymentMethodSelect">
+                    <option value="Dinheiro">Dinheiro</option><option value="Pix">Pix</option>
+                    <option value="Débito">Débito</option><option value="Crédito">Crédito</option>
+                    <option value="Boleto">Boleto</option><option value="Transação bancária">Transação bancária</option>
                 </select>
-                <input type="text" id="pixKeyValue" placeholder="Digite a chave ou código do QR Code">
-            </div>
-            <label style="margin-top: 8px;">Qual é a data de criação dessa dívida?</label>
-            <div class="radio-group" id="dateRadioGroup">
-                <div class="radio-option active" data-value="today">📅 Hoje / Agora</div>
-                <div class="radio-option" data-value="custom">✏️ Outra data</div>
-            </div>
-            <div id="customDateTimeDiv" style="display: none; margin: 12px 0;">
-                <div style="display: flex; gap: 12px;">
-                    <input type="text" id="customDateInput" placeholder="dd/mm/aaaa" maxlength="10" style="flex:1">
-                    <input type="text" id="customTimeInput" placeholder="hh:mm:ss" maxlength="8" style="flex:1">
-                </div>
-            </div>
-            <div class="switch-container">
-                <span class="switch-label">Modo de pagamento parcelado?</span>
-                <label class="switch"><input type="checkbox" id="isParceledToggle"><span class="slider"></span></label>
-            </div>
-            <div id="parcelFields">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-                    <input type="number" id="parcelValue" placeholder="Valor parcela">
-                    <input type="number" id="parcelCount" placeholder="Qtd parcelas">
-                    <select id="periodicitySelect"><option value="mensal">Mensal</option><option value="semanal">Semanal</option><option value="diario">Diário</option></select>
-                </div>
-            </div>
-            <div id="lumpSumDiv" style="display: block; margin: 12px 0;">
-                <label>Data limite de pagamento (vencimento único)</label>
-                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <input type="text" id="lumpSumDate" placeholder="dd/mm/aaaa" maxlength="10" style="flex: 2;">
-                    <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 40px;">
-                        <span style="font-size: 0.8rem;">Sem data</span>
-                        <label class="switch-small"><input type="checkbox" id="noDueDateToggle"><span class="slider-small"></span></label>
-                    </div>
-                </div>
-            </div>
-            <div id="dailyExcludeDiv" style="display: none;">
-                <label>Ignorar dias da semana:</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" class="exclude-day" value="1"> Seg</label>
-                    <label><input type="checkbox" class="exclude-day" value="2"> Ter</label>
-                    <label><input type="checkbox" class="exclude-day" value="3"> Qua</label>
-                    <label><input type="checkbox" class="exclude-day" value="4"> Qui</label>
-                    <label><input type="checkbox" class="exclude-day" value="5"> Sex</label>
-                    <label><input type="checkbox" class="exclude-day" value="6"> Sáb</label>
-                    <label><input type="checkbox" class="exclude-day" value="0"> Dom</label>
-                </div>
-                <input type="text" id="holidaysInput" placeholder="Feriados (ex: 01/01,25/12,15/11)">
-            </div>
-            <button id="createDebtBtn" class="btn-amber" style="width:100%; margin-top: 12px;"><i class="fas fa-plus-circle"></i> Adicionar dívida</button>
-        </div>
-        <div class="card-premium">
-            <h3><i class="fas fa-table-list"></i> Lista de dívidas (ativas)</h3>
-            <div class="table-wrapper"><table class="table-dark-premium" id="fullDebtsTable"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Restante</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Vencimento</th><th></th></tr></thead><tbody id="debtsTableBody"></tbody></table></div>
-        </div>
-    </div>
-
-    <!-- PAGAMENTOS -->
-    <div id="sectionPayments" class="section-page">
-        <div class="card-premium">
-            <h3><i class="fas fa-receipt"></i> Registrar pagamento</h3>
-            <select id="debtSelectPayment"></select>
-            <div id="selectedDebtInfo" style="background: rgba(0,0,0,0.4); border-radius: 24px; padding: 12px; margin-bottom: 16px;"><p class="text-muted">Selecione uma dívida</p></div>
-            <label>Esse pagamento corresponde ao dia de hoje?</label>
-            <div class="radio-group" id="paymentDateGroup">
-                <div class="radio-option active" data-value="today">✅ Sim, hoje</div>
-                <div class="radio-option" data-value="custom">📅 Não, outra data</div>
-            </div>
-            <div id="customPaymentDateDiv" style="display: none; margin: 12px 0;">
-                <div style="display: flex; gap: 12px;">
-                    <input type="text" id="paymentDateCustom" placeholder="dd/mm/aaaa" maxlength="10" style="flex:1">
-                    <input type="text" id="paymentTimeCustom" placeholder="hh:mm:ss" maxlength="8" style="flex:1">
-                </div>
-            </div>
-            <div class="radio-group" id="paymentTypeGroup">
-                <div class="radio-option active" data-value="parcela">📦 Pagar por parcela</div>
-                <div class="radio-option" data-value="manual">✏️ Pagar valor manual</div>
-            </div>
-            <div id="parcelCountDiv" style="display: block; margin-bottom: 12px;">
-                <label>Quantidade de parcelas a pagar</label>
-                <input type="number" id="parcelQty" placeholder="Ex: 2" step="1" min="1">
-                <div id="parcelTotalCalc" class="text-muted" style="font-size: 0.75rem; margin-top: 4px;">Valor total: R$ 0,00</div>
-            </div>
-            <div id="manualAmountDiv" style="display: none; margin-bottom: 12px;">
-                <label>Valor a pagar (R$)</label>
-                <input type="number" id="paymentAmount" placeholder="0,00" step="0.01">
-            </div>
-            <div id="paymentMethodInfo" style="background: rgba(0,0,0,0.3); border-radius: 24px; padding: 12px; margin: 12px 0;"></div>
-            <div id="pixChangeDiv" style="display: none; margin-top: 12px;">
-                <div class="switch-container" style="margin: 8px 0;">
-                    <span class="switch-label">Usei outra chave Pix</span>
-                    <label class="switch"><input type="checkbox" id="useDifferentPixToggle"><span class="slider"></span></label>
-                </div>
-                <div id="differentPixFields" style="display: none; margin-top: 12px;">
-                    <label>Novo tipo de chave</label>
-                    <select id="newPixKeyType">
+                <div id="pixFields" style="display: none;">
+                    <label>Tipo de chave Pix</label>
+                    <select id="pixKeyTypeSelect">
                         <option>Telefone</option><option>CPF</option><option>CNPJ</option>
                         <option>Celular</option><option>E-mail</option><option>Chave aleatória</option>
                         <option>QR Code</option>
                     </select>
-                    <input type="text" id="newPixKeyValue" placeholder="Digite a nova chave">
+                    <input type="text" id="pixKeyValue" placeholder="Digite a chave ou código do QR Code">
+                </div>
+                <label style="margin-top: 8px;">Qual é a data de criação dessa dívida?</label>
+                <div class="radio-group" id="dateRadioGroup">
+                    <div class="radio-option active" data-value="today">📅 Hoje / Agora</div>
+                    <div class="radio-option" data-value="custom">✏️ Outra data</div>
+                </div>
+                <div id="customDateTimeDiv" style="display: none; margin: 12px 0;">
+                    <div style="display: flex; gap: 12px;">
+                        <input type="text" id="customDateInput" placeholder="dd/mm/aaaa" maxlength="10" style="flex:1">
+                        <input type="text" id="customTimeInput" placeholder="hh:mm:ss" maxlength="8" style="flex:1">
+                    </div>
+                </div>
+                <div class="switch-container">
+                    <span class="switch-label">Modo de pagamento parcelado?</span>
+                    <label class="switch"><input type="checkbox" id="isParceledToggle"><span class="slider"></span></label>
+                </div>
+                <div id="parcelFields">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                        <input type="number" id="parcelValue" placeholder="Valor parcela">
+                        <input type="number" id="parcelCount" placeholder="Qtd parcelas">
+                        <select id="periodicitySelect"><option value="mensal">Mensal</option><option value="semanal">Semanal</option><option value="diario">Diário</option></select>
+                    </div>
+                </div>
+                <div id="lumpSumDiv" style="display: block; margin: 12px 0;">
+                    <label>Data limite de pagamento (vencimento único)</label>
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <input type="text" id="lumpSumDate" placeholder="dd/mm/aaaa" maxlength="10" style="flex: 2;">
+                        <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 40px;">
+                            <span style="font-size: 0.8rem;">Sem data</span>
+                            <label class="switch-small"><input type="checkbox" id="noDueDateToggle"><span class="slider-small"></span></label>
+                        </div>
+                    </div>
+                </div>
+                <div id="dailyExcludeDiv" style="display: none;">
+                    <label>Ignorar dias da semana:</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" class="exclude-day" value="1"> Seg</label>
+                        <label><input type="checkbox" class="exclude-day" value="2"> Ter</label>
+                        <label><input type="checkbox" class="exclude-day" value="3"> Qua</label>
+                        <label><input type="checkbox" class="exclude-day" value="4"> Qui</label>
+                        <label><input type="checkbox" class="exclude-day" value="5"> Sex</label>
+                        <label><input type="checkbox" class="exclude-day" value="6"> Sáb</label>
+                        <label><input type="checkbox" class="exclude-day" value="0"> Dom</label>
+                    </div>
+                    <input type="text" id="holidaysInput" placeholder="Feriados (ex: 01/01,25/12,15/11)">
+                </div>
+                <button id="createDebtBtn" class="btn-amber" style="width:100%; margin-top: 12px;"><i class="fas fa-plus-circle"></i> Adicionar dívida</button>
+            </div>
+        </div>
+        <!-- Lista -->
+        <div id="subLista" class="sub-section">
+            <div class="card-premium">
+                <h3><i class="fas fa-table-list"></i> Lista de dívidas (ativas)</h3>
+                <div class="table-wrapper"><table class="table-dark-premium" id="fullDebtsTable"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Restante</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Vencimento</th><th></th></tr></thead><tbody id="debtsTableBody"></tbody></table></div>
+            </div>
+        </div>
+        <!-- Pagamentos -->
+        <div id="subPagamentos" class="sub-section">
+            <div class="card-premium">
+                <h3><i class="fas fa-receipt"></i> Registrar pagamento</h3>
+                <select id="debtSelectPayment"></select>
+                <div id="selectedDebtInfo" style="background: rgba(0,0,0,0.4); border-radius: 24px; padding: 12px; margin-bottom: 16px;"><p class="text-muted">Selecione uma dívida</p></div>
+                <label>Esse pagamento corresponde ao dia de hoje?</label>
+                <div class="radio-group" id="paymentDateGroup">
+                    <div class="radio-option active" data-value="today">✅ Sim, hoje</div>
+                    <div class="radio-option" data-value="custom">📅 Não, outra data</div>
+                </div>
+                <div id="customPaymentDateDiv" style="display: none; margin: 12px 0;">
+                    <div style="display: flex; gap: 12px;">
+                        <input type="text" id="paymentDateCustom" placeholder="dd/mm/aaaa" maxlength="10" style="flex:1">
+                        <input type="text" id="paymentTimeCustom" placeholder="hh:mm:ss" maxlength="8" style="flex:1">
+                    </div>
+                </div>
+                <div class="radio-group" id="paymentTypeGroup">
+                    <div class="radio-option active" data-value="parcela">📦 Pagar por parcela</div>
+                    <div class="radio-option" data-value="manual">✏️ Pagar valor manual</div>
+                </div>
+                <div id="parcelCountDiv" style="display: block; margin-bottom: 12px;">
+                    <label>Quantidade de parcelas a pagar</label>
+                    <input type="number" id="parcelQty" placeholder="Ex: 2" step="1" min="1">
+                    <div id="parcelTotalCalc" class="text-muted" style="font-size: 0.75rem; margin-top: 4px;">Valor total: R$ 0,00</div>
+                </div>
+                <div id="manualAmountDiv" style="display: none; margin-bottom: 12px;">
+                    <label>Valor a pagar (R$)</label>
+                    <input type="number" id="paymentAmount" placeholder="0,00" step="0.01">
+                </div>
+                <div id="paymentMethodInfo" style="background: rgba(0,0,0,0.3); border-radius: 24px; padding: 12px; margin: 12px 0;"></div>
+                <div id="pixChangeDiv" style="display: none; margin-top: 12px;">
+                    <div class="switch-container" style="margin: 8px 0;">
+                        <span class="switch-label">Usei outra chave Pix</span>
+                        <label class="switch"><input type="checkbox" id="useDifferentPixToggle"><span class="slider"></span></label>
+                    </div>
+                    <div id="differentPixFields" style="display: none; margin-top: 12px;">
+                        <label>Novo tipo de chave</label>
+                        <select id="newPixKeyType">
+                            <option>Telefone</option><option>CPF</option><option>CNPJ</option>
+                            <option>Celular</option><option>E-mail</option><option>Chave aleatória</option>
+                            <option>QR Code</option>
+                        </select>
+                        <input type="text" id="newPixKeyValue" placeholder="Digite a nova chave">
+                    </div>
+                </div>
+                <button id="registerPaymentAction" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-check-circle"></i> Registrar pagamento</button>
+            </div>
+            <div class="card-premium">
+                <h3>Histórico de pagamentos</h3>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1rem;">
+                    <input type="date" id="filterStart"><span>até</span><input type="date" id="filterEnd">
+                    <button id="applyFilterBtn" class="btn-outline-light">Filtrar</button>
+                    <button id="resetFilterBtn" class="btn-outline-light">Limpar</button>
+                </div>
+                <div class="table-wrapper"><table class="table-dark-premium"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Valor</th><th>Método</th><th>Chave utilizada</th><th></th></tr></thead><tbody id="paymentsHistoryBody"></tbody></table></div>
+            </div>
+        </div>
+        <!-- Histórico / Análises -->
+        <div id="subHistorico" class="sub-section">
+            <div class="card-premium">
+                <h3><i class="fas fa-archive"></i> Histórico completo de dívidas</h3>
+                <div class="table-wrapper"><table class="table-dark-premium" id="fullHistoryTable"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Status</th><th>Ações</th></tr></thead><tbody id="fullHistoryBody"></tbody></table></div>
+            </div>
+            <div class="card-premium">
+                <h3><i class="fas fa-chart-pie"></i> Análise profissional</h3>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                    <label>Data inicial: <input type="date" id="analyticsStartDate"></label>
+                    <label>Data final: <input type="date" id="analyticsEndDate"></label>
+                    <button id="applyAnalyticsFilter" class="btn-amber">Filtrar</button>
+                    <button id="resetAnalyticsFilter" class="btn-outline-light">Resetar</button>
+                </div>
+                <div id="staticDiagrams" class="diagram-card">
+                    <div class="diagram-stat"><span class="diagram-label">Total de dívidas criadas (R$):</span><span class="diagram-value" id="statTotalDebtsPeriod">0,00</span></div>
+                    <div class="diagram-stat"><span class="diagram-label">Total pago (R$):</span><span class="diagram-value" id="statTotalPaidPeriod">0,00</span></div>
+                    <div class="diagram-stat"><span class="diagram-label">Parcelas pendentes (total):</span><span class="diagram-value" id="statPendingInstallments">0</span></div>
+                    <div class="diagram-stat"><span class="diagram-label">Quantidade de dívidas ativas:</span><span class="diagram-value" id="statActiveCountPeriod">0</span></div>
+                    <div class="diagram-stat"><span class="diagram-label">Evolução mensal:</span></div>
+                    <div id="monthlyEvolutionTable" style="max-height: 300px; overflow-y: auto;"></div>
                 </div>
             </div>
-            <button id="registerPaymentAction" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-check-circle"></i> Registrar pagamento</button>
         </div>
-        <div class="card-premium">
-            <h3>Histórico de pagamentos</h3>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1rem;">
-                <input type="date" id="filterStart"><span>até</span><input type="date" id="filterEnd">
-                <button id="applyFilterBtn" class="btn-outline-light">Filtrar</button>
-                <button id="resetFilterBtn" class="btn-outline-light">Limpar</button>
-            </div>
-            <div class="table-wrapper"><table class="table-dark-premium"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Valor</th><th>Método</th><th>Chave utilizada</th><th></th></tr></thead><tbody id="paymentsHistoryBody"></tbody></table></div>
-        </div>
-    </div>
-
-    <!-- CALCULADORA -->
-    <div id="sectionCalculator" class="section-page">
-        <div class="card-premium">
-            <h3><i class="fas fa-calculator"></i> Simulador de juros</h3>
-            <div class="radio-group" id="calcTypeGroup">
-                <div class="radio-option active" data-value="parcela">Por parcela e quantidade</div>
-                <div class="radio-option" data-value="percentual">Por percentual de juros (%)</div>
-            </div>
-            <div id="calcParcelaDiv" style="display: block;">
-                <input type="number" id="calcCapitalParcela" placeholder="Capital (R$)" step="0.01">
-                <input type="number" id="calcParcelVal" placeholder="Valor da parcela (R$)" step="0.01">
-                <input type="number" id="calcQtd" placeholder="Quantidade de parcelas" step="1">
-            </div>
-            <div id="calcPercentualDiv" style="display: none;">
-                <input type="number" id="calcCapitalPercent" placeholder="Capital (R$)" step="0.01">
-                <input type="number" id="calcInterestPercent" placeholder="Taxa de juros total (%)" step="0.01">
-                <input type="number" id="calcQtdPercent" placeholder="Quantidade de parcelas" step="1">
-            </div>
-            <div style="display: flex; gap: 12px; margin-top: 8px;">
-                <button id="calcInterestBtn" class="btn-amber">Calcular</button>
-                <button id="resetCalculatorBtn" class="btn-outline-light">Zerar</button>
-            </div>
-            <div id="calcResultBox" style="margin-top:1rem; background:rgba(0,0,0,0.5); border-radius:28px; padding:1rem;"></div>
-        </div>
-    </div>
-
-    <!-- HISTÓRICO E ANÁLISES -->
-    <div id="sectionHistoryAnalytics" class="section-page">
-        <div class="card-premium">
-            <h3><i class="fas fa-archive"></i> Histórico completo de dívidas</h3>
-            <div class="table-wrapper"><table class="table-dark-premium" id="fullHistoryTable"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Status</th><th>Ações</th></tr></thead><tbody id="fullHistoryBody"></tbody></table></div>
-        </div>
-        <div class="card-premium">
-            <h3><i class="fas fa-chart-pie"></i> Análise profissional</h3>
-            <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
-                <label>Data inicial: <input type="date" id="analyticsStartDate"></label>
-                <label>Data final: <input type="date" id="analyticsEndDate"></label>
-                <button id="applyAnalyticsFilter" class="btn-amber">Filtrar</button>
-                <button id="resetAnalyticsFilter" class="btn-outline-light">Resetar</button>
-            </div>
-            <div id="staticDiagrams" class="diagram-card">
-                <div class="diagram-stat"><span class="diagram-label">Total de dívidas criadas (R$):</span><span class="diagram-value" id="statTotalDebtsPeriod">0,00</span></div>
-                <div class="diagram-stat"><span class="diagram-label">Total pago (R$):</span><span class="diagram-value" id="statTotalPaidPeriod">0,00</span></div>
-                <div class="diagram-stat"><span class="diagram-label">Parcelas pendentes (total):</span><span class="diagram-value" id="statPendingInstallments">0</span></div>
-                <div class="diagram-stat"><span class="diagram-label">Quantidade de dívidas ativas:</span><span class="diagram-value" id="statActiveCountPeriod">0</span></div>
-                <div class="diagram-stat"><span class="diagram-label">Evolução mensal:</span></div>
-                <div id="monthlyEvolutionTable" style="max-height: 300px; overflow-y: auto;"></div>
+        <!-- Juros -->
+        <div id="subJuros" class="sub-section">
+            <div class="card-premium">
+                <h3><i class="fas fa-calculator"></i> Simulador de juros</h3>
+                <div class="radio-group" id="calcTypeGroup">
+                    <div class="radio-option active" data-value="parcela">Por parcela e quantidade</div>
+                    <div class="radio-option" data-value="percentual">Por percentual de juros (%)</div>
+                </div>
+                <div id="calcParcelaDiv" style="display: block;">
+                    <input type="number" id="calcCapitalParcela" placeholder="Capital (R$)" step="0.01">
+                    <input type="number" id="calcParcelVal" placeholder="Valor da parcela (R$)" step="0.01">
+                    <input type="number" id="calcQtd" placeholder="Quantidade de parcelas" step="1">
+                </div>
+                <div id="calcPercentualDiv" style="display: none;">
+                    <input type="number" id="calcCapitalPercent" placeholder="Capital (R$)" step="0.01">
+                    <input type="number" id="calcInterestPercent" placeholder="Taxa de juros total (%)" step="0.01">
+                    <input type="number" id="calcQtdPercent" placeholder="Quantidade de parcelas" step="1">
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 8px;">
+                    <button id="calcInterestBtn" class="btn-amber">Calcular</button>
+                    <button id="resetCalculatorBtn" class="btn-outline-light">Zerar</button>
+                </div>
+                <div id="calcResultBox" style="margin-top:1rem; background:rgba(0,0,0,0.5); border-radius:28px; padding:1rem;"></div>
             </div>
         </div>
     </div>
@@ -558,14 +577,11 @@
     </div>
 </div>
 
-<!-- NAVBAR -->
+<!-- NAVBAR (reduzida para 3 ícones) -->
 <div class="bottom-nav" id="bottomNav">
-    <button class="nav-item" data-section="sectionDashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
+    <button class="nav-item active" data-section="sectionDashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
     <button class="nav-item" data-section="sectionDebts"><i class="fas fa-file-invoice"></i><span>Dívidas</span></button>
-    <button class="nav-item" data-section="sectionPayments"><i class="fas fa-history"></i><span>Pagamentos</span></button>
     <button class="nav-item" data-section="sectionGoals"><i class="fas fa-bullseye"></i><span>Compromissos</span></button>
-    <button class="nav-item" data-section="sectionHistoryAnalytics"><i class="fas fa-chart-line"></i><span>Análises</span></button>
-    <button class="nav-item" data-section="sectionCalculator"><i class="fas fa-calculator"></i><span>Juros</span></button>
 </div>
 
 <script>
@@ -595,7 +611,6 @@
         "Parcelamento de conta de dívida"
     ];
 
-    // ---------- FUNÇÕES AUXILIARES ----------
     function applyDateMask(input) {
         let value = input.value.replace(/\D/g, ''); if (value.length > 8) value = value.slice(0,8);
         let formatted = '';
@@ -629,7 +644,7 @@
         return date;
     }
 
-    // ---------- DÍVIDAS ----------
+    // DÍVIDAS
     function getParcelDueDate(startDate, parcelIndex, periodicidade, excludedDays=[], holidays=[]) {
         let date = new Date(startDate);
         for(let i=0;i<parcelIndex;i++) {
@@ -813,7 +828,7 @@
         });
     }
 
-    // ---------- COMPROMISSOS ----------
+    // COMPROMISSOS
     function getGoalSaved(goalId) { return currentUserData.goalDeposits.filter(d=>d.goalId===goalId).reduce((s,d)=>s+d.amount,0); }
     function getGoalRemaining(goal) { return Math.max(0, goal.valorTotal - getGoalSaved(goal.id)); }
     function getGoalProgress(goal) { let saved=getGoalSaved(goal.id); return Math.min(100,(saved/goal.valorTotal)*100); }
@@ -948,6 +963,22 @@
         document.getElementById('goalsCount').innerText=activeCount;
     }
 
+    function renderDashboardGoalsSummary() {
+        let container = document.getElementById('dashboardGoalsSummary');
+        if (!container) return;
+        let totalNeeded=currentUserData.goals.reduce((s,g)=>s+g.valorTotal,0);
+        let totalSaved=currentUserData.goalDeposits.reduce((s,d)=>s+d.amount,0);
+        let remaining=Math.max(0,totalNeeded-totalSaved);
+        let activeCount=currentUserData.goals.filter(g=>getGoalRemaining(g)>0).length;
+        container.innerHTML = `
+            <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:space-between;">
+                <div><strong>${activeCount}</strong> ativos</div>
+                <div>Necessário: <strong>${formatMoney(totalNeeded)}</strong></div>
+                <div>Poupado: <strong>${formatMoney(totalSaved)}</strong></div>
+                <div>Falta: <strong>${formatMoney(remaining)}</strong></div>
+            </div>`;
+    }
+
     async function autoRenewRecurringGoals() {
         if (!currentUser) return;
         let hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -985,19 +1016,17 @@
         updateGoalsSummary(); 
         renderGoals(); 
         renderGoalDepositsHistory(); 
+        renderDashboardGoalsSummary();
         autoRenewRecurringGoals(); 
     }
 
-    // ---------- NOMES DOS COMPROMISSOS ----------
+    // NOMES DOS COMPROMISSOS
     async function seedDefaultNames() {
         if (!auth.currentUser) return;
         const uid = auth.currentUser.uid;
-        // Busca todos os nomes já existentes para este usuário
         const snapshot = await db.collection('userGoalNames').where('userId','==',uid).get();
         const existingNames = [];
         snapshot.forEach(doc => existingNames.push(doc.data().nome));
-        
-        // Adiciona cada nome padrão que ainda não existir
         for (let name of DEFAULT_GOAL_NAMES) {
             if (!existingNames.includes(name)) {
                 await db.collection('userGoalNames').add({ userId: uid, nome: name });
@@ -1092,7 +1121,6 @@
         });
     }
 
-    // ---------- RENDER PRINCIPAL ----------
     function scheduleRender() { clearTimeout(renderTimeout); renderTimeout=setTimeout(()=>renderAll(),80); }
     function renderAll() {
         if(!currentUser) return;
@@ -1102,7 +1130,6 @@
         renderGoalsAll();
     }
 
-    // ---------- AUTH E LISTENERS ----------
     async function registerWithFirebase(email,password,username) {
         try {
             const uc=await auth.createUserWithEmailAndPassword(email,password);
@@ -1142,7 +1169,7 @@
             scheduleRender();
         });
         db.collection('users').doc(uid).get().then(doc=>{ if(doc.exists){ const ud=doc.data(); document.getElementById('userNameDisplay').innerText=ud.username; if(ud.avatar) document.getElementById('userAvatarImg').src=ud.avatar; scheduleRender(); } });
-        seedDefaultNames(); // Garante que os nomes padrão existam
+        seedDefaultNames();
     }
 
     auth.onAuthStateChanged(user=>{
@@ -1154,7 +1181,6 @@
         }
     });
 
-    // ---------- EVENTOS ----------
     window.onload=()=>{
         const dateInput=document.getElementById('customDateInput'), timeInput=document.getElementById('customTimeInput'), lumpSumDateInput=document.getElementById('lumpSumDate');
         if(dateInput) dateInput.addEventListener('input',function(){applyDateMask(this);});
@@ -1171,6 +1197,20 @@
             registerWithFirebase(e,p,u);
         };
         document.getElementById('logoutDashBtn').onclick=()=>logoutFirebase();
+
+        // Sub-abas de Dívidas
+        document.querySelectorAll('.sub-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                const subSectionId = tab.dataset.subsection;
+                document.querySelectorAll('#sectionDebts .sub-section').forEach(sec => sec.classList.remove('active-section'));
+                document.getElementById(subSectionId).classList.add('active-section');
+                if (subSectionId === 'subLista') renderFullDebts();
+                if (subSectionId === 'subPagamentos') { renderSelectDebts(); renderPaymentsHistory(); }
+                if (subSectionId === 'subHistorico') { renderFullHistory(); updateStaticDiagrams(); }
+            });
+        });
 
         const radioOptions=document.querySelectorAll('#dateRadioGroup .radio-option'), customDateDiv=document.getElementById('customDateTimeDiv');
         function setDateMode(value) { customDateDiv.style.display=value==='today'?'none':'block'; radioOptions.forEach(opt=>opt.classList.toggle('active',opt.dataset.value===value)); }
@@ -1224,8 +1264,12 @@
             }
             await db.collection('debts').add({userId:auth.currentUser.uid,title,credor,totalCapital:tcn,totalFinanciado,isParceled,paymentMethod,pixKey:pixKey||null,originDateTime:originDateTime.toISOString(),createdAt:firebase.firestore.FieldValue.serverTimestamp(),...(isParceled&&{parcelValue,parcelCount,periodicity,excludedDays,holidays}),...(!isParceled&&{lumpSumDueDate:lumpDateStr,noDueDate})});
             showToast('Dívida adicionada!');
-            ['newTitle','newCredor','newCapital','pixKeyValue','parcelValue','parcelCount','lumpSumDate','holidaysInput','customDateInput','customTimeInput'].forEach(id=>document.getElementById(id).value='');
-            document.querySelectorAll('.exclude-day:checked').forEach(cb=>cb.checked=false); parcelToggle.checked=false; noDueDateToggle.checked=false; toggleParcelFields(); togglePixFields(); setDateMode('today');
+            // Limpar formulário completamente
+            ['newTitle','newCredor','newCapital','pixKeyValue','parcelValue','parcelCount','lumpSumDate','holidaysInput','customDateInput','customTimeInput'].forEach(id=>{ let el = document.getElementById(id); if(el) el.value = ''; });
+            document.querySelectorAll('.exclude-day:checked').forEach(cb=>cb.checked=false);
+            if(parcelToggle) parcelToggle.checked=false;
+            if(noDueDateToggle) noDueDateToggle.checked=false;
+            toggleParcelFields(); togglePixFields(); setDateMode('today');
         };
 
         const debtSelect=document.getElementById('debtSelectPayment'), selectedDebtInfoDiv=document.getElementById('selectedDebtInfo'), paymentMethodInfoDiv=document.getElementById('paymentMethodInfo'), pixChangeDiv=document.getElementById('pixChangeDiv'), parcelQtyInput=document.getElementById('parcelQty'), paymentAmountInput=document.getElementById('paymentAmount'), useDifferentPixToggle=document.getElementById('useDifferentPixToggle'), differentPixFields=document.getElementById('differentPixFields'), newPixKeyType=document.getElementById('newPixKeyType'), newPixKeyValue=document.getElementById('newPixKeyValue');
@@ -1273,7 +1317,14 @@
             if(pm==='today') paymentDate=new Date();
             else { const ds=paymentDateCustom.value, ts=paymentTimeCustom.value; if(!ds) { alert('Informe a data do pagamento no formato dd/mm/aaaa'); return; } paymentDate=parseCustomDateTime(ds,ts); if(!paymentDate) { alert('Data/hora inválida'); return; } }
             await db.collection('payments').add({userId:auth.currentUser.uid,debtId:debt.id,credor:debt.credor,amount,method:debt.paymentMethod,date:paymentDate.toISOString(),pixKeyUsed});
-            showToast('Pagamento registrado!'); parcelQtyInput.value=''; paymentAmountInput.value=''; useDifferentPixToggle.checked=false; differentPixFields.style.display='none'; newPixKeyValue.value=''; setPaymentDateMode('today');
+            showToast('Pagamento registrado!');
+            // Limpar formulário de pagamento
+            if(parcelQtyInput) parcelQtyInput.value='';
+            if(paymentAmountInput) paymentAmountInput.value='';
+            if(useDifferentPixToggle) useDifferentPixToggle.checked=false;
+            if(differentPixFields) differentPixFields.style.display='none';
+            if(newPixKeyValue) newPixKeyValue.value='';
+            setPaymentDateMode('today');
         };
         document.getElementById('applyFilterBtn').onclick=()=>{ let s=document.getElementById('filterStart').value, e=document.getElementById('filterEnd').value; if(s&&e) renderPaymentsHistory(s,e); else if(!s&&!e) renderPaymentsHistory(); else alert('Preencha ambas as datas ou deixe ambas em branco.'); };
         document.getElementById('resetFilterBtn').onclick=()=>{ document.getElementById('filterStart').value=''; document.getElementById('filterEnd').value=''; renderPaymentsHistory(); };
@@ -1293,7 +1344,7 @@
             }
             document.getElementById('calcResultBox').innerHTML=rh;
         };
-        document.getElementById('resetCalculatorBtn').onclick=()=>{ ['calcCapitalParcela','calcParcelVal','calcQtd','calcCapitalPercent','calcInterestPercent','calcQtdPercent'].forEach(id=>document.getElementById(id).value=''); document.getElementById('calcResultBox').innerHTML=''; };
+        document.getElementById('resetCalculatorBtn').onclick=()=>{ ['calcCapitalParcela','calcParcelVal','calcQtd','calcCapitalPercent','calcInterestPercent','calcQtdPercent'].forEach(id=>{ let el = document.getElementById(id); if(el) el.value = ''; }); document.getElementById('calcResultBox').innerHTML=''; };
 
         document.getElementById('editProfileBtn').addEventListener('click',()=>{
             const uid=auth.currentUser?.uid; if(!uid) return;
@@ -1364,11 +1415,16 @@
             }
             await db.collection('monthlyGoals').add(goalData);
             showToast('Compromisso criado!');
-            document.getElementById('newGoalValue').value=''; document.getElementById('newGoalDueDate').value='';
+            // Limpar formulário completamente
+            document.getElementById('newGoalValue').value='';
+            document.getElementById('newGoalDueDate').value='';
             document.getElementById('goalRecurrent').checked = false;
             document.getElementById('parcelamentoExtraFields').style.display = 'none';
             document.getElementById('newCustomNameDiv').style.display = 'none';
-            goalNameSelect.value = '';
+            document.getElementById('newCustomNameInput').value = '';
+            if(goalNameSelect) goalNameSelect.value = '';
+            // Limpar campos extras de parcelamento
+            ['goalDebtBank','goalTotalDebtValue','goalMonthlyParcel','goalTotalParcels'].forEach(id=>{ let el = document.getElementById(id); if(el) el.value = ''; });
         };
 
         // Modal depósito
@@ -1433,14 +1489,20 @@
                 goalId, amount, method, bank,
                 date: depositDate ? depositDate.toISOString() : firebase.firestore.FieldValue.serverTimestamp()
             });
-            showToast('Depósito registrado!'); 
-            document.getElementById('depositModal').classList.remove('active');
+            showToast('Depósito registrado!');
+            // Limpar formulário do modal de depósito
+            document.getElementById('depositAmount').value = '';
+            document.getElementById('depositMethod').value = 'Pix';
+            document.getElementById('depositBank').value = 'Itaú';
+            document.getElementById('infinityPayTypeDiv').style.display = 'none';
+            document.getElementById('depositOtherBankDiv').style.display = 'none';
+            document.getElementById('depositOtherBank').value = '';
             depositDateCustom.value = '';
             depositTimeCustom.value = '';
             setDepositDateMode('now');
+            document.getElementById('depositModal').classList.remove('active');
         };
 
-        document.getElementById('openHistoryAnalyticsBtn').addEventListener('click',()=>setActiveSection('sectionHistoryAnalytics'));
         document.getElementById('applyAnalyticsFilter').addEventListener('click',()=>updateStaticDiagrams());
         document.getElementById('resetAnalyticsFilter').addEventListener('click',()=>{ document.getElementById('analyticsStartDate').value=''; document.getElementById('analyticsEndDate').value=''; updateStaticDiagrams(); });
 
@@ -1450,9 +1512,25 @@
             document.querySelectorAll('.nav-item').forEach(nav=>nav.classList.remove('active'));
             let an=Array.from(document.querySelectorAll('.nav-item')).find(btn=>btn.dataset.section===sectionId);
             if(an) an.classList.add('active');
+            if (sectionId === 'sectionDebts') {
+                // Garantir que a primeira sub-aba esteja ativa
+                document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+                document.querySelector('.sub-tab[data-subsection="subRegistrar"]').classList.add('active');
+                document.querySelectorAll('#sectionDebts .sub-section').forEach(sec => sec.classList.remove('active-section'));
+                document.getElementById('subRegistrar').classList.add('active-section');
+            }
         }
         document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>setActiveSection(btn.dataset.section)));
-        document.getElementById('goToPaymentsBtn').addEventListener('click',()=>setActiveSection('sectionPayments'));
+        document.getElementById('goToPaymentsBtn').addEventListener('click',()=>{
+            setActiveSection('sectionDebts');
+            // Ativar sub-aba de Pagamentos
+            document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.sub-tab[data-subsection="subPagamentos"]').classList.add('active');
+            document.querySelectorAll('#sectionDebts .sub-section').forEach(sec => sec.classList.remove('active-section'));
+            document.getElementById('subPagamentos').classList.add('active-section');
+            renderSelectDebts();
+            renderPaymentsHistory();
+        });
     };
 </script>
 </body>
