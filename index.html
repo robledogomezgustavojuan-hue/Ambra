@@ -190,10 +190,7 @@
         .sub-tab.active { background: #FF7A1A; color: black; border-color: #FF7A1A; font-weight: 600; }
         .sub-section { display: none; }
         .sub-section.active-section { display: block; }
-        .stat-detail-line { font-size: 0.8rem; margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
-        .stat-detail-line span { display: flex; justify-content: space-between; color: rgba(255,255,255,0.7); }
-        .stat-detail-line .atrasado-text { color: #FF4444; }
-        .stat-detail-line .prazo-text { color: #4CAF50; }
+        .overdue-summary { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: space-between; }
     </style>
 </head>
 <body>
@@ -255,13 +252,19 @@
             <h3><i class="fas fa-chart-simple"></i> Últimas dívidas</h3>
             <div class="table-wrapper"><table class="table-dark-premium" id="miniDebtsTable"><thead><tr><th>Credor</th><th>Descrição</th><th>Parcela</th><th>Pendentes</th><th>Restante</th></tr></thead><tbody id="miniDebtsBody"></tbody></table></div>
         </div>
+        <!-- Compromissos do mês (visão geral) -->
         <div class="card-premium">
             <h3><i class="fas fa-bullseye"></i> Compromissos do mês</h3>
             <div id="dashboardGoalsSummary"></div>
         </div>
+        <!-- Compromissos atrasados (novo card) -->
+        <div class="card-premium">
+            <h3><i class="fas fa-exclamation-triangle"></i> Compromissos Atrasados</h3>
+            <div id="dashboardOverdueSummary"></div>
+        </div>
     </div>
 
-    <!-- DÍVIDAS -->
+    <!-- DÍVIDAS (unificada) -->
     <div id="sectionDebts" class="section-page">
         <div class="sub-tabs">
             <button class="sub-tab active" data-subsection="subRegistrar">📝 Registrar</button>
@@ -270,6 +273,7 @@
             <button class="sub-tab" data-subsection="subHistorico">📊 Histórico</button>
             <button class="sub-tab" data-subsection="subJuros">🧮 Juros</button>
         </div>
+        <!-- Registrar -->
         <div id="subRegistrar" class="sub-section active-section">
             <div class="card-premium">
                 <h3><i class="fas fa-hand-holding-usd"></i> Registrar nova dívida</h3>
@@ -341,12 +345,14 @@
                 <button id="createDebtBtn" class="btn-amber" style="width:100%; margin-top: 12px;"><i class="fas fa-plus-circle"></i> Adicionar dívida</button>
             </div>
         </div>
+        <!-- Lista -->
         <div id="subLista" class="sub-section">
             <div class="card-premium">
                 <h3><i class="fas fa-table-list"></i> Lista de dívidas (ativas)</h3>
                 <div class="table-wrapper"><table class="table-dark-premium" id="fullDebtsTable"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Restante</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Vencimento</th><th></th></tr></thead><tbody id="debtsTableBody"></tbody></table></div>
             </div>
         </div>
+        <!-- Pagamentos -->
         <div id="subPagamentos" class="sub-section">
             <div class="card-premium">
                 <h3><i class="fas fa-receipt"></i> Registrar pagamento</h3>
@@ -404,6 +410,7 @@
                 <div class="table-wrapper"><table class="table-dark-premium"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Valor</th><th>Método</th><th>Chave utilizada</th><th></th></tr></thead><tbody id="paymentsHistoryBody"></tbody></table></div>
             </div>
         </div>
+        <!-- Histórico -->
         <div id="subHistorico" class="sub-section">
             <div class="card-premium">
                 <h3><i class="fas fa-archive"></i> Histórico completo de dívidas</h3>
@@ -427,6 +434,7 @@
                 </div>
             </div>
         </div>
+        <!-- Juros -->
         <div id="subJuros" class="sub-section">
             <div class="card-premium">
                 <h3><i class="fas fa-calculator"></i> Simulador de juros</h3>
@@ -458,18 +466,7 @@
         <div class="card-premium">
             <h3><i class="fas fa-bullseye"></i> Resumo de Compromissos Mensais</h3>
             <div class="stats-grid">
-                <div class="stat-block">
-                    <div class="text-muted">Total necessário</div>
-                    <div class="value-large" id="goalsTotalNeeded">R$ 0</div>
-                    <div class="stat-detail-line">
-                        <span class="atrasado-text">Vencidos</span>
-                        <span class="atrasado-text" id="goalsOverdueValue">R$ 0,00</span>
-                    </div>
-                    <div class="stat-detail-line">
-                        <span class="prazo-text">A vencer</span>
-                        <span class="prazo-text" id="goalsUpcomingValue">R$ 0,00</span>
-                    </div>
-                </div>
+                <div class="stat-block"><div class="text-muted">Total necessário</div><div class="value-large" id="goalsTotalNeeded">R$ 0</div></div>
                 <div class="stat-block"><div class="text-muted">Já poupado</div><div class="value-large" id="goalsTotalSaved">R$ 0</div></div>
                 <div class="stat-block"><div class="text-muted">Ainda falta</div><div class="value-large" id="goalsRemaining">R$ 0</div></div>
                 <div class="stat-block"><div class="text-muted">Compromissos ativos</div><div class="value-large" id="goalsCount">0</div></div>
@@ -584,7 +581,7 @@
     </div>
 </div>
 
-<!-- NAVBAR -->
+<!-- NAVBAR (3 ícones) -->
 <div class="bottom-nav" id="bottomNav">
     <button class="nav-item active" data-section="sectionDashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
     <button class="nav-item" data-section="sectionDebts"><i class="fas fa-file-invoice"></i><span>Dívidas</span></button>
@@ -972,21 +969,11 @@
     }
 
     function updateGoalsSummary() {
-        let hoje = new Date(); hoje.setHours(0,0,0,0);
         let totalNeeded=currentUserData.goals.reduce((s,g)=>s+g.valorTotal,0);
         let totalSaved=currentUserData.goalDeposits.reduce((s,d)=>s+d.amount,0);
         let remaining=Math.max(0,totalNeeded-totalSaved);
         let activeCount=currentUserData.goals.filter(g=>getGoalRemaining(g)>0).length;
-        let overdueTotal=0;
-        let upcomingTotal=0;
-        currentUserData.goals.forEach(g=>{
-            let days = getGoalDaysRemaining(g);
-            if (days < 0) overdueTotal += g.valorTotal;
-            else upcomingTotal += g.valorTotal;
-        });
         document.getElementById('goalsTotalNeeded').innerHTML=formatMoney(totalNeeded);
-        document.getElementById('goalsOverdueValue').innerHTML=formatMoney(overdueTotal);
-        document.getElementById('goalsUpcomingValue').innerHTML=formatMoney(upcomingTotal);
         document.getElementById('goalsTotalSaved').innerHTML=formatMoney(totalSaved);
         document.getElementById('goalsRemaining').innerHTML=formatMoney(remaining);
         document.getElementById('goalsCount').innerText=activeCount;
@@ -1000,11 +987,31 @@
         let remaining=Math.max(0,totalNeeded-totalSaved);
         let activeCount=currentUserData.goals.filter(g=>getGoalRemaining(g)>0).length;
         container.innerHTML = `
-            <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:space-between;">
+            <div class="overdue-summary">
                 <div><strong>${activeCount}</strong> ativos</div>
                 <div>Necessário: <strong>${formatMoney(totalNeeded)}</strong></div>
                 <div>Poupado: <strong>${formatMoney(totalSaved)}</strong></div>
                 <div>Falta: <strong>${formatMoney(remaining)}</strong></div>
+            </div>`;
+    }
+
+    function renderDashboardOverdueSummary() {
+        let container = document.getElementById('dashboardOverdueSummary');
+        if (!container) return;
+        let overdueGoals = currentUserData.goals.filter(g => getGoalRemaining(g) > 0 && getGoalDaysRemaining(g) < 0);
+        if (overdueGoals.length === 0) {
+            container.innerHTML = '<p>Tudo em dia! 🎉</p>';
+            return;
+        }
+        let overdueNeeded = overdueGoals.reduce((s,g)=>s+g.valorTotal,0);
+        let overdueSaved = overdueGoals.reduce((s,g)=>s+getGoalSaved(g.id),0);
+        let overdueRemaining = Math.max(0, overdueNeeded - overdueSaved);
+        container.innerHTML = `
+            <div class="overdue-summary">
+                <div><strong>${overdueGoals.length}</strong> atrasados</div>
+                <div>Total: <strong>${formatMoney(overdueNeeded)}</strong></div>
+                <div>Poupado: <strong>${formatMoney(overdueSaved)}</strong></div>
+                <div>Falta: <strong>${formatMoney(overdueRemaining)}</strong></div>
             </div>`;
     }
 
@@ -1046,6 +1053,7 @@
         renderGoals(); 
         renderGoalDepositsHistory(); 
         renderDashboardGoalsSummary();
+        renderDashboardOverdueSummary(); // Novo
         autoRenewRecurringGoals(); 
     }
 
