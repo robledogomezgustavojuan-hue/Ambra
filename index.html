@@ -252,12 +252,10 @@
             <h3><i class="fas fa-chart-simple"></i> Últimas dívidas</h3>
             <div class="table-wrapper"><table class="table-dark-premium" id="miniDebtsTable"><thead><tr><th>Credor</th><th>Descrição</th><th>Parcela</th><th>Pendentes</th><th>Restante</th></tr></thead><tbody id="miniDebtsBody"></tbody></table></div>
         </div>
-        <!-- Compromissos do mês (visão geral) -->
         <div class="card-premium">
             <h3><i class="fas fa-bullseye"></i> Compromissos do mês</h3>
             <div id="dashboardGoalsSummary"></div>
         </div>
-        <!-- Compromissos atrasados (novo card) -->
         <div class="card-premium">
             <h3><i class="fas fa-exclamation-triangle"></i> Compromissos Atrasados</h3>
             <div id="dashboardOverdueSummary"></div>
@@ -273,7 +271,6 @@
             <button class="sub-tab" data-subsection="subHistorico">📊 Histórico</button>
             <button class="sub-tab" data-subsection="subJuros">🧮 Juros</button>
         </div>
-        <!-- Registrar -->
         <div id="subRegistrar" class="sub-section active-section">
             <div class="card-premium">
                 <h3><i class="fas fa-hand-holding-usd"></i> Registrar nova dívida</h3>
@@ -345,14 +342,12 @@
                 <button id="createDebtBtn" class="btn-amber" style="width:100%; margin-top: 12px;"><i class="fas fa-plus-circle"></i> Adicionar dívida</button>
             </div>
         </div>
-        <!-- Lista -->
         <div id="subLista" class="sub-section">
             <div class="card-premium">
                 <h3><i class="fas fa-table-list"></i> Lista de dívidas (ativas)</h3>
                 <div class="table-wrapper"><table class="table-dark-premium" id="fullDebtsTable"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Restante</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Vencimento</th><th></th></tr></thead><tbody id="debtsTableBody"></tbody></table></div>
             </div>
         </div>
-        <!-- Pagamentos -->
         <div id="subPagamentos" class="sub-section">
             <div class="card-premium">
                 <h3><i class="fas fa-receipt"></i> Registrar pagamento</h3>
@@ -410,7 +405,6 @@
                 <div class="table-wrapper"><table class="table-dark-premium"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Valor</th><th>Método</th><th>Chave utilizada</th><th></th></tr></thead><tbody id="paymentsHistoryBody"></tbody></table></div>
             </div>
         </div>
-        <!-- Histórico -->
         <div id="subHistorico" class="sub-section">
             <div class="card-premium">
                 <h3><i class="fas fa-archive"></i> Histórico completo de dívidas</h3>
@@ -434,7 +428,6 @@
                 </div>
             </div>
         </div>
-        <!-- Juros -->
         <div id="subJuros" class="sub-section">
             <div class="card-premium">
                 <h3><i class="fas fa-calculator"></i> Simulador de juros</h3>
@@ -1053,11 +1046,11 @@
         renderGoals(); 
         renderGoalDepositsHistory(); 
         renderDashboardGoalsSummary();
-        renderDashboardOverdueSummary(); // Novo
+        renderDashboardOverdueSummary();
         autoRenewRecurringGoals(); 
     }
 
-    // NOMES DOS COMPROMISSOS
+    // NOMES DOS COMPROMISSOS (CORRIGIDO)
     async function seedDefaultNames() {
         if (!auth.currentUser) return;
         const uid = auth.currentUser.uid;
@@ -1123,6 +1116,10 @@
             container.innerHTML = '<p>Nenhum nome cadastrado.</p>';
             return;
         }
+        // Remove listeners antigos clonando o container (evita duplicação)
+        const newContainer = container.cloneNode(true);
+        container.parentNode.replaceChild(newContainer, container);
+        newContainer.innerHTML = '';
         currentUserData.goalNames.forEach(name => {
             const div = document.createElement('div');
             div.className = 'name-item';
@@ -1131,27 +1128,34 @@
                 <button class="edit-name-btn" data-oldname="${name}"><i class="fas fa-edit"></i></button>
                 <button class="delete-name-btn" data-name="${name}"><i class="fas fa-trash-alt"></i></button>
             `;
-            container.appendChild(div);
+            newContainer.appendChild(div);
         });
-        container.querySelectorAll('.delete-name-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const name = btn.dataset.name;
+        // Adiciona event listeners corretamente
+        newContainer.querySelectorAll('.delete-name-btn').forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                const name = this.dataset.name;
                 if (!confirm(`Excluir o nome "${name}"?`)) return;
-                const snapshot = await db.collection('userGoalNames').where('userId','==',auth.currentUser.uid).where('nome','==',name).get();
+                const uid = auth.currentUser?.uid;
+                if (!uid) return;
+                const snapshot = await db.collection('userGoalNames').where('userId','==',uid).where('nome','==',name).get();
                 snapshot.forEach(doc => doc.ref.delete());
                 showToast('Nome excluído');
             });
         });
-        container.querySelectorAll('.edit-name-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const oldName = btn.dataset.oldname;
+        newContainer.querySelectorAll('.edit-name-btn').forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                const oldName = this.dataset.oldname;
                 const newName = prompt('Editar nome:', oldName);
                 if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
                 if (currentUserData.goalNames.includes(newName.trim())) {
                     showToast('Esse nome já existe','danger');
                     return;
                 }
-                const snapshot = await db.collection('userGoalNames').where('userId','==',auth.currentUser.uid).where('nome','==',oldName).get();
+                const uid = auth.currentUser?.uid;
+                if (!uid) return;
+                const snapshot = await db.collection('userGoalNames').where('userId','==',uid).where('nome','==',oldName).get();
                 snapshot.forEach(doc => doc.ref.update({ nome: newName.trim() }));
                 showToast('Nome atualizado');
             });
