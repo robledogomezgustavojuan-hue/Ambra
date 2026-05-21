@@ -55,36 +55,36 @@
             background: #000000;
             background: linear-gradient(145deg, #0a0a0a, #000000);
             border-radius: 28px;
-            padding: 1rem;
+            padding: 1.5rem 1rem;
             text-align: center;
             border: 2px solid rgba(255,255,255,0.2);
             transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
             animation: borderGlowStat 2.2s infinite ease-in-out;
         }
-        .stat-block .text-muted { color: rgba(255,255,255,0.95); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.5px; margin-bottom: 6px; }
-        .stat-block .value-large { font-size: 34px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .stat-block .text-muted { color: rgba(255,255,255,0.95); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .stat-block .value-large { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .today-debt-card {
             background: #000000;
             background: linear-gradient(145deg, #0a0a0a, #000000);
             border-radius: 28px;
-            padding: 1rem 1.5rem;
+            padding: 1.5rem 1.8rem;
             margin-bottom: 1.8rem;
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 1.5rem;
             border: 2px solid rgba(255,255,255,0.3);
             animation: borderGlowStat 2.2s infinite ease-in-out;
         }
-        .today-debt-info { flex: 1; min-width: 180px; }
-        .today-debt-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.9); font-weight: 600; margin-bottom: 6px; }
-        .today-debt-value { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1.2; margin-bottom: 12px; }
-        .today-debt-details { max-height: 120px; overflow-y: auto; padding-right: 8px; margin-top: 8px; }
-        .debt-detail-item { font-size: 0.75rem; color: rgba(255,255,255,0.9); padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; }
+        .today-debt-info { flex: 1; min-width: 200px; }
+        .today-debt-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.9); font-weight: 600; margin-bottom: 8px; }
+        .today-debt-value { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1.2; margin-bottom: 12px; }
+        .today-debt-details { max-height: 130px; overflow-y: auto; padding-right: 8px; margin-top: 8px; }
+        .debt-detail-item { font-size: 0.75rem; color: rgba(255,255,255,0.9); padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; }
         .debt-detail-item:last-child { border-bottom: none; }
         .debt-detail-item i { color: #FF7A1A; font-size: 0.7rem; width: 16px; }
-        .today-debt-btn { background: rgba(255,122,26,0.2); border: 1px solid #FF7A1A; border-radius: 40px; padding: 8px 20px; color: #FFB066; font-weight: 500; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .today-debt-btn { background: rgba(255,122,26,0.2); border: 1px solid #FF7A1A; border-radius: 40px; padding: 10px 24px; color: #FFB066; font-weight: 500; cursor: pointer; transition: 0.2s; white-space: nowrap; font-size: 0.9rem; }
         .today-debt-btn:hover { background: #FF7A1A; color: black; }
         .btn-amber {
             background: linear-gradient(180deg, #FF8A2B, #E76300);
@@ -103,6 +103,7 @@
         }
         .btn-amber:active { transform: scale(0.97); animation: none; }
         .btn-outline-light { background: transparent; border: 1px solid rgba(255,255,255,0.2); border-radius: 18px; padding: 10px 20px; color: rgba(255,255,255,0.8); font-weight: 500; cursor: pointer; }
+        .btn-sm { padding: 8px 12px; font-size: 0.8rem; border-radius: 18px; }
         input, select { background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.1); border-radius: 22px; padding: 14px 18px; color: white; width: 100%; margin-bottom: 12px; }
         input:focus, select:focus { outline: none; border-color: #FF7A1A; box-shadow: 0 0 0 3px rgba(255,122,26,0.25); }
         label { font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.6); margin-bottom: 6px; display: block; }
@@ -137,8 +138,8 @@
         .section-page { display: none; animation: fadeIn 0.3s; }
         .section-page.active-page { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.8rem; }
-        .value-large { font-size: 34px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
+        .value-large { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .badge-amber { background: rgba(255,122,26,0.18); color: #FFB066; border-radius: 40px; padding: 4px 12px; display: inline-block; }
         .login-card { max-width: 460px; width: 100%; padding: 2rem; margin: auto; }
         .switch-mode { display: flex; gap: 1rem; background: rgba(0,0,0,0.4); border-radius: 40px; padding: 6px; margin-bottom: 2rem; }
@@ -146,19 +147,24 @@
         .switch-btn.active { background: #FF7A1A; color: black; }
         .toast-msg { position: fixed; bottom: 100px; right: 20px; background: #16100F; backdrop-filter: blur(16px); border-left: 4px solid #FF7A1A; border-radius: 24px; padding: 12px 24px; z-index: 1200; transform: translateX(120%); transition: 0.25s; }
         .toast-msg.show { transform: translateX(0); }
-        @media (max-width: 680px) { .value-large { font-size: 28px; } .stat-block { padding: 0.8rem; } .today-debt-value { font-size: 1.6rem; } }
+        @media (max-width: 680px) { .value-large { font-size: 28px; } .stat-block { padding: 1rem; } .today-debt-value { font-size: 1.8rem; } }
         .user-name-top { font-size: 0.9rem; font-weight: 500; color: rgba(255,255,255,0.7); }
         .top-bar { display: flex; align-items: center; justify-content: flex-start; padding: 10px 0 25px 0; gap: 12px; }
         .modal-aura { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal-aura.active { display: flex; }
-        .modal-inner { background: #16100F; border-radius: 40px; max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.8rem; border: 1px solid rgba(255,122,26,0.3); }
+        .modal-inner { background: #16100F; border-radius: 40px; max-width: 550px; width: 95%; max-height: 85vh; overflow-y: auto; padding: 1.8rem; border: 1px solid rgba(255,122,26,0.3); }
         .avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #0a0a0a; border: 2px solid #FF7A1A; margin-bottom: 12px; }
         .sub-tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; }
         .sub-tab { padding: 8px 16px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s; }
         .sub-tab.active { background: #FF7A1A; color: black; border-color: #FF7A1A; font-weight: 600; }
         .sub-section { display: none; }
         .sub-section.active-section { display: block; }
-        .section-centered { max-width: 800px; margin: 0 auto; }
+        .section-centered { max-width: 850px; margin: 0 auto; }
+        .clickable-debt { color: #FFB066; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; transition: color 0.2s; }
+        .clickable-debt:hover { color: #FF7A1A; }
+        .payment-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem; }
+        .payment-row:last-child { border-bottom: none; }
+        .payment-summary { margin-top: 1rem; padding-top: 1rem; border-top: 2px solid rgba(255,122,26,0.3); display: flex; justify-content: space-between; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -190,8 +196,7 @@
     </div>
 </div>
 
-<div id="dashboardApp" style="display: none; width: 100%; max-width: 900px; margin: 0 auto;">
-    <!-- TOPO: Botões Perfil e Sair alinhados horizontalmente -->
+<div id="dashboardApp" style="display: none; width: 100%; max-width: 950px; margin: 0 auto;">
     <div class="top-bar">
         <button id="editProfileBtn" class="btn-outline-light"><i class="fas fa-user-edit"></i> Perfil</button>
         <button id="logoutDashBtn" class="btn-outline-light"><i class="fas fa-sign-out-alt"></i> Sair</button>
@@ -361,15 +366,6 @@
                     <h3><i class="fas fa-archive"></i> Histórico completo de dívidas</h3>
                     <div class="table-wrapper"><table class="table-dark-premium" id="fullHistoryTable"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Status</th><th>Ações</th></tr></thead><tbody id="fullHistoryBody"></tbody></table></div>
                 </div>
-                <div class="card-premium">
-                    <h3>Histórico de pagamentos</h3>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1rem;">
-                        <input type="date" id="filterStart"><span>até</span><input type="date" id="filterEnd">
-                        <button id="applyFilterBtn" class="btn-outline-light">Filtrar</button>
-                        <button id="resetFilterBtn" class="btn-outline-light">Limpar</button>
-                    </div>
-                    <div class="table-wrapper"><table class="table-dark-premium"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Valor</th><th>Método</th><th>Chave utilizada</th><th></th></tr></thead><tbody id="paymentsHistoryBody"></tbody></table></div>
-                </div>
             </div>
             <!-- Juros -->
             <div id="subJuros" class="sub-section">
@@ -414,6 +410,19 @@
         <label>Nova senha (deixe em branco para manter)</label><input type="password" id="profilePassword" placeholder="••••••">
         <label>Confirmar nova senha</label><input type="password" id="profileConfirmPassword" placeholder="••••••">
         <button id="saveProfileBtn" class="btn-amber" style="width:100%; margin-top: 12px;">Salvar alterações</button>
+    </div>
+</div>
+
+<!-- MODAL HISTÓRICO DE PAGAMENTOS DA DÍVIDA -->
+<div id="debtPaymentsModal" class="modal-aura">
+    <div class="modal-inner">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <h3><i class="fas fa-history"></i> Pagamentos da dívida</h3>
+            <span id="closeDebtPaymentsModalBtn" style="font-size: 28px; cursor: pointer;">&times;</span>
+        </div>
+        <div id="debtPaymentsInfo" style="margin-bottom: 1rem; color: #FFB066; font-size: 0.9rem;"></div>
+        <div id="debtPaymentsList"></div>
+        <div id="debtPaymentsSummary" class="payment-summary"></div>
     </div>
 </div>
 
@@ -605,7 +614,10 @@
             let remaining=getRemaining(d.id); let status=remaining<=0?'<span style="color:#10b981;">Quitada</span>':'<span style="color:#FFB066;">Ativa</span>';
             let row=tbody.insertRow();
             row.insertCell(0).innerText=d.originDateTime?new Date(d.originDateTime).toLocaleString('pt-BR'):'Data não informada';
-            row.insertCell(1).innerText=d.credor; row.insertCell(2).innerText=d.title;
+            row.insertCell(1).innerText=d.credor;
+            // Nome da dívida clicável
+            let descCell = row.insertCell(2);
+            descCell.innerHTML = `<span class="clickable-debt" data-debtid="${d.id}">${d.title}</span>`;
             row.insertCell(3).innerHTML=formatMoney(d.totalFinanciado); row.insertCell(4).innerHTML=formatMoney(d.totalCapital);
             row.insertCell(5).innerHTML=d.isParceled?`${formatMoney(d.parcelValue)} (${d.parcelCount}x)`:'À vista';
             row.insertCell(6).innerHTML=getParcelasPendentes(d);
@@ -617,6 +629,43 @@
             delBtn.onclick=async()=>{ if(confirm(`Excluir permanentemente a dívida "${d.title}"?`)) { await db.collection('debts').doc(d.id).delete(); showToast('Dívida excluída permanentemente','danger'); } };
             act.appendChild(delBtn);
         });
+        // Adiciona eventos de clique nos nomes das dívidas
+        document.querySelectorAll('.clickable-debt').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const debtId = e.target.dataset.debtid;
+                showDebtPaymentsModal(debtId);
+            });
+        });
+    }
+    function showDebtPaymentsModal(debtId) {
+        const debt = currentUserData.debts.find(d => d.id === debtId);
+        if (!debt) return;
+        const payments = currentUserData.payments.filter(p => p.debtId === debtId).sort((a,b)=>new Date(b.date)-new Date(a.date));
+        const totalPaid = payments.reduce((s,p)=>s+p.amount,0);
+        const remaining = getRemaining(debtId);
+        
+        document.getElementById('debtPaymentsInfo').innerHTML = `<strong>${debt.title}</strong> (${debt.credor})<br>Total financiado: ${formatMoney(debt.totalFinanciado)} | Pago: ${formatMoney(totalPaid)} | Restante: ${formatMoney(remaining)}`;
+        
+        let listHtml = '';
+        if (payments.length === 0) {
+            listHtml = '<p>Nenhum pagamento registrado para esta dívida.</p>';
+        } else {
+            payments.forEach(p => {
+                listHtml += `
+                <div class="payment-row">
+                    <span>${new Date(p.date).toLocaleString('pt-BR')}</span>
+                    <span>${formatMoney(p.amount)}</span>
+                    <span>${p.method}</span>
+                    <span>${p.pixKeyUsed || '—'}</span>
+                </div>`;
+            });
+        }
+        document.getElementById('debtPaymentsList').innerHTML = listHtml;
+        document.getElementById('debtPaymentsSummary').innerHTML = `
+            <span>Total pago: ${formatMoney(totalPaid)}</span>
+            <span>Saldo restante: ${formatMoney(remaining)}</span>
+        `;
+        document.getElementById('debtPaymentsModal').classList.add('active');
     }
     function updateUserAvatarInUI() {
         if(!auth.currentUser) return;
@@ -691,7 +740,7 @@
                 document.getElementById(subSectionId).classList.add('active-section');
                 if (subSectionId === 'subLista') renderFullDebts();
                 if (subSectionId === 'subPagamentos') { renderSelectDebts(); renderPaymentsHistory(); }
-                if (subSectionId === 'subHistorico') { renderFullHistory(); renderPaymentsHistory(); }
+                if (subSectionId === 'subHistorico') { renderFullHistory(); }
             });
         });
 
@@ -799,8 +848,6 @@
             showToast('Pagamento registrado!');
             parcelQtyInput.value=''; paymentAmountInput.value=''; useDifferentPixToggle.checked=false; differentPixFields.style.display='none'; newPixKeyValue.value=''; setPaymentDateMode('today');
         };
-        document.getElementById('applyFilterBtn').onclick=()=>{ let s=document.getElementById('filterStart').value, e=document.getElementById('filterEnd').value; if(s&&e) renderPaymentsHistory(s,e); else if(!s&&!e) renderPaymentsHistory(); else alert('Preencha ambas as datas ou deixe ambas em branco.'); };
-        document.getElementById('resetFilterBtn').onclick=()=>{ document.getElementById('filterStart').value=''; document.getElementById('filterEnd').value=''; renderPaymentsHistory(); };
 
         const calcTypeOptions=document.querySelectorAll('#calcTypeGroup .radio-option'), calcParcelaDiv=document.getElementById('calcParcelaDiv'), calcPercentualDiv=document.getElementById('calcPercentualDiv');
         calcTypeOptions.forEach(opt=>opt.addEventListener('click',()=>{ calcTypeOptions.forEach(o=>o.classList.remove('active')); opt.classList.add('active'); calcParcelaDiv.style.display=opt.dataset.value==='parcela'?'block':'none'; calcPercentualDiv.style.display=opt.dataset.value==='percentual'?'block':'none'; }));
@@ -838,7 +885,8 @@
             reader.onload=async function(e){ const ab=e.target.result, uid=auth.currentUser?.uid; if(uid) { await db.collection('users').doc(uid).update({avatar:ab}); updateUserAvatarInUI(); showToast('Foto de perfil atualizada!'); } };
             reader.readAsDataURL(file);
         });
-        window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); };
+        window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('debtPaymentsModal')) document.getElementById('debtPaymentsModal').classList.remove('active'); };
+        document.getElementById('closeDebtPaymentsModalBtn').addEventListener('click',()=>{ document.getElementById('debtPaymentsModal').classList.remove('active'); });
 
         function setActiveSection(sectionId) {
             document.querySelectorAll('.section-page').forEach(s=>s.classList.remove('active-page'));
