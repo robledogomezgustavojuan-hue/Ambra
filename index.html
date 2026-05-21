@@ -606,7 +606,6 @@
 
     <!-- JORNADA (NOVA ABA) -->
     <div id="sectionJourney" class="section-page">
-        <!-- Cronômetro futurista -->
         <div class="card-premium">
             <div class="timer-container">
                 <div class="timer-circle">
@@ -621,7 +620,6 @@
                     <button id="timerStopBtn" class="timer-btn" title="Finalizar jornada" disabled><i class="fas fa-stop"></i></button>
                 </div>
             </div>
-            <!-- Resumo da jornada ativa -->
             <div class="journey-summary" id="journeySummary">
                 <div class="journey-summary-item">
                     <span>Ganhos</span>
@@ -642,19 +640,15 @@
             </div>
         </div>
 
-        <!-- Registrar ganho / despesa -->
         <div class="card-premium">
             <h3><i class="fas fa-plus-circle"></i> Registrar na jornada</h3>
             <div class="radio-group" id="journeyEntryType">
                 <div class="radio-option active" data-value="earning">💰 Ganho</div>
                 <div class="radio-option" data-value="expense">💸 Despesa</div>
             </div>
-            <!-- Formulário de ganho -->
             <div id="journeyEarningForm">
                 <div class="select-with-gear" style="margin-bottom: 12px;">
-                    <select id="earningPlatformSelect" style="margin-bottom: 0;">
-                        <!-- preenchido via JS -->
-                    </select>
+                    <select id="earningPlatformSelect" style="margin-bottom: 0;"></select>
                     <button id="managePlatformsBtn" class="btn-outline-light" title="Gerenciar plataformas"><i class="fas fa-cog"></i></button>
                 </div>
                 <div id="newPlatformDiv" style="display: none; margin-top: 8px;">
@@ -669,7 +663,6 @@
                 </div>
                 <button id="addEarningBtn" class="btn-amber" style="width:100%; margin-top:8px;"><i class="fas fa-plus"></i> Adicionar ganho</button>
             </div>
-            <!-- Formulário de despesa -->
             <div id="journeyExpenseForm" style="display: none;">
                 <select id="expenseCategorySelect">
                     <option value="Gasolina">Gasolina</option>
@@ -684,13 +677,11 @@
             </div>
         </div>
 
-        <!-- Lista de ganhos e gastos do dia -->
         <div class="card-premium">
             <h3><i class="fas fa-list"></i> Ganhos e gastos de hoje</h3>
             <div id="journeyEntriesList"></div>
         </div>
 
-        <!-- Histórico de jornadas -->
         <div class="card-premium">
             <h3><i class="fas fa-history"></i> Histórico de jornadas</h3>
             <div class="table-wrapper"><table class="table-dark-premium"><thead><tr><th>Data</th><th>Tempo</th><th>Ganhos</th><th>Gastos</th><th>Líquido</th><th></th></tr></thead><tbody id="journeyHistoryBody"></tbody></table></div>
@@ -797,14 +788,12 @@
     const DEFAULT_GOAL_NAMES = ["Aluguel de casa","Fatura de luz","Fatura de internet","Fatura da água","Corte de grama área externa","Parcelamento de conta de dívida"];
     const DEFAULT_PLATFORMS = ["Uber","99","inDrive","Cabify","Didi"];
 
-    // Timer state
     let timerInterval = null;
     let activeSessionId = null;
     let timerStartTime = null;
     let timerPaused = false;
     let timerAccumulated = 0;
 
-    // ========== FUNÇÕES AUXILIARES ==========
     function applyDateMask(input) {
         let value = input.value.replace(/\D/g, ''); if (value.length > 8) value = value.slice(0,8);
         let formatted = '';
@@ -847,7 +836,7 @@
         return date;
     }
 
-    // ========== DÍVIDAS (mantidas completas) ==========
+    // DÍVIDAS
     function getParcelDueDate(startDate, parcelIndex, periodicidade, excludedDays=[], holidays=[]) {
         let date = new Date(startDate);
         for(let i=0;i<parcelIndex;i++) {
@@ -1037,7 +1026,7 @@
         });
     }
 
-    // ========== COMPROMISSOS (mantidos) ==========
+    // COMPROMISSOS
     function getGoalSaved(goalId) { return currentUserData.goalDeposits.filter(d=>d.goalId===goalId).reduce((s,d)=>s+d.amount,0); }
     function getGoalRemaining(goal) { return Math.max(0, goal.valorTotal - getGoalSaved(goal.id)); }
     function getGoalProgress(goal) { let saved=getGoalSaved(goal.id); return Math.min(100,(saved/goal.valorTotal)*100); }
@@ -1167,8 +1156,8 @@
     }
     function renderGoalsAll() { updateGoalsSummary(); renderGoals(); renderGoalDepositsHistory(); renderDashboardGoalsSummary(); renderDashboardOverdueSummary(); autoRenewRecurringGoals(); }
 
-    // ========== NOMES / PLATAFORMAS ==========
-    async function seedDefaults(collectionName, defaultList, currentList) {
+    // NOMES / PLATAFORMAS
+    async function seedDefaults(collectionName, defaultList) {
         if (!auth.currentUser) return;
         const uid = auth.currentUser.uid;
         const snapshot = await db.collection(collectionName).where('userId','==',uid).get();
@@ -1196,17 +1185,16 @@
         container.querySelectorAll('.edit-name-btn').forEach(btn => { btn.addEventListener('click', async function(e) { e.stopPropagation(); const oldName = this.dataset.oldname; const newName = prompt('Editar:', oldName); if (!newName || newName.trim() === '' || newName.trim() === oldName) return; const uid = auth.currentUser?.uid; if (!uid) return; const snap = await db.collection(collectionName).where('userId','==',uid).where('nome','==',oldName).get(); snap.forEach(doc => doc.ref.update({ nome: newName.trim() })); showToast('Atualizado'); }); });
     }
 
-    // ========== JORNADA (CRONÔMETRO E REGISTROS) ==========
+    // JORNADA
     function updateTimerDisplay() {
         const now = Date.now();
         let elapsed = timerPaused ? timerAccumulated : (now - timerStartTime) + timerAccumulated;
         document.getElementById('timerDisplay').textContent = formatTime(elapsed);
-        // Atualizar resumo da jornada ativa
         updateJourneySummary(elapsed);
     }
     function updateJourneySummary(elapsedMs) {
-        let totalEarnings = currentUserData.earnings.filter(e => e.sessionId === activeSessionId).reduce((s,e)=>s+e.gross+e.tip,0);
-        let totalExpenses = currentUserData.expenses.filter(e => e.sessionId === activeSessionId).reduce((s,e)=>s+e.amount,0);
+        let totalEarnings = currentUserData.earnings.filter(e => e.sessionId === activeSessionId).reduce((s,e)=>s+(e.gross||0)+(e.tip||0),0);
+        let totalExpenses = currentUserData.expenses.filter(e => e.sessionId === activeSessionId).reduce((s,e)=>s+(e.amount||0),0);
         let net = totalEarnings - totalExpenses;
         let hours = elapsedMs / 3600000;
         let avgHour = hours > 0 ? net / hours : 0;
@@ -1361,7 +1349,7 @@
         renderJourneyAll();
     }
 
-    // ========== AUTH / LISTENERS ==========
+    // AUTH / LISTENERS
     async function registerWithFirebase(email,password,username) {
         try {
             const uc=await auth.createUserWithEmailAndPassword(email,password);
@@ -1395,8 +1383,8 @@
         unsubscribeEarnings=db.collection('earnings').where('userId','==',uid).onSnapshot(snap=>{ const e=[]; snap.forEach(doc=>e.push({id:doc.id,...doc.data()})); currentUserData.earnings=e; scheduleRender(); });
         unsubscribeExpenses=db.collection('expenses').where('userId','==',uid).onSnapshot(snap=>{ const ex=[]; snap.forEach(doc=>ex.push({id:doc.id,...doc.data()})); currentUserData.expenses=ex; scheduleRender(); });
         db.collection('users').doc(uid).get().then(doc=>{ if(doc.exists){ const ud=doc.data(); document.getElementById('userNameDisplay').innerText=ud.username; if(ud.avatar) document.getElementById('userAvatarImg').src=ud.avatar; scheduleRender(); } });
-        seedDefaults('userGoalNames', DEFAULT_GOAL_NAMES, currentUserData.goalNames);
-        seedDefaults('earningPlatforms', DEFAULT_PLATFORMS, currentUserData.platforms);
+        seedDefaults('userGoalNames', DEFAULT_GOAL_NAMES);
+        seedDefaults('earningPlatforms', DEFAULT_PLATFORMS);
     }
 
     auth.onAuthStateChanged(user=>{
@@ -1409,7 +1397,6 @@
     });
 
     window.onload=()=>{
-        // Máscaras, login, etc (mantidos)
         const dateInput=document.getElementById('customDateInput'), timeInput=document.getElementById('customTimeInput'), lumpSumDateInput=document.getElementById('lumpSumDate');
         if(dateInput) dateInput.addEventListener('input',function(){applyDateMask(this);});
         if(timeInput) timeInput.addEventListener('input',function(){applyTimeMask(this);});
@@ -1420,18 +1407,13 @@
         document.getElementById('doRegisterAction').onclick=()=>{ const u=document.getElementById('regUser').value, e=document.getElementById('regEmail').value, p=document.getElementById('regPass').value, c=document.getElementById('regConfirm').value; if(p!==c) { showToast('Senhas não coincidem','danger'); return; } if(p.length<6) { showToast('Senha deve ter no mínimo 6 caracteres','danger'); return; } registerWithFirebase(e,p,u); };
         document.getElementById('logoutDashBtn').onclick=()=>logoutFirebase();
 
-        // Sub-abas de Dívidas
         document.querySelectorAll('.sub-tab').forEach(tab => { tab.addEventListener('click', () => { document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const subSectionId = tab.dataset.subsection; document.querySelectorAll('#sectionDebts .sub-section').forEach(sec => sec.classList.remove('active-section')); document.getElementById(subSectionId).classList.add('active-section'); if (subSectionId === 'subLista') renderFullDebts(); if (subSectionId === 'subPagamentos') { renderSelectDebts(); renderPaymentsHistory(); } if (subSectionId === 'subHistorico') { renderFullHistory(); updateStaticDiagrams(); } }); });
 
-        // Dívidas eventos
         const radioOptions=document.querySelectorAll('#dateRadioGroup .radio-option'), customDateDiv=document.getElementById('customDateTimeDiv');
         function setDateMode(value) { customDateDiv.style.display=value==='today'?'none':'block'; radioOptions.forEach(opt=>opt.classList.toggle('active',opt.dataset.value===value)); }
         radioOptions.forEach(opt=>opt.addEventListener('click',()=>setDateMode(opt.dataset.value))); setDateMode('today');
         const parcelToggle=document.getElementById('isParceledToggle'), parcelDiv=document.getElementById('parcelFields'), lumpDiv=document.getElementById('lumpSumDiv'), dailyExcludeDiv=document.getElementById('dailyExcludeDiv'), noDueDateToggle=document.getElementById('noDueDateToggle'), lumpSumDateField=document.getElementById('lumpSumDate');
-        function toggleParcelFields() {
-            if(parcelToggle.checked) { parcelDiv.style.display='block'; lumpDiv.style.display='none'; dailyExcludeDiv.style.display=document.getElementById('periodicitySelect').value==='diario'?'block':'none'; }
-            else { parcelDiv.style.display='none'; lumpDiv.style.display='block'; dailyExcludeDiv.style.display='none'; if(lumpSumDateField) applyDateMask(lumpSumDateField); }
-        }
+        function toggleParcelFields() { if(parcelToggle.checked) { parcelDiv.style.display='block'; lumpDiv.style.display='none'; dailyExcludeDiv.style.display=document.getElementById('periodicitySelect').value==='diario'?'block':'none'; } else { parcelDiv.style.display='none'; lumpDiv.style.display='block'; dailyExcludeDiv.style.display='none'; if(lumpSumDateField) applyDateMask(lumpSumDateField); } }
         parcelToggle.onchange=toggleParcelFields;
         document.getElementById('periodicitySelect').onchange=()=>{ if(parcelToggle.checked) dailyExcludeDiv.style.display=document.getElementById('periodicitySelect').value==='diario'?'block':'none'; };
         toggleParcelFields();
@@ -1439,36 +1421,10 @@
         const paymentMethodSelect=document.getElementById('paymentMethodSelect'), pixFieldsDiv=document.getElementById('pixFields');
         function togglePixFields(){ pixFieldsDiv.style.display=paymentMethodSelect.value==='Pix'?'block':'none'; }
         paymentMethodSelect.onchange=togglePixFields; togglePixFields();
-        document.getElementById('createDebtBtn').onclick=async()=>{
-            let title=document.getElementById('newTitle').value, credor=document.getElementById('newCredor').value, capital=document.getElementById('newCapital').value;
-            if(!title||!credor||!capital) { alert('Preencha todos os campos básicos'); return; }
-            let originDateTime=null;
-            if(document.querySelector('#dateRadioGroup .radio-option.active').dataset.value==='today') originDateTime=new Date();
-            else { let ds=document.getElementById('customDateInput').value, ts=document.getElementById('customTimeInput').value; if(!ds) { alert('Informe a data no formato dd/mm/aaaa'); return; } originDateTime=parseCustomDateTime(ds,ts); if(!originDateTime) { alert('Formato inválido. Use dd/mm/aaaa'); return; } }
-            let isParceled=parcelToggle.checked, paymentMethod=paymentMethodSelect.value, pixKey='';
-            if(paymentMethod==='Pix') { let pt=document.getElementById('pixKeyTypeSelect').value, pv=document.getElementById('pixKeyValue').value; if(!pv) { alert('Informe a chave Pix'); return; } pixKey=`${pt}: ${pv}`; }
-            let excludedDays=[], holidays=[];
-            if(isParceled&&document.getElementById('periodicitySelect').value==='diario') { excludedDays=Array.from(document.querySelectorAll('.exclude-day:checked')).map(cb=>parseInt(cb.value)); let hr=document.getElementById('holidaysInput').value; if(hr.trim()) holidays=hr.split(',').map(h=>h.trim()); }
-            let tcn=parseFloat(capital), totalFinanciado=tcn, parcelValue=null, parcelCount=null, periodicity=null, lumpDateStr=null, noDueDate=false;
-            if(isParceled) { parcelValue=parseFloat(document.getElementById('parcelValue').value); parcelCount=parseInt(document.getElementById('parcelCount').value); periodicity=document.getElementById('periodicitySelect').value; if(!parcelValue||!parcelCount) { alert('Preencha valor e quantidade de parcelas'); return; } totalFinanciado=parcelValue*parcelCount; }
-            else { noDueDate=noDueDateToggle.checked; if(!noDueDate) { let ldr=document.getElementById('lumpSumDate').value; if(!ldr) { alert('Informe a data de vencimento único (dd/mm/aaaa) ou marque "Sem data"'); return; } let ldo=parseCustomDateTime(ldr,''); if(!ldo) { alert('Data de vencimento inválida. Use dd/mm/aaaa'); return; } lumpDateStr=ldo.toISOString().slice(0,10); } }
-            await db.collection('debts').add({userId:auth.currentUser.uid,title,credor,totalCapital:tcn,totalFinanciado,isParceled,paymentMethod,pixKey:pixKey||null,originDateTime:originDateTime.toISOString(),createdAt:firebase.firestore.FieldValue.serverTimestamp(),...(isParceled&&{parcelValue,parcelCount,periodicity,excludedDays,holidays}),...(!isParceled&&{lumpSumDueDate:lumpDateStr,noDueDate})});
-            showToast('Dívida adicionada!');
-            ['newTitle','newCredor','newCapital','pixKeyValue','parcelValue','parcelCount','lumpSumDate','holidaysInput','customDateInput','customTimeInput'].forEach(id=>{ let el=document.getElementById(id); if(el) el.value=''; });
-            document.querySelectorAll('.exclude-day:checked').forEach(cb=>cb.checked=false); parcelToggle.checked=false; noDueDateToggle.checked=false; toggleParcelFields(); togglePixFields(); setDateMode('today');
-        };
+        document.getElementById('createDebtBtn').onclick=async()=>{ let title=document.getElementById('newTitle').value, credor=document.getElementById('newCredor').value, capital=document.getElementById('newCapital').value; if(!title||!credor||!capital) { alert('Preencha todos os campos básicos'); return; } let originDateTime=null; if(document.querySelector('#dateRadioGroup .radio-option.active').dataset.value==='today') originDateTime=new Date(); else { let ds=document.getElementById('customDateInput').value, ts=document.getElementById('customTimeInput').value; if(!ds) { alert('Informe a data no formato dd/mm/aaaa'); return; } originDateTime=parseCustomDateTime(ds,ts); if(!originDateTime) { alert('Formato inválido. Use dd/mm/aaaa'); return; } } let isParceled=parcelToggle.checked, paymentMethod=paymentMethodSelect.value, pixKey=''; if(paymentMethod==='Pix') { let pt=document.getElementById('pixKeyTypeSelect').value, pv=document.getElementById('pixKeyValue').value; if(!pv) { alert('Informe a chave Pix'); return; } pixKey=`${pt}: ${pv}`; } let excludedDays=[], holidays=[]; if(isParceled&&document.getElementById('periodicitySelect').value==='diario') { excludedDays=Array.from(document.querySelectorAll('.exclude-day:checked')).map(cb=>parseInt(cb.value)); let hr=document.getElementById('holidaysInput').value; if(hr.trim()) holidays=hr.split(',').map(h=>h.trim()); } let tcn=parseFloat(capital), totalFinanciado=tcn, parcelValue=null, parcelCount=null, periodicity=null, lumpDateStr=null, noDueDate=false; if(isParceled) { parcelValue=parseFloat(document.getElementById('parcelValue').value); parcelCount=parseInt(document.getElementById('parcelCount').value); periodicity=document.getElementById('periodicitySelect').value; if(!parcelValue||!parcelCount) { alert('Preencha valor e quantidade de parcelas'); return; } totalFinanciado=parcelValue*parcelCount; } else { noDueDate=noDueDateToggle.checked; if(!noDueDate) { let ldr=document.getElementById('lumpSumDate').value; if(!ldr) { alert('Informe a data de vencimento único (dd/mm/aaaa) ou marque "Sem data"'); return; } let ldo=parseCustomDateTime(ldr,''); if(!ldo) { alert('Data de vencimento inválida. Use dd/mm/aaaa'); return; } lumpDateStr=ldo.toISOString().slice(0,10); } } await db.collection('debts').add({userId:auth.currentUser.uid,title,credor,totalCapital:tcn,totalFinanciado,isParceled,paymentMethod,pixKey:pixKey||null,originDateTime:originDateTime.toISOString(),createdAt:firebase.firestore.FieldValue.serverTimestamp(),...(isParceled&&{parcelValue,parcelCount,periodicity,excludedDays,holidays}),...(!isParceled&&{lumpSumDueDate:lumpDateStr,noDueDate})}); showToast('Dívida adicionada!'); ['newTitle','newCredor','newCapital','pixKeyValue','parcelValue','parcelCount','lumpSumDate','holidaysInput','customDateInput','customTimeInput'].forEach(id=>{ let el=document.getElementById(id); if(el) el.value=''; }); document.querySelectorAll('.exclude-day:checked').forEach(cb=>cb.checked=false); parcelToggle.checked=false; noDueDateToggle.checked=false; toggleParcelFields(); togglePixFields(); setDateMode('today'); };
 
-        // Pagamentos eventos (mantidos)
         const debtSelect=document.getElementById('debtSelectPayment'), selectedDebtInfoDiv=document.getElementById('selectedDebtInfo'), paymentMethodInfoDiv=document.getElementById('paymentMethodInfo'), pixChangeDiv=document.getElementById('pixChangeDiv'), parcelQtyInput=document.getElementById('parcelQty'), paymentAmountInput=document.getElementById('paymentAmount'), useDifferentPixToggle=document.getElementById('useDifferentPixToggle'), differentPixFields=document.getElementById('differentPixFields'), newPixKeyType=document.getElementById('newPixKeyType'), newPixKeyValue=document.getElementById('newPixKeyValue');
-        function updateSelectedDebtInfo(){
-            const debtId=debtSelect.value; let debt=currentUserData.debts.find(d=>d.id===debtId);
-            if(!debt) { selectedDebtInfoDiv.innerHTML='<p class="text-muted">Selecione uma dívida</p>'; paymentMethodInfoDiv.innerHTML=''; pixChangeDiv.style.display='none'; return; }
-            let remaining=getRemaining(debt.id);
-            selectedDebtInfoDiv.innerHTML=`<div><strong>${debt.title}</strong> (${debt.credor})</div><div>Saldo devedor: ${formatMoney(remaining)}</div><div>Valor da parcela: ${debt.isParceled?formatMoney(debt.parcelValue):'À vista'}</div>`;
-            let ph=`<div><strong>Forma de pagamento original:</strong> ${debt.paymentMethod}</div>`;
-            if(debt.paymentMethod==='Pix'&&debt.pixKey) { ph+=`<div><strong>Chave Pix original:</strong> ${debt.pixKey}</div>`; pixChangeDiv.style.display='block'; } else pixChangeDiv.style.display='none';
-            paymentMethodInfoDiv.innerHTML=ph; useDifferentPixToggle.checked=false; differentPixFields.style.display='none'; newPixKeyValue.value='';
-        }
+        function updateSelectedDebtInfo(){ const debtId=debtSelect.value; let debt=currentUserData.debts.find(d=>d.id===debtId); if(!debt) { selectedDebtInfoDiv.innerHTML='<p class="text-muted">Selecione uma dívida</p>'; paymentMethodInfoDiv.innerHTML=''; pixChangeDiv.style.display='none'; return; } let remaining=getRemaining(debt.id); selectedDebtInfoDiv.innerHTML=`<div><strong>${debt.title}</strong> (${debt.credor})</div><div>Saldo devedor: ${formatMoney(remaining)}</div><div>Valor da parcela: ${debt.isParceled?formatMoney(debt.parcelValue):'À vista'}</div>`; let ph=`<div><strong>Forma de pagamento original:</strong> ${debt.paymentMethod}</div>`; if(debt.paymentMethod==='Pix'&&debt.pixKey) { ph+=`<div><strong>Chave Pix original:</strong> ${debt.pixKey}</div>`; pixChangeDiv.style.display='block'; } else pixChangeDiv.style.display='none'; paymentMethodInfoDiv.innerHTML=ph; useDifferentPixToggle.checked=false; differentPixFields.style.display='none'; newPixKeyValue.value=''; }
         function updateParcelTotal(){ const debtId=debtSelect.value; let debt=currentUserData.debts.find(d=>d.id===debtId), qty=parseInt(parcelQtyInput.value); if(debt&&debt.isParceled&&!isNaN(qty)&&qty>0) { let total=qty*debt.parcelValue, rem=getRemaining(debt.id); if(total>rem) total=rem; document.getElementById('parcelTotalCalc').innerHTML=`Valor total: ${formatMoney(total)}`; } else document.getElementById('parcelTotalCalc').innerHTML='Valor total: R$ 0,00'; }
         debtSelect.addEventListener('change',()=>{updateSelectedDebtInfo();updateParcelTotal();}); parcelQtyInput.addEventListener('input',updateParcelTotal);
         const paymentTypeOptions=document.querySelectorAll('#paymentTypeGroup .radio-option'), parcelCountDiv=document.getElementById('parcelCountDiv'), manualAmountDiv=document.getElementById('manualAmountDiv');
@@ -1480,31 +1436,15 @@
         if(paymentDateCustom) paymentDateCustom.addEventListener('input',function(){applyDateMask(this);});
         if(paymentTimeCustom) paymentTimeCustom.addEventListener('input',function(){applyTimeMask(this);});
         useDifferentPixToggle.addEventListener('change',()=>{differentPixFields.style.display=useDifferentPixToggle.checked?'block':'none';});
-        document.getElementById('registerPaymentAction').onclick=async()=>{
-            const debtId=debtSelect.value; let debt=currentUserData.debts.find(d=>d.id===debtId);
-            if(!debt) { alert('Selecione uma dívida'); return; }
-            let amount=0; const paymentType=document.querySelector('#paymentTypeGroup .radio-option.active').dataset.value;
-            if(paymentType==='parcela') { let qty=parseInt(parcelQtyInput.value); if(isNaN(qty)||qty<=0) { alert('Informe a quantidade de parcelas'); return; } amount=qty*debt.parcelValue; let rem=getRemaining(debt.id); if(amount>rem) amount=rem; }
-            else { let mv=parseFloat(paymentAmountInput.value); if(isNaN(mv)||mv<=0) { alert('Informe um valor válido'); return; } amount=mv; }
-            let pixKeyUsed=null;
-            if(debt.paymentMethod==='Pix') { if(useDifferentPixToggle.checked) { let nt=newPixKeyType.value, nv=newPixKeyValue.value; if(!nv) { alert('Informe a nova chave Pix'); return; } pixKeyUsed=`${nt}: ${nv}`; } else pixKeyUsed=debt.pixKey||'Chave original não informada'; }
-            let paymentDate=null; const pm=document.querySelector('#paymentDateGroup .radio-option.active').dataset.value;
-            if(pm==='today') paymentDate=new Date();
-            else { const ds=paymentDateCustom.value, ts=paymentTimeCustom.value; if(!ds) { alert('Informe a data do pagamento no formato dd/mm/aaaa'); return; } paymentDate=parseCustomDateTime(ds,ts); if(!paymentDate) { alert('Data/hora inválida'); return; } }
-            await db.collection('payments').add({userId:auth.currentUser.uid,debtId:debt.id,credor:debt.credor,amount,method:debt.paymentMethod,date:paymentDate.toISOString(),pixKeyUsed});
-            showToast('Pagamento registrado!');
-            if(parcelQtyInput) parcelQtyInput.value=''; if(paymentAmountInput) paymentAmountInput.value=''; if(useDifferentPixToggle) useDifferentPixToggle.checked=false; if(differentPixFields) differentPixFields.style.display='none'; if(newPixKeyValue) newPixKeyValue.value=''; setPaymentDateMode('today');
-        };
+        document.getElementById('registerPaymentAction').onclick=async()=>{ const debtId=debtSelect.value; let debt=currentUserData.debts.find(d=>d.id===debtId); if(!debt) { alert('Selecione uma dívida'); return; } let amount=0; const paymentType=document.querySelector('#paymentTypeGroup .radio-option.active').dataset.value; if(paymentType==='parcela') { let qty=parseInt(parcelQtyInput.value); if(isNaN(qty)||qty<=0) { alert('Informe a quantidade de parcelas'); return; } amount=qty*debt.parcelValue; let rem=getRemaining(debt.id); if(amount>rem) amount=rem; } else { let mv=parseFloat(paymentAmountInput.value); if(isNaN(mv)||mv<=0) { alert('Informe um valor válido'); return; } amount=mv; } let pixKeyUsed=null; if(debt.paymentMethod==='Pix') { if(useDifferentPixToggle.checked) { let nt=newPixKeyType.value, nv=newPixKeyValue.value; if(!nv) { alert('Informe a nova chave Pix'); return; } pixKeyUsed=`${nt}: ${nv}`; } else pixKeyUsed=debt.pixKey||'Chave original não informada'; } let paymentDate=null; const pm=document.querySelector('#paymentDateGroup .radio-option.active').dataset.value; if(pm==='today') paymentDate=new Date(); else { const ds=paymentDateCustom.value, ts=paymentTimeCustom.value; if(!ds) { alert('Informe a data do pagamento no formato dd/mm/aaaa'); return; } paymentDate=parseCustomDateTime(ds,ts); if(!paymentDate) { alert('Data/hora inválida'); return; } } await db.collection('payments').add({userId:auth.currentUser.uid,debtId:debt.id,credor:debt.credor,amount,method:debt.paymentMethod,date:paymentDate.toISOString(),pixKeyUsed}); showToast('Pagamento registrado!'); if(parcelQtyInput) parcelQtyInput.value=''; if(paymentAmountInput) paymentAmountInput.value=''; if(useDifferentPixToggle) useDifferentPixToggle.checked=false; if(differentPixFields) differentPixFields.style.display='none'; if(newPixKeyValue) newPixKeyValue.value=''; setPaymentDateMode('today'); };
         document.getElementById('applyFilterBtn').onclick=()=>{ let s=document.getElementById('filterStart').value, e=document.getElementById('filterEnd').value; if(s&&e) renderPaymentsHistory(s,e); else if(!s&&!e) renderPaymentsHistory(); else alert('Preencha ambas as datas ou deixe ambas em branco.'); };
         document.getElementById('resetFilterBtn').onclick=()=>{ document.getElementById('filterStart').value=''; document.getElementById('filterEnd').value=''; renderPaymentsHistory(); };
 
-        // Calculadora
         const calcTypeOptions=document.querySelectorAll('#calcTypeGroup .radio-option'), calcParcelaDiv=document.getElementById('calcParcelaDiv'), calcPercentualDiv=document.getElementById('calcPercentualDiv');
         calcTypeOptions.forEach(opt=>opt.addEventListener('click',()=>{ calcTypeOptions.forEach(o=>o.classList.remove('active')); opt.classList.add('active'); calcParcelaDiv.style.display=opt.dataset.value==='parcela'?'block':'none'; calcPercentualDiv.style.display=opt.dataset.value==='percentual'?'block':'none'; }));
         document.getElementById('calcInterestBtn').onclick=()=>{ const ct=document.querySelector('#calcTypeGroup .radio-option.active').dataset.value; let rh=''; if(ct==='parcela') { let cap=parseFloat(document.getElementById('calcCapitalParcela').value), par=parseFloat(document.getElementById('calcParcelVal').value), qtd=parseInt(document.getElementById('calcQtd').value); if(isNaN(cap)||isNaN(par)||isNaN(qtd)) rh='Preencha todos os campos corretamente.'; else { let total=par*qtd, juros=total-cap, perc=(juros/cap)*100; rh=`Capital: ${formatMoney(cap)}<br>${qtd}x ${formatMoney(par)}<br>Total: ${formatMoney(total)}<br>Juros: ${formatMoney(juros)} (${perc.toFixed(2)}%)`; } } else { let cap=parseFloat(document.getElementById('calcCapitalPercent').value), perc=parseFloat(document.getElementById('calcInterestPercent').value), qtd=parseInt(document.getElementById('calcQtdPercent').value); if(isNaN(cap)||isNaN(perc)||isNaN(qtd)||qtd<=0) rh='Preencha todos os campos corretamente.'; else { let tj=cap*(perc/100), total=cap+tj, par=total/qtd; rh=`Capital: ${formatMoney(cap)}<br>Taxa de juros total: ${perc}%<br>Valor dos juros: ${formatMoney(tj)}<br>Total a pagar: ${formatMoney(total)}<br>${qtd}x de ${formatMoney(par)} (com juros)`; } } document.getElementById('calcResultBox').innerHTML=rh; };
         document.getElementById('resetCalculatorBtn').onclick=()=>{ ['calcCapitalParcela','calcParcelVal','calcQtd','calcCapitalPercent','calcInterestPercent','calcQtdPercent'].forEach(id=>{ let el = document.getElementById(id); if(el) el.value = ''; }); document.getElementById('calcResultBox').innerHTML=''; };
 
-        // Perfil
         document.getElementById('editProfileBtn').addEventListener('click',()=>{ const uid=auth.currentUser?.uid; if(!uid) return; db.collection('users').doc(uid).get().then(doc=>{ if(doc.exists){ const ud=doc.data(); document.getElementById('profileUsername').value=ud.username; document.getElementById('profileEmail').value=ud.email; document.getElementById('profilePassword').value=''; document.getElementById('profileConfirmPassword').value=''; document.getElementById('profileModal').classList.add('active'); } }); });
         document.getElementById('closeProfileModalBtn').addEventListener('click',()=>{ document.getElementById('profileModal').classList.remove('active'); });
         document.getElementById('saveProfileBtn').addEventListener('click',async()=>{ const nu=document.getElementById('profileUsername').value.trim(), ne=document.getElementById('profileEmail').value.trim(), np=document.getElementById('profilePassword').value, cp=document.getElementById('profileConfirmPassword').value; if(!nu) { showToast('Nome de usuário não pode ficar vazio','danger'); return; } const uid=auth.currentUser?.uid; if(!uid) return; const ur=db.collection('users').doc(uid); if(!(await ur.get()).exists) return; if(np&&np.trim()!=='') { if(np.length<6) { showToast('Senha deve ter no mínimo 6 caracteres','danger'); return; } if(np!==cp) { showToast('Senhas não coincidem','danger'); return; } await auth.currentUser.updatePassword(np); } await ur.update({username:nu,email:ne}); document.getElementById('userNameDisplay').innerText=nu; showToast('Perfil atualizado!'); document.getElementById('profileModal').classList.remove('active'); });
@@ -1512,14 +1452,11 @@
         document.getElementById('avatarUpload').addEventListener('change',(event)=>{ const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=async function(e){ const ab=e.target.result, uid=auth.currentUser?.uid; if(uid) { await db.collection('users').doc(uid).update({avatar:ab}); updateUserAvatarInUI(); showToast('Foto de perfil atualizada!'); } }; reader.readAsDataURL(file); });
         window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('depositModal')) document.getElementById('depositModal').classList.remove('active'); if(e.target===document.getElementById('manageNamesModal')) document.getElementById('manageNamesModal').classList.remove('active'); if(e.target===document.getElementById('managePlatformsModal')) document.getElementById('managePlatformsModal').classList.remove('active'); };
 
-        // Compromissos
         document.getElementById('newGoalDueDate').addEventListener('input',function(){applyDateMask(this);});
         const goalNameSelect = document.getElementById('newGoalNameSelect');
         goalNameSelect.addEventListener('change', ()=>{
-            const customDiv = document.getElementById('newCustomNameDiv');
-            const parcelamentoFields = document.getElementById('parcelamentoExtraFields');
-            if (goalNameSelect.value === '__add_new__') { customDiv.style.display = 'block'; parcelamentoFields.style.display = 'none'; }
-            else { customDiv.style.display = 'none'; parcelamentoFields.style.display = (goalNameSelect.value === 'Parcelamento de conta de dívida') ? 'block' : 'none'; }
+            document.getElementById('newCustomNameDiv').style.display = goalNameSelect.value === '__add_new__' ? 'block' : 'none';
+            document.getElementById('parcelamentoExtraFields').style.display = goalNameSelect.value === 'Parcelamento de conta de dívida' ? 'block' : 'none';
         });
         document.getElementById('saveCustomNameBtn').addEventListener('click', async ()=>{
             const input = document.getElementById('newCustomNameInput'); const name = input.value.trim();
@@ -1552,7 +1489,6 @@
             ['goalDebtBank','goalTotalDebtValue','goalMonthlyParcel','goalTotalParcels'].forEach(id=>{ let el = document.getElementById(id); if(el) el.value = ''; });
         };
 
-        // Modal depósito (mantido)
         document.getElementById('closeDepositModalBtn').addEventListener('click',()=>document.getElementById('depositModal').classList.remove('active'));
         const depositBankSelect = document.getElementById('depositBank');
         depositBankSelect.addEventListener('change', function(){
@@ -1590,42 +1526,19 @@
         document.getElementById('applyAnalyticsFilter').addEventListener('click',()=>updateStaticDiagrams());
         document.getElementById('resetAnalyticsFilter').addEventListener('click',()=>{ document.getElementById('analyticsStartDate').value=''; document.getElementById('analyticsEndDate').value=''; updateStaticDiagrams(); });
 
-        // ========== JORNADA ==========
+        // JORNADA
         document.getElementById('timerStartBtn').addEventListener('click', startTimer);
-        document.getElementById('timerPauseBtn').addEventListener('click', ()=>{
-            if (timerPaused) resumeTimer(); else pauseTimer();
-        });
+        document.getElementById('timerPauseBtn').addEventListener('click', ()=>{ if (timerPaused) resumeTimer(); else pauseTimer(); });
         document.getElementById('timerStopBtn').addEventListener('click', stopTimer);
-        document.querySelectorAll('#journeyEntryType .radio-option').forEach(opt => {
-            opt.addEventListener('click', ()=>{
-                document.querySelectorAll('#journeyEntryType .radio-option').forEach(o=>o.classList.remove('active'));
-                opt.classList.add('active');
-                document.getElementById('journeyEarningForm').style.display = opt.dataset.value === 'earning' ? 'block' : 'none';
-                document.getElementById('journeyExpenseForm').style.display = opt.dataset.value === 'expense' ? 'block' : 'none';
-            });
-        });
+        document.querySelectorAll('#journeyEntryType .radio-option').forEach(opt => { opt.addEventListener('click', ()=>{ document.querySelectorAll('#journeyEntryType .radio-option').forEach(o=>o.classList.remove('active')); opt.classList.add('active'); document.getElementById('journeyEarningForm').style.display = opt.dataset.value === 'earning' ? 'block' : 'none'; document.getElementById('journeyExpenseForm').style.display = opt.dataset.value === 'expense' ? 'block' : 'none'; }); });
         document.getElementById('addEarningBtn').addEventListener('click', addEarning);
         document.getElementById('addExpenseBtn').addEventListener('click', addExpense);
-        // Plataformas
         const platformSelect = document.getElementById('earningPlatformSelect');
-        platformSelect.addEventListener('change', ()=>{
-            document.getElementById('newPlatformDiv').style.display = platformSelect.value === '__add_new__' ? 'block' : 'none';
-        });
-        document.getElementById('savePlatformBtn').addEventListener('click', async ()=>{
-            const input = document.getElementById('newPlatformInput'); const name = input.value.trim();
-            if (!name) { showToast('Digite um nome','danger'); return; }
-            if (currentUserData.platforms.includes(name)) { showToast('Essa plataforma já existe','danger'); return; }
-            if (!auth.currentUser) return;
-            await db.collection('earningPlatforms').add({ userId: auth.currentUser.uid, nome: name });
-            showToast('Plataforma adicionada!'); input.value = '';
-        });
-        document.getElementById('managePlatformsBtn').addEventListener('click', ()=>{
-            renderManageModal('platformsList', currentUserData.platforms, 'earningPlatforms');
-            document.getElementById('managePlatformsModal').classList.add('active');
-        });
+        platformSelect.addEventListener('change', ()=>{ document.getElementById('newPlatformDiv').style.display = platformSelect.value === '__add_new__' ? 'block' : 'none'; });
+        document.getElementById('savePlatformBtn').addEventListener('click', async ()=>{ const input = document.getElementById('newPlatformInput'); const name = input.value.trim(); if (!name) { showToast('Digite um nome','danger'); return; } if (currentUserData.platforms.includes(name)) { showToast('Essa plataforma já existe','danger'); return; } if (!auth.currentUser) return; await db.collection('earningPlatforms').add({ userId: auth.currentUser.uid, nome: name }); showToast('Plataforma adicionada!'); input.value = ''; });
+        document.getElementById('managePlatformsBtn').addEventListener('click', ()=>{ renderManageModal('platformsList', currentUserData.platforms, 'earningPlatforms'); document.getElementById('managePlatformsModal').classList.add('active'); });
         document.getElementById('closeManagePlatformsBtn').addEventListener('click', ()=>{ document.getElementById('managePlatformsModal').classList.remove('active'); });
 
-        // Navegação
         function setActiveSection(sectionId) {
             document.querySelectorAll('.section-page').forEach(s=>s.classList.remove('active-page'));
             document.getElementById(sectionId).classList.add('active-page');
