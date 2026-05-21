@@ -144,8 +144,11 @@
         .toast-msg { position: fixed; bottom: 100px; right: 20px; background: #16100F; backdrop-filter: blur(16px); border-left: 4px solid #FF7A1A; border-radius: 24px; padding: 12px 24px; z-index: 1200; transform: translateX(120%); transition: 0.25s; }
         .toast-msg.show { transform: translateX(0); }
         @media (max-width: 680px) { .value-large { font-size: 28px; } .stat-block { padding: 0.8rem; } .today-debt-value { font-size: 1.6rem; } }
-        .avatar-top { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid #FF7A1A; margin-bottom: 8px; }
-        .user-name-top { font-size: 1.2rem; font-weight: 600; margin-bottom: 12px; }
+        .avatar-top { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #FF7A1A; }
+        .user-name-top { font-size: 1.1rem; font-weight: 600; }
+        .header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; gap: 16px; flex-wrap: wrap; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-right { display: flex; gap: 8px; }
         .modal-aura { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal-aura.active { display: flex; }
         .modal-inner { background: #16100F; border-radius: 40px; max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.8rem; border: 1px solid rgba(255,122,26,0.3); }
@@ -194,10 +197,13 @@
 </div>
 
 <div id="dashboardApp" style="display: none; max-width: 1300px; margin: 0 auto;">
-    <div style="text-align: center; margin-bottom: 2rem;">
-        <img id="userAvatarImg" class="avatar-top" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF7A1A'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="avatar">
-        <div class="user-name-top"><span id="userNameDisplay" class="badge-amber"></span></div>
-        <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+    <!-- NOVO HEADER -->
+    <div class="header-bar">
+        <div class="header-left">
+            <img id="userAvatarImg" class="avatar-top" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF7A1A'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="avatar">
+            <span id="userNameDisplay" class="user-name-top"></span>
+        </div>
+        <div class="header-right">
             <button id="editProfileBtn" class="btn-outline-light"><i class="fas fa-user-edit"></i> Perfil</button>
             <button id="logoutDashBtn" class="btn-outline-light"><i class="fas fa-sign-out-alt"></i> Sair</button>
         </div>
