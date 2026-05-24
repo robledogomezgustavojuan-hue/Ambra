@@ -17,7 +17,7 @@
             font-family: 'Inter', system-ui, sans-serif;
             color: #FFFFFF;
             min-height: 100vh;
-            padding: 30px 20px 120px 20px;
+            padding: 20px 20px 120px 20px;
             overflow-x: hidden;
             width: 100%;
             max-width: 100vw;
@@ -134,7 +134,6 @@
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: rgba(255,255,255,0.5); font-size: 0.7rem; background: transparent; border: none; cursor: pointer; }
         .nav-item i { font-size: 1.5rem; }
         .nav-item.active { color: #FF7A1A; text-shadow: 0 0 8px rgba(255,122,26,0.6); }
-        .nav-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #FF7A1A; cursor: pointer; }
         .section-page { display: none; animation: fadeIn 0.3s; }
         .section-page.active-page { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -148,8 +147,10 @@
         .toast-msg { position: fixed; bottom: 100px; right: 20px; background: #16100F; backdrop-filter: blur(16px); border-left: 4px solid #FF7A1A; border-radius: 24px; padding: 12px 24px; z-index: 1200; transform: translateX(120%); transition: 0.25s; }
         .toast-msg.show { transform: translateX(0); }
         @media (max-width: 680px) { .value-large { font-size: 28px; } .stat-block { padding: 1rem; } .today-debt-value { font-size: 1.8rem; } }
-        .user-name-top { font-size: 0.9rem; font-weight: 500; color: rgba(255,255,255,0.7); }
-        .top-bar { display: flex; align-items: center; justify-content: flex-start; padding: 10px 0 25px 0; gap: 12px; }
+        .avatar-top { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #FF7A1A; }
+        .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 0 25px 0; gap: 12px; flex-wrap: wrap; }
+        .top-left { display: flex; align-items: center; gap: 12px; }
+        .top-right { display: flex; gap: 8px; }
         .modal-aura { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal-aura.active { display: flex; }
         .modal-inner { background: #16100F; border-radius: 40px; max-width: 550px; width: 95%; max-height: 85vh; overflow-y: auto; padding: 1.8rem; border: 1px solid rgba(255,122,26,0.3); }
@@ -165,6 +166,8 @@
         .payment-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem; }
         .payment-row:last-child { border-bottom: none; }
         .payment-summary { margin-top: 1rem; padding-top: 1rem; border-top: 2px solid rgba(255,122,26,0.3); display: flex; justify-content: space-between; font-weight: 600; }
+        .btn-history { background: transparent; border: 1px solid rgba(255,122,26,0.3); color: #FFB066; border-radius: 18px; padding: 6px 12px; cursor: pointer; font-size: 0.75rem; transition: 0.2s; }
+        .btn-history:hover { background: #FF7A1A; color: black; }
     </style>
 </head>
 <body>
@@ -197,9 +200,16 @@
 </div>
 
 <div id="dashboardApp" style="display: none; width: 100%; max-width: 950px; margin: 0 auto;">
+    <!-- TOPO: Foto + nome à esquerda, botões Perfil/Sair à direita -->
     <div class="top-bar">
-        <button id="editProfileBtn" class="btn-outline-light"><i class="fas fa-user-edit"></i> Perfil</button>
-        <button id="logoutDashBtn" class="btn-outline-light"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        <div class="top-left">
+            <img id="userAvatarImg" class="avatar-top" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF7A1A'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="avatar">
+            <span id="userNameDisplay" class="badge-amber"></span>
+        </div>
+        <div class="top-right">
+            <button id="editProfileBtn" class="btn-outline-light"><i class="fas fa-user-edit"></i> Perfil</button>
+            <button id="logoutDashBtn" class="btn-outline-light"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        </div>
     </div>
 
     <!-- DASHBOARD -->
@@ -426,10 +436,9 @@
     </div>
 </div>
 
-<!-- NAVBAR -->
+<!-- NAVBAR (apenas ícones, sem foto) -->
 <div class="bottom-nav" id="bottomNav">
     <button class="nav-item active" data-section="sectionDashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
-    <img id="userAvatarImg" class="nav-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF7A1A'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="avatar" title="Editar perfil" onclick="document.getElementById('editProfileBtn').click()">
     <button class="nav-item" data-section="sectionDebts"><i class="fas fa-file-invoice"></i><span>Dívidas</span></button>
 </div>
 
@@ -552,9 +561,18 @@
             }
         });
         document.getElementById('todayTotalValue').innerHTML=formatMoney(total);
-        let container=document.getElementById('todayDebtDetails'); container.innerHTML='';
-        if(detalhes.length===0) container.innerHTML='<div class="debt-detail-item"><i class="fas fa-check-circle"></i> Nenhum pagamento previsto para hoje.</div>';
-        else detalhes.forEach(item=>{ let div=document.createElement('div'); div.className='debt-detail-item'; div.innerHTML=`<i class="fas fa-circle"></i> ${item.texto}`; container.appendChild(div); });
+        let container=document.getElementById('todayDebtDetails');
+        container.innerHTML='';
+        if(detalhes.length===0) {
+            container.innerHTML='<div class="debt-detail-item"><i class="fas fa-check-circle"></i> Nenhum pagamento previsto para hoje.</div>';
+        } else {
+            detalhes.forEach(item=>{
+                let div=document.createElement('div');
+                div.className='debt-detail-item';
+                div.innerHTML=`<i class="fas fa-circle"></i> ${item.texto}`;
+                container.appendChild(div);
+            });
+        }
     }
     function renderFullDebts() {
         let tbody=document.getElementById('debtsTableBody'); tbody.innerHTML='';
@@ -563,7 +581,10 @@
         activeDebts.forEach(d=>{
             let remaining=getRemaining(d.id); let row=tbody.insertRow();
             row.insertCell(0).innerText=d.originDateTime?new Date(d.originDateTime).toLocaleString('pt-BR'):'Data não informada';
-            row.insertCell(1).innerText=d.credor; row.insertCell(2).innerText=d.title;
+            row.insertCell(1).innerText=d.credor;
+            // Nome da dívida clicável
+            let descCell = row.insertCell(2);
+            descCell.innerHTML = `<span class="clickable-debt" data-debtid="${d.id}">${d.title}</span>`;
             row.insertCell(3).innerHTML=formatMoney(d.totalFinanciado); row.insertCell(4).innerHTML=formatMoney(d.totalCapital);
             row.insertCell(5).innerHTML=d.isParceled?`${formatMoney(d.parcelValue)} (${d.parcelCount}x)`:'À vista';
             row.insertCell(6).innerHTML=`<span style="color:#FFB066;">${formatMoney(remaining)}</span>`;
@@ -578,17 +599,35 @@
                 vencimentoStr = d.noDueDate ? 'Sem data' : (d.lumpSumDueDate || '—');
             }
             row.insertCell(10).innerHTML = vencimentoStr;
-            let act=row.insertCell(11); let delBtn=document.createElement('button');
+            // Célula de ações: botão de histórico + botão de excluir
+            let act=row.insertCell(11);
+            act.style.display='flex'; act.style.gap='6px'; act.style.alignItems='center';
+            // Botão de histórico
+            let histBtn=document.createElement('button');
+            histBtn.className='btn-history';
+            histBtn.innerHTML='<i class="fas fa-eye"></i> Histórico';
+            histBtn.onclick=(e)=>{ e.stopPropagation(); showDebtPaymentsModal(d.id); };
+            act.appendChild(histBtn);
+            // Botão de excluir
+            let delBtn=document.createElement('button');
             delBtn.innerHTML='<i class="fas fa-trash"></i>'; delBtn.className='btn-outline-light'; delBtn.style.padding='4px 10px';
             delBtn.onclick=async()=>{ if(confirm('Excluir dívida?')) { await db.collection('debts').doc(d.id).delete(); showToast('Removida','danger'); } };
             act.appendChild(delBtn);
+        });
+        // Eventos de clique nos nomes das dívidas
+        document.querySelectorAll('#debtsTableBody .clickable-debt').forEach(el=>{
+            el.addEventListener('click',(e)=>{
+                const debtId = e.target.dataset.debtid;
+                showDebtPaymentsModal(debtId);
+            });
         });
         document.querySelectorAll('.copy-pix').forEach(el=>el.addEventListener('click',e=>{ let pix=e.currentTarget.dataset.pix; if(pix){navigator.clipboard.writeText(pix); showToast('Pix copiado!');} }));
     }
     function renderPaymentsHistory(start=null,end=null) {
         let filtered=[...currentUserData.payments];
         if(start&&end) { let s=new Date(start),e=new Date(end); e.setHours(23,59,59); filtered=filtered.filter(p=>{let d=new Date(p.date); return d>=s&&d<=e;}); }
-        let tbody=document.getElementById('paymentsHistoryBody'); tbody.innerHTML='';
+        let tbody=document.getElementById('paymentsHistoryBody'); if(!tbody) return;
+        tbody.innerHTML='';
         if(filtered.length===0) { tbody.innerHTML='<tr><td colspan="6">Nenhum pagamento</td></tr>'; return; }
         filtered.sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(p=>{
             let row=tbody.insertRow();
@@ -615,7 +654,6 @@
             let row=tbody.insertRow();
             row.insertCell(0).innerText=d.originDateTime?new Date(d.originDateTime).toLocaleString('pt-BR'):'Data não informada';
             row.insertCell(1).innerText=d.credor;
-            // Nome da dívida clicável
             let descCell = row.insertCell(2);
             descCell.innerHTML = `<span class="clickable-debt" data-debtid="${d.id}">${d.title}</span>`;
             row.insertCell(3).innerHTML=formatMoney(d.totalFinanciado); row.insertCell(4).innerHTML=formatMoney(d.totalCapital);
@@ -629,7 +667,6 @@
             delBtn.onclick=async()=>{ if(confirm(`Excluir permanentemente a dívida "${d.title}"?`)) { await db.collection('debts').doc(d.id).delete(); showToast('Dívida excluída permanentemente','danger'); } };
             act.appendChild(delBtn);
         });
-        // Adiciona eventos de clique nos nomes das dívidas
         document.querySelectorAll('.clickable-debt').forEach(el => {
             el.addEventListener('click', (e) => {
                 const debtId = e.target.dataset.debtid;
@@ -707,7 +744,7 @@
         if(unsubscribePayments) { unsubscribePayments(); unsubscribePayments=null; }
         unsubscribeDebts=db.collection('debts').where('userId','==',uid).onSnapshot(snap=>{ const d=[]; snap.forEach(doc=>d.push({id:doc.id,...doc.data()})); currentUserData.debts=d; scheduleRender(); });
         unsubscribePayments=db.collection('payments').where('userId','==',uid).onSnapshot(snap=>{ const p=[]; snap.forEach(doc=>p.push({id:doc.id,...doc.data()})); currentUserData.payments=p; scheduleRender(); });
-        db.collection('users').doc(uid).get().then(doc=>{ if(doc.exists){ const ud=doc.data(); if(ud.avatar) document.getElementById('userAvatarImg').src=ud.avatar; scheduleRender(); } });
+        db.collection('users').doc(uid).get().then(doc=>{ if(doc.exists){ const ud=doc.data(); document.getElementById('userNameDisplay').innerText=ud.username||''; if(ud.avatar) document.getElementById('userAvatarImg').src=ud.avatar; scheduleRender(); } });
     }
 
     auth.onAuthStateChanged(user=>{
