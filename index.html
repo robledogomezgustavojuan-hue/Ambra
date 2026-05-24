@@ -39,6 +39,11 @@
             50% { box-shadow: 0 8px 25px rgba(255,122,26,0.7), 0 0 8px rgba(255,122,26,0.5); }
             100% { box-shadow: 0 8px 20px rgba(255,122,26,0.35); }
         }
+        @keyframes redGlowStat {
+            0% { box-shadow: 0 0 0 0 rgba(255,60,30,0.5), 0 15px 35px rgba(0,0,0,0.7); border-color: rgba(255,60,30,0.3); }
+            50% { box-shadow: 0 0 0 6px rgba(255,60,30,0.7), 0 0 25px 5px rgba(255,60,30,0.6), 0 15px 35px rgba(0,0,0,0.8); border-color: rgba(255,60,30,0.7); }
+            100% { box-shadow: 0 0 0 0 rgba(255,60,30,0.5), 0 15px 35px rgba(0,0,0,0.7); border-color: rgba(255,60,30,0.3); }
+        }
         .card-premium, .login-card {
             background: #16100F;
             background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
@@ -61,8 +66,14 @@
             transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
             animation: borderGlowStat 2.2s infinite ease-in-out;
         }
+        .stat-block.red-glow {
+            animation: redGlowStat 2.2s infinite ease-in-out;
+            border-color: rgba(255,60,30,0.5);
+            background: linear-gradient(145deg, #1a0505, #0a0000);
+        }
         .stat-block .text-muted { color: rgba(255,255,255,0.95); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.5px; margin-bottom: 8px; }
         .stat-block .value-large { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .stat-block.red-glow .value-large { background: linear-gradient(135deg, #FF6666, #FF2222); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .today-debt-card {
             background: #000000;
             background: linear-gradient(145deg, #0a0a0a, #000000);
@@ -137,7 +148,7 @@
         .section-page { display: none; animation: fadeIn 0.3s; }
         .section-page.active-page { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
         .value-large { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .badge-amber { background: rgba(255,122,26,0.18); color: #FFB066; border-radius: 40px; padding: 4px 12px; display: inline-block; }
         .login-card { max-width: 460px; width: 100%; padding: 2rem; margin: auto; }
@@ -200,7 +211,6 @@
 </div>
 
 <div id="dashboardApp" style="display: none; width: 100%; max-width: 950px; margin: 0 auto;">
-    <!-- TOPO: Foto + nome à esquerda, botões Perfil/Sair à direita -->
     <div class="top-bar">
         <div class="top-left">
             <img id="userAvatarImg" class="avatar-top" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF7A1A'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="avatar">
@@ -215,12 +225,18 @@
     <!-- DASHBOARD -->
     <div id="sectionDashboard" class="section-page active-page">
         <div class="section-centered">
+            <!-- Novos stat blocks -->
             <div class="stats-grid">
-                <div class="stat-block"><div class="text-muted">Total dívidas</div><div class="value-large" id="statTotalDebt">R$ 0</div></div>
-                <div class="stat-block"><div class="text-muted">Total pago</div><div class="value-large" id="statTotalPaid">R$ 0</div></div>
-                <div class="stat-block"><div class="text-muted">Saldo devedor</div><div class="value-large" id="statBalance">R$ 0</div></div>
-                <div class="stat-block"><div class="text-muted">Dívidas ativas</div><div class="value-large" id="statActiveCount">0</div></div>
+                <div class="stat-block red-glow">
+                    <div class="text-muted">Saldo restante total</div>
+                    <div class="value-large" id="statTotalRemaining">R$ 0</div>
+                </div>
+                <div class="stat-block">
+                    <div class="text-muted">Dívidas ativas</div>
+                    <div class="value-large" id="statActiveCount">0</div>
+                </div>
             </div>
+            <!-- Compromissos de hoje -->
             <div class="today-debt-card" id="todayDebtCard">
                 <div class="today-debt-info">
                     <div class="today-debt-label"><i class="fas fa-calendar-day"></i> Compromissos de hoje</div>
@@ -242,7 +258,6 @@
                 <button class="sub-tab" data-subsection="subHistorico">📊 Histórico</button>
                 <button class="sub-tab" data-subsection="subJuros">🧮 Juros</button>
             </div>
-            <!-- Registrar -->
             <div id="subRegistrar" class="sub-section active-section">
                 <div class="card-premium">
                     <h3><i class="fas fa-hand-holding-usd"></i> Registrar nova dívida</h3>
@@ -314,14 +329,12 @@
                     <button id="createDebtBtn" class="btn-amber" style="width:100%; margin-top: 12px;"><i class="fas fa-plus-circle"></i> Adicionar dívida</button>
                 </div>
             </div>
-            <!-- Lista -->
             <div id="subLista" class="sub-section">
                 <div class="card-premium">
                     <h3><i class="fas fa-table-list"></i> Lista de dívidas (ativas)</h3>
                     <div class="table-wrapper"><table class="table-dark-premium" id="fullDebtsTable"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Restante</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Vencimento</th><th></th></tr></thead><tbody id="debtsTableBody"></tbody></table></div>
                 </div>
             </div>
-            <!-- Pagamentos -->
             <div id="subPagamentos" class="sub-section">
                 <div class="card-premium">
                     <h3><i class="fas fa-receipt"></i> Registrar pagamento</h3>
@@ -370,14 +383,12 @@
                     <button id="registerPaymentAction" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-check-circle"></i> Registrar pagamento</button>
                 </div>
             </div>
-            <!-- Histórico -->
             <div id="subHistorico" class="sub-section">
                 <div class="card-premium">
                     <h3><i class="fas fa-archive"></i> Histórico completo de dívidas</h3>
                     <div class="table-wrapper"><table class="table-dark-premium" id="fullHistoryTable"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Status</th><th>Ações</th></tr></thead><tbody id="fullHistoryBody"></tbody></table></div>
                 </div>
             </div>
-            <!-- Juros -->
             <div id="subJuros" class="sub-section">
                 <div class="card-premium">
                     <h3><i class="fas fa-calculator"></i> Simulador de juros</h3>
@@ -423,7 +434,7 @@
     </div>
 </div>
 
-<!-- MODAL HISTÓRICO DE PAGAMENTOS DA DÍVIDA -->
+<!-- MODAL HISTÓRICO DE PAGAMENTOS -->
 <div id="debtPaymentsModal" class="modal-aura">
     <div class="modal-inner">
         <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
@@ -436,7 +447,7 @@
     </div>
 </div>
 
-<!-- NAVBAR (apenas ícones, sem foto) -->
+<!-- NAVBAR -->
 <div class="bottom-nav" id="bottomNav">
     <button class="nav-item active" data-section="sectionDashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
     <button class="nav-item" data-section="sectionDebts"><i class="fas fa-file-invoice"></i><span>Dívidas</span></button>
@@ -520,17 +531,14 @@
         return `${pendentes} / ${totalParcelas}`;
     }
     function calcTotals() {
-        let totalDebt = currentUserData.debts.reduce((s,d)=>s+d.totalFinanciado,0);
-        let totalPaid = currentUserData.payments.reduce((s,p)=>s+p.amount,0);
+        let totalRemaining = currentUserData.debts.filter(d=>getRemaining(d.id)>0).reduce((s,d)=>s+getRemaining(d.id),0);
         let activeCount = currentUserData.debts.filter(d=>getRemaining(d.id)>0).length;
-        return {totalDebt,totalPaid,balance:totalDebt-totalPaid,active:activeCount};
+        return { totalRemaining, activeCount };
     }
     function updateStatsUI() {
-        let {totalDebt,totalPaid,balance,active}=calcTotals();
-        document.getElementById('statTotalDebt').innerHTML=formatMoney(totalDebt);
-        document.getElementById('statTotalPaid').innerHTML=formatMoney(totalPaid);
-        document.getElementById('statBalance').innerHTML=formatMoney(balance);
-        document.getElementById('statActiveCount').innerText=active;
+        let {totalRemaining,activeCount}=calcTotals();
+        document.getElementById('statTotalRemaining').innerHTML=formatMoney(totalRemaining);
+        document.getElementById('statActiveCount').innerText=activeCount;
     }
     function updateTodayDebtCard() {
         let hoje=new Date(); hoje.setHours(0,0,0,0); let total=0, detalhes=[];
@@ -582,7 +590,6 @@
             let remaining=getRemaining(d.id); let row=tbody.insertRow();
             row.insertCell(0).innerText=d.originDateTime?new Date(d.originDateTime).toLocaleString('pt-BR'):'Data não informada';
             row.insertCell(1).innerText=d.credor;
-            // Nome da dívida clicável
             let descCell = row.insertCell(2);
             descCell.innerHTML = `<span class="clickable-debt" data-debtid="${d.id}">${d.title}</span>`;
             row.insertCell(3).innerHTML=formatMoney(d.totalFinanciado); row.insertCell(4).innerHTML=formatMoney(d.totalCapital);
@@ -599,22 +606,18 @@
                 vencimentoStr = d.noDueDate ? 'Sem data' : (d.lumpSumDueDate || '—');
             }
             row.insertCell(10).innerHTML = vencimentoStr;
-            // Célula de ações: botão de histórico + botão de excluir
             let act=row.insertCell(11);
             act.style.display='flex'; act.style.gap='6px'; act.style.alignItems='center';
-            // Botão de histórico
             let histBtn=document.createElement('button');
             histBtn.className='btn-history';
             histBtn.innerHTML='<i class="fas fa-eye"></i> Histórico';
             histBtn.onclick=(e)=>{ e.stopPropagation(); showDebtPaymentsModal(d.id); };
             act.appendChild(histBtn);
-            // Botão de excluir
             let delBtn=document.createElement('button');
             delBtn.innerHTML='<i class="fas fa-trash"></i>'; delBtn.className='btn-outline-light'; delBtn.style.padding='4px 10px';
             delBtn.onclick=async()=>{ if(confirm('Excluir dívida?')) { await db.collection('debts').doc(d.id).delete(); showToast('Removida','danger'); } };
             act.appendChild(delBtn);
         });
-        // Eventos de clique nos nomes das dívidas
         document.querySelectorAll('#debtsTableBody .clickable-debt').forEach(el=>{
             el.addEventListener('click',(e)=>{
                 const debtId = e.target.dataset.debtid;
@@ -680,9 +683,7 @@
         const payments = currentUserData.payments.filter(p => p.debtId === debtId).sort((a,b)=>new Date(b.date)-new Date(a.date));
         const totalPaid = payments.reduce((s,p)=>s+p.amount,0);
         const remaining = getRemaining(debtId);
-        
         document.getElementById('debtPaymentsInfo').innerHTML = `<strong>${debt.title}</strong> (${debt.credor})<br>Total financiado: ${formatMoney(debt.totalFinanciado)} | Pago: ${formatMoney(totalPaid)} | Restante: ${formatMoney(remaining)}`;
-        
         let listHtml = '';
         if (payments.length === 0) {
             listHtml = '<p>Nenhum pagamento registrado para esta dívida.</p>';
