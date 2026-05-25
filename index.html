@@ -151,6 +151,7 @@
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
         .value-large { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .badge-amber { background: rgba(255,122,26,0.18); color: #FFB066; border-radius: 40px; padding: 4px 12px; display: inline-block; }
+        .badge-blue { background: rgba(100,149,237,0.18); color: #87CEEB; border-radius: 40px; padding: 4px 12px; display: inline-block; font-size: 0.75rem; }
         .login-card { max-width: 460px; width: 100%; padding: 2rem; margin: auto; }
         .switch-mode { display: flex; gap: 1rem; background: rgba(0,0,0,0.4); border-radius: 40px; padding: 6px; margin-bottom: 2rem; }
         .switch-btn { flex: 1; text-align: center; padding: 8px; border-radius: 40px; cursor: pointer; font-weight: 600; color: rgba(255,255,255,0.6); }
@@ -183,6 +184,8 @@
         .btn-history:hover { background: #FF7A1A; color: black; }
         .btn-payment-action { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: #FFB066; border-radius: 16px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; transition: 0.2s; }
         .btn-payment-action:hover { background: #FF7A1A; color: black; }
+        .reminder-fields { margin-top: 12px; padding: 12px; background: rgba(100,149,237,0.05); border-radius: 20px; border: 1px solid rgba(100,149,237,0.2); }
+        .reminder-fields label { color: rgba(135,206,235,0.8); }
     </style>
 </head>
 <body>
@@ -250,7 +253,7 @@
         </div>
     </div>
 
-    <!-- DÍVIDAS (unificada, sem sub-aba Histórico) -->
+    <!-- DÍVIDAS (unificada) -->
     <div id="sectionDebts" class="section-page">
         <div class="section-centered">
             <div class="sub-tabs">
@@ -326,6 +329,37 @@
                             <label><input type="checkbox" class="exclude-day" value="0"> Dom</label>
                         </div>
                         <input type="text" id="holidaysInput" placeholder="Feriados (ex: 01/01,25/12,15/11)">
+                    </div>
+                    <!-- NOVO: Switch "Apenas lembrete" -->
+                    <div class="switch-container">
+                        <span class="switch-label">Apenas lembrete (não afeta os totais)</span>
+                        <label class="switch"><input type="checkbox" id="reminderOnlyToggle"><span class="slider"></span></label>
+                    </div>
+                    <!-- NOVO: Campos de recorrência do lembrete -->
+                    <div id="reminderFields" class="reminder-fields" style="display: none;">
+                        <label>Recorrência do lembrete</label>
+                        <select id="reminderRecurrenceSelect">
+                            <option value="once">Apenas uma vez</option>
+                            <option value="daily">Todos os dias</option>
+                            <option value="weekly">Dias específicos da semana</option>
+                            <option value="interval">A cada X dias</option>
+                        </select>
+                        <div id="reminderDaysDiv" style="display: none; margin-top: 8px;">
+                            <label>Dias da semana</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="reminder-day" value="1"> Seg</label>
+                                <label><input type="checkbox" class="reminder-day" value="2"> Ter</label>
+                                <label><input type="checkbox" class="reminder-day" value="3"> Qua</label>
+                                <label><input type="checkbox" class="reminder-day" value="4"> Qui</label>
+                                <label><input type="checkbox" class="reminder-day" value="5"> Sex</label>
+                                <label><input type="checkbox" class="reminder-day" value="6"> Sáb</label>
+                                <label><input type="checkbox" class="reminder-day" value="0"> Dom</label>
+                            </div>
+                        </div>
+                        <div id="reminderIntervalDiv" style="display: none; margin-top: 8px;">
+                            <label>A cada quantos dias</label>
+                            <input type="number" id="reminderIntervalDays" placeholder="Ex: 3" step="1" min="1" value="1">
+                        </div>
                     </div>
                     <button id="createDebtBtn" class="btn-amber" style="width:100%; margin-top: 12px;"><i class="fas fa-plus-circle"></i> Adicionar dívida</button>
                 </div>
@@ -547,9 +581,40 @@
         if(pendentes<0) pendentes=0;
         return `${pendentes} / ${totalParcelas}`;
     }
+    function isReminderActiveToday(debt) {
+        if (!debt.reminderOnly) return false;
+        const hoje = new Date();
+        const todayDay = hoje.getDay();
+        const startDate = new Date(debt.originDateTime);
+        startDate.setHours(0,0,0,0);
+        const hojeClean = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+        
+        const recurrence = debt.reminderRecurrence || 'once';
+        switch (recurrence) {
+            case 'once':
+                if (debt.lumpSumDueDate) {
+                    const dueDate = new Date(debt.lumpSumDueDate);
+                    dueDate.setHours(0,0,0,0);
+                    return dueDate.getTime() === hojeClean.getTime();
+                }
+                return startDate.getTime() === hojeClean.getTime();
+            case 'daily':
+                return true;
+            case 'weekly':
+                const days = debt.reminderDays || [];
+                return days.includes(todayDay);
+            case 'interval':
+                const interval = debt.reminderInterval || 1;
+                const diffTime = hojeClean.getTime() - startDate.getTime();
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays >= 0 && diffDays % interval === 0;
+            default:
+                return false;
+        }
+    }
     function calcTotals() {
-        let totalRemaining = currentUserData.debts.filter(d=>getRemaining(d.id)>0).reduce((s,d)=>s+getRemaining(d.id),0);
-        let activeCount = currentUserData.debts.filter(d=>getRemaining(d.id)>0).length;
+        let totalRemaining = currentUserData.debts.filter(d=>!d.reminderOnly && getRemaining(d.id)>0).reduce((s,d)=>s+getRemaining(d.id),0);
+        let activeCount = currentUserData.debts.filter(d=>!d.reminderOnly && getRemaining(d.id)>0).length;
         return { totalRemaining, activeCount };
     }
     function updateStatsUI() {
@@ -559,7 +624,9 @@
     }
     function updateTodayDebtCard() {
         let hoje=new Date(); hoje.setHours(0,0,0,0); let total=0, detalhes=[];
+        // Dívidas normais (parceladas ou à vista)
         currentUserData.debts.forEach(debt=>{
+            if (debt.reminderOnly) return;
             let remaining=getRemaining(debt.id); if(remaining<=0) return;
             if(debt.isParceled) {
                 let startDate=new Date(debt.originDateTime);
@@ -585,6 +652,16 @@
                 }
             }
         });
+        // Lembretes
+        currentUserData.debts.forEach(debt=>{
+            if (!debt.reminderOnly) return;
+            if (isReminderActiveToday(debt)) {
+                const valorMostrar = debt.totalFinanciado || 0;
+                const tipoRecorrencia = debt.reminderRecurrence || 'once';
+                const tipos = { once:'Lembrete único', daily:'Diário', weekly:'Semanal', interval:`A cada ${debt.reminderInterval||1} dias` };
+                detalhes.push({texto:`🔔 ${debt.title} (${debt.credor}) - ${tipos[tipoRecorrencia]||'Lembrete'} - ${formatMoney(valorMostrar)}`});
+            }
+        });
         document.getElementById('todayTotalValue').innerHTML=formatMoney(total);
         let container=document.getElementById('todayDebtDetails');
         container.innerHTML='';
@@ -601,7 +678,8 @@
     }
     function renderFullDebts() {
         let tbody=document.getElementById('debtsTableBody'); tbody.innerHTML='';
-        let activeDebts=currentUserData.debts.filter(d=>getRemaining(d.id)>0);
+        // Filtra apenas dívidas NÃO reminderOnly com saldo > 0
+        let activeDebts=currentUserData.debts.filter(d=>!d.reminderOnly && getRemaining(d.id)>0);
         if(activeDebts.length===0) { tbody.innerHTML='<tr><td colspan="12">Nenhuma dívida ativa.</td></tr>'; return; }
         activeDebts.forEach(d=>{
             let remaining=getRemaining(d.id); let row=tbody.insertRow();
@@ -660,8 +738,9 @@
         });
     }
     function renderSelectDebts() {
-        let select=document.getElementById('debtSelectPayment'); select.innerHTML='<option value="">-- selecione --</option>';
-        let activeDebts=currentUserData.debts.filter(d=>getRemaining(d.id)>0);
+        let select=document.getElementById('debtSelectPayment');
+        select.innerHTML='<option value="">-- selecione --</option>';
+        let activeDebts=currentUserData.debts.filter(d=>!d.reminderOnly && getRemaining(d.id)>0);
         if(activeDebts.length===0) { select.innerHTML='<option value="">Nenhuma dívida ativa</option>'; return; }
         activeDebts.forEach(d=>{ let remaining=getRemaining(d.id); let opt=document.createElement('option'); opt.value=d.id; opt.innerText=`${d.title} (${d.credor}) - saldo: ${remaining.toFixed(2)}`; select.appendChild(opt); });
         select.dispatchEvent(new Event('change'));
@@ -698,7 +777,6 @@
             <span>Total pago: ${formatMoney(totalPaid)}</span>
             <span>Saldo restante: ${formatMoney(remaining)}</span>
         `;
-        // Event listeners para editar
         document.querySelectorAll('.edit-payment-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -722,7 +800,6 @@
                 document.getElementById('editPaymentModal').classList.add('active');
             });
         });
-        // Event listeners para apagar
         document.querySelectorAll('.delete-payment-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
@@ -730,7 +807,6 @@
                 if (confirm('Excluir este pagamento?')) {
                     await db.collection('payments').doc(paymentId).delete();
                     showToast('Pagamento removido');
-                    // Reabrir o modal atualizado
                     showDebtPaymentsModal(debtId);
                 }
             });
@@ -828,6 +904,29 @@
         const paymentMethodSelect=document.getElementById('paymentMethodSelect'), pixFieldsDiv=document.getElementById('pixFields');
         function togglePixFields(){ pixFieldsDiv.style.display=paymentMethodSelect.value==='Pix'?'block':'none'; }
         paymentMethodSelect.onchange=togglePixFields; togglePixFields();
+
+        // NOVO: Mostrar/ocultar campos de lembrete
+        const reminderOnlyToggle = document.getElementById('reminderOnlyToggle');
+        const reminderFields = document.getElementById('reminderFields');
+        const reminderRecurrenceSelect = document.getElementById('reminderRecurrenceSelect');
+        const reminderDaysDiv = document.getElementById('reminderDaysDiv');
+        const reminderIntervalDiv = document.getElementById('reminderIntervalDiv');
+        function toggleReminderFields() {
+            if (reminderOnlyToggle.checked) {
+                reminderFields.style.display = 'block';
+                updateReminderSubFields();
+            } else {
+                reminderFields.style.display = 'none';
+            }
+        }
+        function updateReminderSubFields() {
+            const val = reminderRecurrenceSelect.value;
+            reminderDaysDiv.style.display = val === 'weekly' ? 'block' : 'none';
+            reminderIntervalDiv.style.display = val === 'interval' ? 'block' : 'none';
+        }
+        reminderOnlyToggle.addEventListener('change', toggleReminderFields);
+        reminderRecurrenceSelect.addEventListener('change', updateReminderSubFields);
+
         document.getElementById('createDebtBtn').onclick=async()=>{
             let title=document.getElementById('newTitle').value, credor=document.getElementById('newCredor').value, capital=document.getElementById('newCapital').value;
             if(!title||!credor||!capital) { alert('Preencha todos os campos básicos'); return; }
@@ -863,10 +962,39 @@
                     lumpDateStr=ldo.toISOString().slice(0,10);
                 }
             }
-            await db.collection('debts').add({userId:auth.currentUser.uid,title,credor,totalCapital:tcn,totalFinanciado,isParceled,paymentMethod,pixKey:pixKey||null,originDateTime:originDateTime.toISOString(),createdAt:firebase.firestore.FieldValue.serverTimestamp(),...(isParceled&&{parcelValue,parcelCount,periodicity,excludedDays,holidays}),...(!isParceled&&{lumpSumDueDate:lumpDateStr,noDueDate})});
-            showToast('Dívida adicionada!');
-            ['newTitle','newCredor','newCapital','pixKeyValue','parcelValue','parcelCount','lumpSumDate','holidaysInput','customDateInput','customTimeInput'].forEach(id=>{ let el = document.getElementById(id); if(el) el.value = ''; });
-            document.querySelectorAll('.exclude-day:checked').forEach(cb=>cb.checked=false); parcelToggle.checked=false; noDueDateToggle.checked=false; toggleParcelFields(); togglePixFields(); setDateMode('today');
+            // NOVO: Lembrete
+            const reminderOnly = reminderOnlyToggle.checked;
+            let reminderData = {};
+            if (reminderOnly) {
+                const recurrence = reminderRecurrenceSelect.value;
+                reminderData.reminderRecurrence = recurrence;
+                if (recurrence === 'weekly') {
+                    const days = Array.from(document.querySelectorAll('.reminder-day:checked')).map(cb=>parseInt(cb.value));
+                    if (days.length === 0) { alert('Selecione pelo menos um dia da semana para o lembrete.'); return; }
+                    reminderData.reminderDays = days;
+                } else if (recurrence === 'interval') {
+                    const interval = parseInt(document.getElementById('reminderIntervalDays').value);
+                    if (isNaN(interval) || interval < 1) { alert('Informe o intervalo de dias para o lembrete.'); return; }
+                    reminderData.reminderInterval = interval;
+                }
+            }
+            await db.collection('debts').add({
+                userId:auth.currentUser.uid,title,credor,totalCapital:tcn,totalFinanciado,
+                isParceled,paymentMethod,pixKey:pixKey||null,
+                originDateTime:originDateTime.toISOString(),
+                reminderOnly,
+                ...reminderData,
+                createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+                ...(isParceled&&{parcelValue,parcelCount,periodicity,excludedDays,holidays}),
+                ...(!isParceled&&{lumpSumDueDate:lumpDateStr,noDueDate})
+            });
+            showToast(reminderOnly?'Lembrete criado!':'Dívida adicionada!');
+            ['newTitle','newCredor','newCapital','pixKeyValue','parcelValue','parcelCount','lumpSumDate','holidaysInput','customDateInput','customTimeInput','reminderIntervalDays'].forEach(id=>{ let el=document.getElementById(id); if(el) el.value=''; });
+            document.querySelectorAll('.exclude-day:checked').forEach(cb=>cb.checked=false);
+            document.querySelectorAll('.reminder-day:checked').forEach(cb=>cb.checked=false);
+            parcelToggle.checked=false; noDueDateToggle.checked=false; reminderOnlyToggle.checked=false;
+            reminderRecurrenceSelect.value='once';
+            toggleParcelFields(); togglePixFields(); toggleReminderFields(); setDateMode('today');
         };
 
         const debtSelect=document.getElementById('debtSelectPayment'), selectedDebtInfoDiv=document.getElementById('selectedDebtInfo'), paymentMethodInfoDiv=document.getElementById('paymentMethodInfo'), pixChangeDiv=document.getElementById('pixChangeDiv'), parcelQtyInput=document.getElementById('parcelQty'), paymentAmountInput=document.getElementById('paymentAmount'), useDifferentPixToggle=document.getElementById('useDifferentPixToggle'), differentPixFields=document.getElementById('differentPixFields'), newPixKeyType=document.getElementById('newPixKeyType'), newPixKeyValue=document.getElementById('newPixKeyValue');
@@ -902,6 +1030,7 @@
         document.getElementById('registerPaymentAction').onclick=async()=>{
             const debtId=debtSelect.value; let debt=currentUserData.debts.find(d=>d.id===debtId);
             if(!debt) { alert('Selecione uma dívida'); return; }
+            if(debt.reminderOnly) { alert('Esta dívida é apenas um lembrete e não aceita pagamentos.'); return; }
             let amount=0; const paymentType=document.querySelector('#paymentTypeGroup .radio-option.active').dataset.value;
             if(paymentType==='parcela') { let qty=parseInt(parcelQtyInput.value); if(isNaN(qty)||qty<=0) { alert('Informe a quantidade de parcelas'); return; } amount=qty*debt.parcelValue; let remaining=getRemaining(debt.id); if(amount>remaining) amount=remaining; }
             else { let mv=parseFloat(paymentAmountInput.value); if(isNaN(mv)||mv<=0) { alert('Informe um valor válido'); return; } amount=mv; }
@@ -933,7 +1062,7 @@
             }
             document.getElementById('calcResultBox').innerHTML=rh;
         };
-        document.getElementById('resetCalculatorBtn').onclick=()=>{ ['calcCapitalParcela','calcParcelVal','calcQtd','calcCapitalPercent','calcInterestPercent','calcQtdPercent'].forEach(id=>{ let el = document.getElementById(id); if(el) el.value = ''; }); document.getElementById('calcResultBox').innerHTML=''; };
+        document.getElementById('resetCalculatorBtn').onclick=()=>{ ['calcCapitalParcela','calcParcelVal','calcQtd','calcCapitalPercent','calcInterestPercent','calcQtdPercent'].forEach(id=>{ let el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('calcResultBox').innerHTML=''; };
 
         document.getElementById('editProfileBtn').addEventListener('click',()=>{
             const uid=auth.currentUser?.uid; if(!uid) return;
@@ -958,7 +1087,6 @@
         document.getElementById('closeDebtPaymentsModalBtn').addEventListener('click',()=>{ document.getElementById('debtPaymentsModal').classList.remove('active'); });
         document.getElementById('closeEditPaymentModalBtn').addEventListener('click',()=>{ document.getElementById('editPaymentModal').classList.remove('active'); });
 
-        // Salvar edição de pagamento
         document.getElementById('saveEditPaymentBtn').addEventListener('click', async ()=>{
             const paymentId = document.getElementById('editPaymentId').value;
             const amount = parseFloat(document.getElementById('editPaymentAmount').value);
@@ -978,12 +1106,10 @@
             await db.collection('payments').doc(paymentId).update(updateData);
             showToast('Pagamento atualizado!');
             document.getElementById('editPaymentModal').classList.remove('active');
-            // Reabrir o modal de histórico da dívida
             const debtId = currentUserData.payments.find(p=>p.id===paymentId)?.debtId;
             if (debtId) showDebtPaymentsModal(debtId);
         });
 
-        // Máscaras para campos de data/hora do modal de edição
         const editDateInput = document.getElementById('editPaymentDate');
         const editTimeInput = document.getElementById('editPaymentTime');
         if(editDateInput) editDateInput.addEventListener('input',function(){applyDateMask(this);});
