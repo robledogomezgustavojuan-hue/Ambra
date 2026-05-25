@@ -95,6 +95,9 @@
         .debt-detail-item { font-size: 0.75rem; color: rgba(255,255,255,0.9); padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; }
         .debt-detail-item:last-child { border-bottom: none; }
         .debt-detail-item i { color: #FF7A1A; font-size: 0.7rem; width: 16px; }
+        .debt-detail-item.reminder-item { cursor: pointer; color: #87CEEB; }
+        .debt-detail-item.reminder-item:hover { color: #FFB066; }
+        .debt-detail-item.reminder-done { opacity: 0.5; text-decoration: line-through; }
         .today-debt-btn { background: rgba(255,122,26,0.2); border: 1px solid #FF7A1A; border-radius: 40px; padding: 10px 24px; color: #FFB066; font-weight: 500; cursor: pointer; transition: 0.2s; white-space: nowrap; font-size: 0.9rem; }
         .today-debt-btn:hover { background: #FF7A1A; color: black; }
         .btn-amber {
@@ -330,12 +333,12 @@
                         </div>
                         <input type="text" id="holidaysInput" placeholder="Feriados (ex: 01/01,25/12,15/11)">
                     </div>
-                    <!-- NOVO: Switch "Apenas lembrete" -->
+                    <!-- Switch "Apenas lembrete" -->
                     <div class="switch-container">
                         <span class="switch-label">Apenas lembrete (não afeta os totais)</span>
                         <label class="switch"><input type="checkbox" id="reminderOnlyToggle"><span class="slider"></span></label>
                     </div>
-                    <!-- NOVO: Campos de recorrência do lembrete -->
+                    <!-- Campos de recorrência do lembrete -->
                     <div id="reminderFields" class="reminder-fields" style="display: none;">
                         <label>Recorrência do lembrete</label>
                         <select id="reminderRecurrenceSelect">
@@ -498,6 +501,20 @@
     </div>
 </div>
 
+<!-- MODAL DAR BAIXA EM LEMBRETE -->
+<div id="reminderCheckModal" class="modal-aura">
+    <div class="modal-inner">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <h3><i class="fas fa-check-circle"></i> Dar baixa no lembrete</h3>
+            <span id="closeReminderCheckModalBtn" style="font-size: 28px; cursor: pointer;">&times;</span>
+        </div>
+        <input type="hidden" id="reminderCheckDebtId">
+        <div id="reminderCheckInfo" style="margin-bottom: 1rem; color: #87CEEB; font-size: 0.9rem;"></div>
+        <p style="font-size: 0.85rem; margin-bottom: 1rem;">Deseja dar baixa neste compromisso? Ele desaparecerá da lista de hoje e voltará amanhã (se for recorrente).</p>
+        <button id="confirmReminderCheckBtn" class="btn-amber" style="width:100%;"><i class="fas fa-check"></i> Dar baixa</button>
+    </div>
+</div>
+
 <!-- NAVBAR -->
 <div class="bottom-nav" id="bottomNav">
     <button class="nav-item active" data-section="sectionDashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
@@ -518,8 +535,8 @@
     const auth = firebase.auth();
 
     let currentUser = null;
-    let currentUserData = { debts: [], payments: [] };
-    let unsubscribeDebts = null, unsubscribePayments = null;
+    let currentUserData = { debts: [], payments: [], reminderChecks: [] };
+    let unsubscribeDebts = null, unsubscribePayments = null, unsubscribeReminderChecks = null;
     let renderTimeout = null;
 
     function applyDateMask(input) {
@@ -553,6 +570,10 @@
         let date = new Date(year,month,day,hour,minute,second);
         if(date.getFullYear()!==year||date.getMonth()!==month||date.getDate()!==day) return null;
         return date;
+    }
+    function todayKey() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
 
     function getParcelDueDate(startDate, parcelIndex, periodicidade, excludedDays=[], holidays=[]) {
@@ -588,7 +609,6 @@
         const startDate = new Date(debt.originDateTime);
         startDate.setHours(0,0,0,0);
         const hojeClean = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-        
         const recurrence = debt.reminderRecurrence || 'once';
         switch (recurrence) {
             case 'once':
@@ -598,8 +618,7 @@
                     return dueDate.getTime() === hojeClean.getTime();
                 }
                 return startDate.getTime() === hojeClean.getTime();
-            case 'daily':
-                return true;
+            case 'daily': return true;
             case 'weekly':
                 const days = debt.reminderDays || [];
                 return days.includes(todayDay);
@@ -608,9 +627,12 @@
                 const diffTime = hojeClean.getTime() - startDate.getTime();
                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                 return diffDays >= 0 && diffDays % interval === 0;
-            default:
-                return false;
+            default: return false;
         }
+    }
+    function isReminderCheckedToday(debtId) {
+        const key = todayKey();
+        return currentUserData.reminderChecks.some(c => c.debtId === debtId && c.dateKey === key);
     }
     function calcTotals() {
         let totalRemaining = currentUserData.debts.filter(d=>!d.reminderOnly && getRemaining(d.id)>0).reduce((s,d)=>s+getRemaining(d.id),0);
@@ -624,7 +646,7 @@
     }
     function updateTodayDebtCard() {
         let hoje=new Date(); hoje.setHours(0,0,0,0); let total=0, detalhes=[];
-        // Dívidas normais (parceladas ou à vista)
+        // Dívidas normais
         currentUserData.debts.forEach(debt=>{
             if (debt.reminderOnly) return;
             let remaining=getRemaining(debt.id); if(remaining<=0) return;
@@ -641,25 +663,26 @@
                         if(remainingForThis>0) {
                             let valorParcelaDevido=Math.min(valorParcela,remainingForThis);
                             total+=valorParcelaDevido;
-                            detalhes.push({texto:`${debt.title} (${debt.credor}) - parcela ${i+1}: ${formatMoney(valorParcelaDevido)}`});
+                            detalhes.push({texto:`${debt.title} (${debt.credor}) - parcela ${i+1}: ${formatMoney(valorParcelaDevido)}`, debtId: debt.id, type: 'debt'});
                         }
                     }
                 }
             } else {
                 if(debt.lumpSumDueDate&&!debt.noDueDate) {
                     let dueDate=new Date(debt.lumpSumDueDate); dueDate.setHours(0,0,0,0);
-                    if(dueDate.getTime()===hoje.getTime()) { total+=remaining; detalhes.push({texto:`${debt.title} (${debt.credor}) - vencimento hoje: ${formatMoney(remaining)}`}); }
+                    if(dueDate.getTime()===hoje.getTime()) { total+=remaining; detalhes.push({texto:`${debt.title} (${debt.credor}) - vencimento hoje: ${formatMoney(remaining)}`, debtId: debt.id, type: 'debt'}); }
                 }
             }
         });
-        // Lembretes
+        // Lembretes (somam ao total e são clicáveis para dar baixa)
         currentUserData.debts.forEach(debt=>{
             if (!debt.reminderOnly) return;
-            if (isReminderActiveToday(debt)) {
+            if (isReminderActiveToday(debt) && !isReminderCheckedToday(debt.id)) {
                 const valorMostrar = debt.totalFinanciado || 0;
                 const tipoRecorrencia = debt.reminderRecurrence || 'once';
                 const tipos = { once:'Lembrete único', daily:'Diário', weekly:'Semanal', interval:`A cada ${debt.reminderInterval||1} dias` };
-                detalhes.push({texto:`🔔 ${debt.title} (${debt.credor}) - ${tipos[tipoRecorrencia]||'Lembrete'} - ${formatMoney(valorMostrar)}`});
+                total += valorMostrar;
+                detalhes.push({texto:`🔔 ${debt.title} (${debt.credor}) - ${tipos[tipoRecorrencia]||'Lembrete'} - ${formatMoney(valorMostrar)}`, debtId: debt.id, type: 'reminder'});
             }
         });
         document.getElementById('todayTotalValue').innerHTML=formatMoney(total);
@@ -671,14 +694,26 @@
             detalhes.forEach(item=>{
                 let div=document.createElement('div');
                 div.className='debt-detail-item';
-                div.innerHTML=`<i class="fas fa-circle"></i> ${item.texto}`;
+                if (item.type === 'reminder') {
+                    div.classList.add('reminder-item');
+                    div.innerHTML=`<i class="fas fa-bell"></i> ${item.texto}`;
+                    div.addEventListener('click', ()=>{
+                        document.getElementById('reminderCheckDebtId').value = item.debtId;
+                        const debt = currentUserData.debts.find(d=>d.id===item.debtId);
+                        if (debt) {
+                            document.getElementById('reminderCheckInfo').innerHTML = `<strong>${debt.title}</strong> (${debt.credor})<br>Valor: ${formatMoney(debt.totalFinanciado||0)}`;
+                        }
+                        document.getElementById('reminderCheckModal').classList.add('active');
+                    });
+                } else {
+                    div.innerHTML=`<i class="fas fa-circle"></i> ${item.texto}`;
+                }
                 container.appendChild(div);
             });
         }
     }
     function renderFullDebts() {
         let tbody=document.getElementById('debtsTableBody'); tbody.innerHTML='';
-        // Filtra apenas dívidas NÃO reminderOnly com saldo > 0
         let activeDebts=currentUserData.debts.filter(d=>!d.reminderOnly && getRemaining(d.id)>0);
         if(activeDebts.length===0) { tbody.innerHTML='<tr><td colspan="12">Nenhuma dívida ativa.</td></tr>'; return; }
         activeDebts.forEach(d=>{
@@ -840,8 +875,8 @@
     }
     function logoutFirebase() {
         auth.signOut().then(()=>{
-            [unsubscribeDebts,unsubscribePayments].forEach(u=>{ if(u) u(); });
-            unsubscribeDebts=unsubscribePayments=null;
+            [unsubscribeDebts,unsubscribePayments,unsubscribeReminderChecks].forEach(u=>{ if(u) u(); });
+            unsubscribeDebts=unsubscribePayments=unsubscribeReminderChecks=null;
             currentUser=null; document.getElementById('dashboardApp').style.display='none'; document.getElementById('loginScreen').style.display='flex';
             showToast('Deslogado com sucesso');
         });
@@ -851,16 +886,18 @@
         const uid=auth.currentUser.uid;
         if(unsubscribeDebts) { unsubscribeDebts(); unsubscribeDebts=null; }
         if(unsubscribePayments) { unsubscribePayments(); unsubscribePayments=null; }
+        if(unsubscribeReminderChecks) { unsubscribeReminderChecks(); unsubscribeReminderChecks=null; }
         unsubscribeDebts=db.collection('debts').where('userId','==',uid).onSnapshot(snap=>{ const d=[]; snap.forEach(doc=>d.push({id:doc.id,...doc.data()})); currentUserData.debts=d; scheduleRender(); });
         unsubscribePayments=db.collection('payments').where('userId','==',uid).onSnapshot(snap=>{ const p=[]; snap.forEach(doc=>p.push({id:doc.id,...doc.data()})); currentUserData.payments=p; scheduleRender(); });
+        unsubscribeReminderChecks=db.collection('reminderChecks').where('userId','==',uid).onSnapshot(snap=>{ const rc=[]; snap.forEach(doc=>rc.push({id:doc.id,...doc.data()})); currentUserData.reminderChecks=rc; scheduleRender(); });
         db.collection('users').doc(uid).get().then(doc=>{ if(doc.exists){ const ud=doc.data(); document.getElementById('userNameDisplay').innerText=ud.username||''; if(ud.avatar) document.getElementById('userAvatarImg').src=ud.avatar; scheduleRender(); } });
     }
 
     auth.onAuthStateChanged(user=>{
         if(user) { currentUser=user; document.getElementById('loginScreen').style.display='none'; document.getElementById('dashboardApp').style.display='block'; startListening(); }
         else {
-            [unsubscribeDebts,unsubscribePayments].forEach(u=>{ if(u) u(); });
-            unsubscribeDebts=unsubscribePayments=null;
+            [unsubscribeDebts,unsubscribePayments,unsubscribeReminderChecks].forEach(u=>{ if(u) u(); });
+            unsubscribeDebts=unsubscribePayments=unsubscribeReminderChecks=null;
             document.getElementById('dashboardApp').style.display='none'; document.getElementById('loginScreen').style.display='flex';
         }
     });
@@ -905,7 +942,6 @@
         function togglePixFields(){ pixFieldsDiv.style.display=paymentMethodSelect.value==='Pix'?'block':'none'; }
         paymentMethodSelect.onchange=togglePixFields; togglePixFields();
 
-        // NOVO: Mostrar/ocultar campos de lembrete
         const reminderOnlyToggle = document.getElementById('reminderOnlyToggle');
         const reminderFields = document.getElementById('reminderFields');
         const reminderRecurrenceSelect = document.getElementById('reminderRecurrenceSelect');
@@ -962,7 +998,6 @@
                     lumpDateStr=ldo.toISOString().slice(0,10);
                 }
             }
-            // NOVO: Lembrete
             const reminderOnly = reminderOnlyToggle.checked;
             let reminderData = {};
             if (reminderOnly) {
@@ -1083,9 +1118,10 @@
             reader.onload=async function(e){ const ab=e.target.result, uid=auth.currentUser?.uid; if(uid) { await db.collection('users').doc(uid).update({avatar:ab}); updateUserAvatarInUI(); showToast('Foto de perfil atualizada!'); } };
             reader.readAsDataURL(file);
         });
-        window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('debtPaymentsModal')) document.getElementById('debtPaymentsModal').classList.remove('active'); if(e.target===document.getElementById('editPaymentModal')) document.getElementById('editPaymentModal').classList.remove('active'); };
+        window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('debtPaymentsModal')) document.getElementById('debtPaymentsModal').classList.remove('active'); if(e.target===document.getElementById('editPaymentModal')) document.getElementById('editPaymentModal').classList.remove('active'); if(e.target===document.getElementById('reminderCheckModal')) document.getElementById('reminderCheckModal').classList.remove('active'); };
         document.getElementById('closeDebtPaymentsModalBtn').addEventListener('click',()=>{ document.getElementById('debtPaymentsModal').classList.remove('active'); });
         document.getElementById('closeEditPaymentModalBtn').addEventListener('click',()=>{ document.getElementById('editPaymentModal').classList.remove('active'); });
+        document.getElementById('closeReminderCheckModalBtn').addEventListener('click',()=>{ document.getElementById('reminderCheckModal').classList.remove('active'); });
 
         document.getElementById('saveEditPaymentBtn').addEventListener('click', async ()=>{
             const paymentId = document.getElementById('editPaymentId').value;
@@ -1108,6 +1144,20 @@
             document.getElementById('editPaymentModal').classList.remove('active');
             const debtId = currentUserData.payments.find(p=>p.id===paymentId)?.debtId;
             if (debtId) showDebtPaymentsModal(debtId);
+        });
+
+        // Dar baixa em lembrete
+        document.getElementById('confirmReminderCheckBtn').addEventListener('click', async ()=>{
+            const debtId = document.getElementById('reminderCheckDebtId').value;
+            if (!debtId) return;
+            await db.collection('reminderChecks').add({
+                userId: auth.currentUser.uid,
+                debtId: debtId,
+                dateKey: todayKey(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showToast('Baixa realizada!');
+            document.getElementById('reminderCheckModal').classList.remove('active');
         });
 
         const editDateInput = document.getElementById('editPaymentDate');
