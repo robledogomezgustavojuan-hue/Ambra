@@ -347,12 +347,10 @@
                         </div>
                         <input type="text" id="holidaysInput" placeholder="Feriados (ex: 01/01,25/12,15/11)">
                     </div>
-                    <!-- Switch "Apenas lembrete" -->
                     <div class="switch-container">
                         <span class="switch-label">Apenas lembrete (não afeta os totais)</span>
                         <label class="switch"><input type="checkbox" id="reminderOnlyToggle"><span class="slider"></span></label>
                     </div>
-                    <!-- Campos de recorrência do lembrete -->
                     <div id="reminderFields" class="reminder-fields" style="display: none;">
                         <label>Recorrência do lembrete</label>
                         <select id="reminderRecurrenceSelect">
@@ -645,25 +643,40 @@
         document.getElementById('statActiveCount').innerText=activeCount;
     }
 
-    // Função para dar baixa em um lembrete (chamada pelo botão)
+    // Função de baixa CORRIGIDA
     async function checkReminder(debtId) {
-        if (!debtId) return;
-        // Adiciona localmente para feedback instantâneo
+        if (!debtId) {
+            showToast('Erro: ID do lembrete não encontrado','danger');
+            return;
+        }
+        if (!auth.currentUser) {
+            showToast('Erro: usuário não autenticado','danger');
+            return;
+        }
+        // Feedback otimista: adiciona localmente antes de salvar
         const newCheck = {
             debtId: debtId,
             dateKey: todayKey(),
         };
         currentUserData.reminderChecks.push(newCheck);
-        // Salva no Firestore
-        await db.collection('reminderChecks').add({
-            userId: auth.currentUser.uid,
-            debtId: debtId,
-            dateKey: todayKey(),
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        showToast('Baixa realizada!');
-        // Atualiza o card imediatamente
+        // Atualiza a interface imediatamente
         updateTodayDebtCard();
+        try {
+            // Salva no Firestore
+            await db.collection('reminderChecks').add({
+                userId: auth.currentUser.uid,
+                debtId: debtId,
+                dateKey: todayKey(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showToast('Baixa realizada!');
+        } catch (error) {
+            console.error('Erro ao dar baixa:', error);
+            // Reverte a alteração local em caso de erro
+            currentUserData.reminderChecks = currentUserData.reminderChecks.filter(c => c.debtId !== debtId || c.dateKey !== todayKey());
+            updateTodayDebtCard();
+            showToast('Erro ao salvar baixa. Tente novamente.','danger');
+        }
     }
 
     function updateTodayDebtCard() {
@@ -723,10 +736,13 @@
                     let checkBtn = document.createElement('button');
                     checkBtn.className = 'reminder-check-btn';
                     checkBtn.innerHTML = '✅ Dar baixa';
-                    checkBtn.addEventListener('click', (e)=>{
-                        e.stopPropagation();
-                        checkReminder(item.debtId);
-                    });
+                    // Usar closure para capturar o debtId corretamente
+                    checkBtn.addEventListener('click', (function(id) {
+                        return function(e) {
+                            e.stopPropagation();
+                            checkReminder(id);
+                        };
+                    })(item.debtId));
                     div.appendChild(checkBtn);
                 } else {
                     div.innerHTML=`<i class="fas fa-circle"></i> ${item.texto}`;
