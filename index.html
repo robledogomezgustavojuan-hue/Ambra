@@ -174,11 +174,15 @@
         .section-centered { max-width: 850px; margin: 0 auto; }
         .clickable-debt { color: #FFB066; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; transition: color 0.2s; }
         .clickable-debt:hover { color: #FF7A1A; }
-        .payment-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem; }
+        .payment-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem; gap: 8px; }
         .payment-row:last-child { border-bottom: none; }
+        .payment-row span { flex: 1; }
+        .payment-row .payment-actions { display: flex; gap: 6px; }
         .payment-summary { margin-top: 1rem; padding-top: 1rem; border-top: 2px solid rgba(255,122,26,0.3); display: flex; justify-content: space-between; font-weight: 600; }
         .btn-history { background: transparent; border: 1px solid rgba(255,122,26,0.3); color: #FFB066; border-radius: 18px; padding: 6px 12px; cursor: pointer; font-size: 0.75rem; transition: 0.2s; }
         .btn-history:hover { background: #FF7A1A; color: black; }
+        .btn-payment-action { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: #FFB066; border-radius: 16px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; transition: 0.2s; }
+        .btn-payment-action:hover { background: #FF7A1A; color: black; }
     </style>
 </head>
 <body>
@@ -225,7 +229,6 @@
     <!-- DASHBOARD -->
     <div id="sectionDashboard" class="section-page active-page">
         <div class="section-centered">
-            <!-- Novos stat blocks -->
             <div class="stats-grid">
                 <div class="stat-block red-glow">
                     <div class="text-muted">Saldo restante total</div>
@@ -236,7 +239,6 @@
                     <div class="value-large" id="statActiveCount">0</div>
                 </div>
             </div>
-            <!-- Compromissos de hoje -->
             <div class="today-debt-card" id="todayDebtCard">
                 <div class="today-debt-info">
                     <div class="today-debt-label"><i class="fas fa-calendar-day"></i> Compromissos de hoje</div>
@@ -248,14 +250,13 @@
         </div>
     </div>
 
-    <!-- DÍVIDAS (unificada) -->
+    <!-- DÍVIDAS (unificada, sem sub-aba Histórico) -->
     <div id="sectionDebts" class="section-page">
         <div class="section-centered">
             <div class="sub-tabs">
                 <button class="sub-tab active" data-subsection="subRegistrar">📝 Registrar</button>
                 <button class="sub-tab" data-subsection="subLista">📋 Lista</button>
                 <button class="sub-tab" data-subsection="subPagamentos">💳 Pagamentos</button>
-                <button class="sub-tab" data-subsection="subHistorico">📊 Histórico</button>
                 <button class="sub-tab" data-subsection="subJuros">🧮 Juros</button>
             </div>
             <div id="subRegistrar" class="sub-section active-section">
@@ -383,12 +384,6 @@
                     <button id="registerPaymentAction" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-check-circle"></i> Registrar pagamento</button>
                 </div>
             </div>
-            <div id="subHistorico" class="sub-section">
-                <div class="card-premium">
-                    <h3><i class="fas fa-archive"></i> Histórico completo de dívidas</h3>
-                    <div class="table-wrapper"><table class="table-dark-premium" id="fullHistoryTable"><thead><tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Status</th><th>Ações</th></tr></thead><tbody id="fullHistoryBody"></tbody></table></div>
-                </div>
-            </div>
             <div id="subJuros" class="sub-section">
                 <div class="card-premium">
                     <h3><i class="fas fa-calculator"></i> Simulador de juros</h3>
@@ -444,6 +439,28 @@
         <div id="debtPaymentsInfo" style="margin-bottom: 1rem; color: #FFB066; font-size: 0.9rem;"></div>
         <div id="debtPaymentsList"></div>
         <div id="debtPaymentsSummary" class="payment-summary"></div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR PAGAMENTO -->
+<div id="editPaymentModal" class="modal-aura">
+    <div class="modal-inner">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <h3><i class="fas fa-edit"></i> Editar pagamento</h3>
+            <span id="closeEditPaymentModalBtn" style="font-size: 28px; cursor: pointer;">&times;</span>
+        </div>
+        <input type="hidden" id="editPaymentId">
+        <label>Valor (R$)</label><input type="number" id="editPaymentAmount" placeholder="0,00" step="0.01">
+        <label>Método</label>
+        <select id="editPaymentMethod">
+            <option value="Dinheiro">Dinheiro</option><option value="Pix">Pix</option>
+            <option value="Débito">Débito</option><option value="Crédito">Crédito</option>
+            <option value="Boleto">Boleto</option><option value="Transação bancária">Transação bancária</option>
+        </select>
+        <label>Data (dd/mm/aaaa)</label><input type="text" id="editPaymentDate" placeholder="dd/mm/aaaa" maxlength="10">
+        <label>Hora (hh:mm:ss)</label><input type="text" id="editPaymentTime" placeholder="hh:mm:ss" maxlength="8">
+        <label>Chave Pix utilizada</label><input type="text" id="editPaymentPixKey" placeholder="Chave Pix (opcional)">
+        <button id="saveEditPaymentBtn" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-save"></i> Salvar alterações</button>
     </div>
 </div>
 
@@ -649,34 +666,6 @@
         activeDebts.forEach(d=>{ let remaining=getRemaining(d.id); let opt=document.createElement('option'); opt.value=d.id; opt.innerText=`${d.title} (${d.credor}) - saldo: ${remaining.toFixed(2)}`; select.appendChild(opt); });
         select.dispatchEvent(new Event('change'));
     }
-    function renderFullHistory() {
-        let tbody=document.getElementById('fullHistoryBody'); tbody.innerHTML='';
-        if(currentUserData.debts.length===0) { tbody.innerHTML='<tr><td colspan="11">Nenhuma dívida registrada.</td></tr>'; return; }
-        currentUserData.debts.forEach(d=>{
-            let remaining=getRemaining(d.id); let status=remaining<=0?'<span style="color:#10b981;">Quitada</span>':'<span style="color:#FFB066;">Ativa</span>';
-            let row=tbody.insertRow();
-            row.insertCell(0).innerText=d.originDateTime?new Date(d.originDateTime).toLocaleString('pt-BR'):'Data não informada';
-            row.insertCell(1).innerText=d.credor;
-            let descCell = row.insertCell(2);
-            descCell.innerHTML = `<span class="clickable-debt" data-debtid="${d.id}">${d.title}</span>`;
-            row.insertCell(3).innerHTML=formatMoney(d.totalFinanciado); row.insertCell(4).innerHTML=formatMoney(d.totalCapital);
-            row.insertCell(5).innerHTML=d.isParceled?`${formatMoney(d.parcelValue)} (${d.parcelCount}x)`:'À vista';
-            row.insertCell(6).innerHTML=getParcelasPendentes(d);
-            let pgStr=d.paymentMethod; if(d.paymentMethod==='Pix'&&d.pixKey) pgStr+=` (${d.pixKey})`;
-            row.insertCell(7).innerHTML=pgStr; row.insertCell(8).innerHTML=d.pixKey?d.pixKey:'—';
-            row.insertCell(9).innerHTML=status;
-            let act=row.insertCell(10); let delBtn=document.createElement('button');
-            delBtn.innerHTML='<i class="fas fa-trash-alt"></i> Excluir'; delBtn.className='btn-outline-light'; delBtn.style.padding='4px 10px';
-            delBtn.onclick=async()=>{ if(confirm(`Excluir permanentemente a dívida "${d.title}"?`)) { await db.collection('debts').doc(d.id).delete(); showToast('Dívida excluída permanentemente','danger'); } };
-            act.appendChild(delBtn);
-        });
-        document.querySelectorAll('.clickable-debt').forEach(el => {
-            el.addEventListener('click', (e) => {
-                const debtId = e.target.dataset.debtid;
-                showDebtPaymentsModal(debtId);
-            });
-        });
-    }
     function showDebtPaymentsModal(debtId) {
         const debt = currentUserData.debts.find(d => d.id === debtId);
         if (!debt) return;
@@ -689,12 +678,18 @@
             listHtml = '<p>Nenhum pagamento registrado para esta dívida.</p>';
         } else {
             payments.forEach(p => {
+                const dateStr = p.date ? new Date(p.date).toLocaleString('pt-BR') : 'Data não informada';
+                const pixKey = p.pixKeyUsed || '—';
                 listHtml += `
                 <div class="payment-row">
-                    <span>${new Date(p.date).toLocaleString('pt-BR')}</span>
+                    <span>${dateStr}</span>
                     <span>${formatMoney(p.amount)}</span>
                     <span>${p.method}</span>
-                    <span>${p.pixKeyUsed || '—'}</span>
+                    <span>${pixKey}</span>
+                    <div class="payment-actions">
+                        <button class="btn-payment-action edit-payment-btn" data-paymentid="${p.id}" data-amount="${p.amount}" data-method="${p.method}" data-pixkey="${p.pixKeyUsed||''}" data-date="${p.date||''}"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn-payment-action delete-payment-btn" data-paymentid="${p.id}"><i class="fas fa-trash-alt"></i> Apagar</button>
+                    </div>
                 </div>`;
             });
         }
@@ -703,6 +698,43 @@
             <span>Total pago: ${formatMoney(totalPaid)}</span>
             <span>Saldo restante: ${formatMoney(remaining)}</span>
         `;
+        // Event listeners para editar
+        document.querySelectorAll('.edit-payment-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const paymentId = btn.dataset.paymentid;
+                const amount = parseFloat(btn.dataset.amount);
+                const method = btn.dataset.method;
+                const pixKey = btn.dataset.pixkey;
+                const dateStr = btn.dataset.date;
+                document.getElementById('editPaymentId').value = paymentId;
+                document.getElementById('editPaymentAmount').value = amount;
+                document.getElementById('editPaymentMethod').value = method;
+                document.getElementById('editPaymentPixKey').value = pixKey;
+                if (dateStr) {
+                    const d = new Date(dateStr);
+                    document.getElementById('editPaymentDate').value = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+                    document.getElementById('editPaymentTime').value = d.toTimeString().slice(0,8);
+                } else {
+                    document.getElementById('editPaymentDate').value = '';
+                    document.getElementById('editPaymentTime').value = '';
+                }
+                document.getElementById('editPaymentModal').classList.add('active');
+            });
+        });
+        // Event listeners para apagar
+        document.querySelectorAll('.delete-payment-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const paymentId = btn.dataset.paymentid;
+                if (confirm('Excluir este pagamento?')) {
+                    await db.collection('payments').doc(paymentId).delete();
+                    showToast('Pagamento removido');
+                    // Reabrir o modal atualizado
+                    showDebtPaymentsModal(debtId);
+                }
+            });
+        });
         document.getElementById('debtPaymentsModal').classList.add('active');
     }
     function updateUserAvatarInUI() {
@@ -716,7 +748,7 @@
     function renderAll() {
         if(!currentUser) return;
         updateStatsUI(); renderFullDebts(); renderPaymentsHistory(); renderSelectDebts();
-        updateTodayDebtCard(); renderFullHistory(); updateUserAvatarInUI();
+        updateTodayDebtCard(); updateUserAvatarInUI();
     }
 
     async function registerWithFirebase(email,password,username) {
@@ -778,7 +810,6 @@
                 document.getElementById(subSectionId).classList.add('active-section');
                 if (subSectionId === 'subLista') renderFullDebts();
                 if (subSectionId === 'subPagamentos') { renderSelectDebts(); renderPaymentsHistory(); }
-                if (subSectionId === 'subHistorico') { renderFullHistory(); }
             });
         });
 
@@ -923,8 +954,40 @@
             reader.onload=async function(e){ const ab=e.target.result, uid=auth.currentUser?.uid; if(uid) { await db.collection('users').doc(uid).update({avatar:ab}); updateUserAvatarInUI(); showToast('Foto de perfil atualizada!'); } };
             reader.readAsDataURL(file);
         });
-        window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('debtPaymentsModal')) document.getElementById('debtPaymentsModal').classList.remove('active'); };
+        window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('debtPaymentsModal')) document.getElementById('debtPaymentsModal').classList.remove('active'); if(e.target===document.getElementById('editPaymentModal')) document.getElementById('editPaymentModal').classList.remove('active'); };
         document.getElementById('closeDebtPaymentsModalBtn').addEventListener('click',()=>{ document.getElementById('debtPaymentsModal').classList.remove('active'); });
+        document.getElementById('closeEditPaymentModalBtn').addEventListener('click',()=>{ document.getElementById('editPaymentModal').classList.remove('active'); });
+
+        // Salvar edição de pagamento
+        document.getElementById('saveEditPaymentBtn').addEventListener('click', async ()=>{
+            const paymentId = document.getElementById('editPaymentId').value;
+            const amount = parseFloat(document.getElementById('editPaymentAmount').value);
+            const method = document.getElementById('editPaymentMethod').value;
+            const pixKey = document.getElementById('editPaymentPixKey').value.trim();
+            const dateStr = document.getElementById('editPaymentDate').value;
+            const timeStr = document.getElementById('editPaymentTime').value;
+            if (isNaN(amount) || amount <= 0) { showToast('Valor inválido','danger'); return; }
+            let paymentDate = null;
+            if (dateStr) {
+                paymentDate = parseCustomDateTime(dateStr, timeStr);
+                if (!paymentDate) { showToast('Data/hora inválida. Use dd/mm/aaaa e hh:mm:ss','danger'); return; }
+            }
+            const updateData = { amount, method };
+            if (pixKey) updateData.pixKeyUsed = pixKey;
+            if (paymentDate) updateData.date = paymentDate.toISOString();
+            await db.collection('payments').doc(paymentId).update(updateData);
+            showToast('Pagamento atualizado!');
+            document.getElementById('editPaymentModal').classList.remove('active');
+            // Reabrir o modal de histórico da dívida
+            const debtId = currentUserData.payments.find(p=>p.id===paymentId)?.debtId;
+            if (debtId) showDebtPaymentsModal(debtId);
+        });
+
+        // Máscaras para campos de data/hora do modal de edição
+        const editDateInput = document.getElementById('editPaymentDate');
+        const editTimeInput = document.getElementById('editPaymentTime');
+        if(editDateInput) editDateInput.addEventListener('input',function(){applyDateMask(this);});
+        if(editTimeInput) editTimeInput.addEventListener('input',function(){applyTimeMask(this);});
 
         function setActiveSection(sectionId) {
             document.querySelectorAll('.section-page').forEach(s=>s.classList.remove('active-page'));
