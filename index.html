@@ -95,8 +95,23 @@
         .debt-detail-item { font-size: 0.75rem; color: rgba(255,255,255,0.9); padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; }
         .debt-detail-item:last-child { border-bottom: none; }
         .debt-detail-item i { color: #FF7A1A; font-size: 0.7rem; width: 16px; }
-        .debt-detail-item.reminder-item { cursor: pointer; color: #87CEEB; }
-        .debt-detail-item.reminder-item:hover { color: #FFB066; }
+        .debt-detail-item.reminder-item { color: #87CEEB; }
+        .reminder-check-btn {
+            background: rgba(135,206,235,0.15);
+            border: 1px solid #87CEEB;
+            color: #87CEEB;
+            border-radius: 16px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: 0.2s;
+            white-space: nowrap;
+            margin-left: auto;
+        }
+        .reminder-check-btn:hover {
+            background: #87CEEB;
+            color: black;
+        }
         .today-debt-btn { background: rgba(255,122,26,0.2); border: 1px solid #FF7A1A; border-radius: 40px; padding: 10px 24px; color: #FFB066; font-weight: 500; cursor: pointer; transition: 0.2s; white-space: nowrap; font-size: 0.9rem; }
         .today-debt-btn:hover { background: #FF7A1A; color: black; }
         .btn-amber {
@@ -500,20 +515,6 @@
     </div>
 </div>
 
-<!-- MODAL DAR BAIXA EM LEMBRETE -->
-<div id="reminderCheckModal" class="modal-aura">
-    <div class="modal-inner">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-            <h3><i class="fas fa-check-circle"></i> Dar baixa no lembrete</h3>
-            <span id="closeReminderCheckModalBtn" style="font-size: 28px; cursor: pointer;">&times;</span>
-        </div>
-        <input type="hidden" id="reminderCheckDebtId">
-        <div id="reminderCheckInfo" style="margin-bottom: 1rem; color: #87CEEB; font-size: 0.9rem;"></div>
-        <p style="font-size: 0.85rem; margin-bottom: 1rem;">Deseja dar baixa neste compromisso? Ele desaparecerá da lista de hoje e voltará amanhã (se for recorrente).</p>
-        <button id="confirmReminderCheckBtn" class="btn-amber" style="width:100%;"><i class="fas fa-check"></i> Dar baixa</button>
-    </div>
-</div>
-
 <!-- NAVBAR -->
 <div class="bottom-nav" id="bottomNav">
     <button class="nav-item active" data-section="sectionDashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
@@ -643,8 +644,31 @@
         document.getElementById('statTotalRemaining').innerHTML=formatMoney(totalRemaining);
         document.getElementById('statActiveCount').innerText=activeCount;
     }
+
+    // Função para dar baixa em um lembrete (chamada pelo botão)
+    async function checkReminder(debtId) {
+        if (!debtId) return;
+        // Adiciona localmente para feedback instantâneo
+        const newCheck = {
+            debtId: debtId,
+            dateKey: todayKey(),
+        };
+        currentUserData.reminderChecks.push(newCheck);
+        // Salva no Firestore
+        await db.collection('reminderChecks').add({
+            userId: auth.currentUser.uid,
+            debtId: debtId,
+            dateKey: todayKey(),
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('Baixa realizada!');
+        // Atualiza o card imediatamente
+        updateTodayDebtCard();
+    }
+
     function updateTodayDebtCard() {
         let hoje=new Date(); hoje.setHours(0,0,0,0); let total=0, detalhes=[];
+        // Dívidas normais
         currentUserData.debts.forEach(debt=>{
             if (debt.reminderOnly) return;
             let remaining=getRemaining(debt.id); if(remaining<=0) return;
@@ -672,6 +696,7 @@
                 }
             }
         });
+        // Lembretes
         currentUserData.debts.forEach(debt=>{
             if (!debt.reminderOnly) return;
             if (isReminderActiveToday(debt) && !isReminderCheckedToday(debt.id)) {
@@ -694,14 +719,15 @@
                 if (item.type === 'reminder') {
                     div.classList.add('reminder-item');
                     div.innerHTML=`<i class="fas fa-bell"></i> ${item.texto}`;
-                    div.addEventListener('click', ()=>{
-                        document.getElementById('reminderCheckDebtId').value = item.debtId;
-                        const debt = currentUserData.debts.find(d=>d.id===item.debtId);
-                        if (debt) {
-                            document.getElementById('reminderCheckInfo').innerHTML = `<strong>${debt.title}</strong> (${debt.credor})<br>Valor: ${formatMoney(debt.totalFinanciado||0)}`;
-                        }
-                        document.getElementById('reminderCheckModal').classList.add('active');
+                    // Botão de dar baixa
+                    let checkBtn = document.createElement('button');
+                    checkBtn.className = 'reminder-check-btn';
+                    checkBtn.innerHTML = '✅ Dar baixa';
+                    checkBtn.addEventListener('click', (e)=>{
+                        e.stopPropagation();
+                        checkReminder(item.debtId);
                     });
+                    div.appendChild(checkBtn);
                 } else {
                     div.innerHTML=`<i class="fas fa-circle"></i> ${item.texto}`;
                 }
@@ -709,6 +735,7 @@
             });
         }
     }
+
     function renderFullDebts() {
         let tbody=document.getElementById('debtsTableBody'); tbody.innerHTML='';
         let activeDebts=currentUserData.debts.filter(d=>!d.reminderOnly && getRemaining(d.id)>0);
@@ -1115,10 +1142,9 @@
             reader.onload=async function(e){ const ab=e.target.result, uid=auth.currentUser?.uid; if(uid) { await db.collection('users').doc(uid).update({avatar:ab}); updateUserAvatarInUI(); showToast('Foto de perfil atualizada!'); } };
             reader.readAsDataURL(file);
         });
-        window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('debtPaymentsModal')) document.getElementById('debtPaymentsModal').classList.remove('active'); if(e.target===document.getElementById('editPaymentModal')) document.getElementById('editPaymentModal').classList.remove('active'); if(e.target===document.getElementById('reminderCheckModal')) document.getElementById('reminderCheckModal').classList.remove('active'); };
+        window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('debtPaymentsModal')) document.getElementById('debtPaymentsModal').classList.remove('active'); if(e.target===document.getElementById('editPaymentModal')) document.getElementById('editPaymentModal').classList.remove('active'); };
         document.getElementById('closeDebtPaymentsModalBtn').addEventListener('click',()=>{ document.getElementById('debtPaymentsModal').classList.remove('active'); });
         document.getElementById('closeEditPaymentModalBtn').addEventListener('click',()=>{ document.getElementById('editPaymentModal').classList.remove('active'); });
-        document.getElementById('closeReminderCheckModalBtn').addEventListener('click',()=>{ document.getElementById('reminderCheckModal').classList.remove('active'); });
 
         document.getElementById('saveEditPaymentBtn').addEventListener('click', async ()=>{
             const paymentId = document.getElementById('editPaymentId').value;
@@ -1141,29 +1167,6 @@
             document.getElementById('editPaymentModal').classList.remove('active');
             const debtId = currentUserData.payments.find(p=>p.id===paymentId)?.debtId;
             if (debtId) showDebtPaymentsModal(debtId);
-        });
-
-        // Dar baixa em lembrete (CORRIGIDO)
-        document.getElementById('confirmReminderCheckBtn').addEventListener('click', async ()=>{
-            const debtId = document.getElementById('reminderCheckDebtId').value;
-            if (!debtId) return;
-            // Adicionar localmente para feedback instantâneo
-            const newCheck = {
-                debtId: debtId,
-                dateKey: todayKey(),
-            };
-            currentUserData.reminderChecks.push(newCheck);
-            // Salvar no Firestore
-            await db.collection('reminderChecks').add({
-                userId: auth.currentUser.uid,
-                debtId: debtId,
-                dateKey: todayKey(),
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            showToast('Baixa realizada!');
-            document.getElementById('reminderCheckModal').classList.remove('active');
-            // Atualizar a interface imediatamente
-            updateTodayDebtCard();
         });
 
         const editDateInput = document.getElementById('editPaymentDate');
