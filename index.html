@@ -257,9 +257,18 @@
         .toast-msg { position: fixed; bottom: 100px; right: 20px; background: var(--toast-bg); backdrop-filter: blur(16px); border-left: 4px solid #FF7A1A; border-radius: 24px; padding: 12px 24px; z-index: 1200; transform: translateX(120%); transition: 0.25s; }
         .toast-msg.show { transform: translateX(0); }
         @media (max-width: 680px) { .value-large { font-size: 28px; } .stat-block { padding: 1rem; } .today-debt-value { font-size: 1.8rem; } }
-        .avatar-top { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #FF7A1A; }
-        .header-bar { position: relative; margin-bottom: 30px; }
-        .header-logo-row { display: flex; justify-content: center; align-items: center; margin-bottom: 15px; }
+
+        /* NOVO HEADER */
+        .header-bar {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header-logo-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
         .header-logo {
             font-size: 2rem;
             font-weight: 900;
@@ -269,10 +278,43 @@
             color: transparent;
             letter-spacing: -1px;
         }
-        .header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 8px; align-items: center; }
-        .header-avatar-row { display: flex; justify-content: center; align-items: center; gap: 10px; }
-        .theme-toggle-btn { background: transparent; border: 1px solid var(--btn-outline-border); border-radius: 18px; padding: 10px 16px; color: var(--btn-outline-color); cursor: pointer; font-size: 1.1rem; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .theme-toggle-btn:hover { background: rgba(255,122,26,0.1); color: #FF7A1A; }
+        .header-avatar-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .header-avatar-col .avatar-top {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #FF7A1A;
+        }
+        .header-avatar-col .badge-amber {
+            background: var(--badge-amber-bg);
+            color: var(--badge-amber-color);
+            border-radius: 40px;
+            padding: 6px 18px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .header-actions-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .header-actions-row .theme-toggle-btn,
+        .header-actions-row .btn-outline-light {
+            font-size: 0.85rem;
+        }
+        /* Esconde as classes antigas do header que não serão mais usadas */
+        .header-actions { display: none; }
+        .header-avatar-row { display: none; }
+
+        /* Modal e demais estilos originais permanecem */
         .modal-aura { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal-aura.active { display: flex; }
         .modal-inner { background: var(--modal-bg); border-radius: 40px; max-width: 550px; width: 95%; max-height: 85vh; overflow-y: auto; padding: 1.8rem; border: 1px solid var(--modal-border); color: var(--text-color); }
@@ -330,18 +372,19 @@
 </div>
 
 <div id="dashboardApp" style="display: none; width: 100%; max-width: 950px; margin: 0 auto;">
+    <!-- NOVO HEADER REORGANIZADO -->
     <div class="header-bar">
-        <div class="header-actions">
-            <button id="themeToggleBtn" class="theme-toggle-btn" title="Alternar tema">🌙</button>
-            <button id="editProfileBtn" class="btn-outline-light"><i class="fas fa-user-edit"></i> Perfil</button>
-            <button id="logoutDashBtn" class="btn-outline-light"><i class="fas fa-sign-out-alt"></i> Sair</button>
-        </div>
         <div class="header-logo-row">
             <span class="header-logo">ÂMBRA</span>
         </div>
-        <div class="header-avatar-row">
+        <div class="header-avatar-col">
             <img id="userAvatarImg" class="avatar-top" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF7A1A'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="avatar">
-            <span id="userNameDisplay" class="badge-amber"></span>
+            <span id="userNameDisplay" class="badge-amber">Usuário</span>
+        </div>
+        <div class="header-actions-row">
+            <button id="themeToggleBtn" class="theme-toggle-btn" title="Alternar tema">🌙</button>
+            <button id="editProfileBtn" class="btn-outline-light"><i class="fas fa-user-edit"></i> Perfil</button>
+            <button id="logoutDashBtn" class="btn-outline-light"><i class="fas fa-sign-out-alt"></i> Sair</button>
         </div>
     </div>
 
