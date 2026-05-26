@@ -337,6 +337,7 @@
             <div><label>E-MAIL</label><input type="email" id="loginUser" placeholder="seu@email.com"></div>
             <div><label>SENHA</label><input type="password" id="loginPass" placeholder="••••••"></div>
             <button id="doLoginAction" class="btn-amber" style="width:100%; justify-content: center; margin-top: 1rem;"><i class="fas fa-arrow-right"></i> Acessar</button>
+            <div id="loginMsg" style="margin-top: 1rem; text-align: center; font-size: 0.8rem; color: var(--login-card-text);"></div>
         </div>
         <div id="registerPanel" style="display: none;">
             <div><label>USUÁRIO</label><input type="text" id="regUser"></div>
@@ -344,8 +345,8 @@
             <div><label>SENHA</label><input type="password" id="regPass"></div>
             <div><label>CONFIRMAR</label><input type="password" id="regConfirm"></div>
             <button id="doRegisterAction" class="btn-amber" style="width:100%; justify-content: center; margin-top: 1rem;"><i class="fas fa-user-plus"></i> Criar conta</button>
+            <div id="registerMsg" style="margin-top: 1rem; text-align: center; font-size: 0.8rem; color: var(--login-card-text);"></div>
         </div>
-        <div id="loginMsg" style="margin-top: 1rem; text-align: center; font-size: 0.8rem; color: var(--login-card-text);"></div>
     </div>
 </div>
 
@@ -393,70 +394,72 @@
             <div id="subRegistrar" class="sub-section active-section">
                 <div class="card-premium">
                     <h3><i class="fas fa-hand-holding-usd"></i> Registrar nova dívida</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 12px;">
+                    <div id="basicFields" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 12px;">
                         <input type="text" id="newTitle" placeholder="Descrição da dívida">
                         <input type="text" id="newCredor" placeholder="Nome ou referência do credor">
                         <input type="number" id="newCapital" placeholder="Valor total do empréstimo (R$)" step="0.01">
                     </div>
-                    <label style="margin-top: 8px;">Qual vai ser a forma de pagamento?</label>
-                    <select id="paymentMethodSelect">
-                        <option value="Dinheiro">Dinheiro</option><option value="Pix">Pix</option>
-                        <option value="Débito">Débito</option><option value="Crédito">Crédito</option>
-                        <option value="Boleto">Boleto</option><option value="Transação bancária">Transação bancária</option>
-                    </select>
-                    <div id="pixFields" style="display: none;">
-                        <label>Tipo de chave Pix</label>
-                        <select id="pixKeyTypeSelect">
-                            <option>Telefone</option><option>CPF</option><option>CNPJ</option>
-                            <option>Celular</option><option>E-mail</option><option>Chave aleatória</option>
-                            <option>QR Code</option>
+                    <div id="nonReminderFields">
+                        <label style="margin-top: 8px;">Qual vai ser a forma de pagamento?</label>
+                        <select id="paymentMethodSelect">
+                            <option value="Dinheiro">Dinheiro</option><option value="Pix">Pix</option>
+                            <option value="Débito">Débito</option><option value="Crédito">Crédito</option>
+                            <option value="Boleto">Boleto</option><option value="Transação bancária">Transação bancária</option>
                         </select>
-                        <input type="text" id="pixKeyValue" placeholder="Digite a chave ou código do QR Code">
-                    </div>
-                    <label style="margin-top: 8px;">Qual é a data de criação dessa dívida?</label>
-                    <div class="radio-group" id="dateRadioGroup">
-                        <div class="radio-option active" data-value="today">📅 Hoje / Agora</div>
-                        <div class="radio-option" data-value="custom">✏️ Outra data</div>
-                    </div>
-                    <div id="customDateTimeDiv" style="display: none; margin: 12px 0;">
-                        <div style="display: flex; gap: 12px;">
-                            <input type="text" id="customDateInput" placeholder="dd/mm/aaaa" maxlength="10" style="flex:1">
-                            <input type="text" id="customTimeInput" placeholder="hh:mm:ss" maxlength="8" style="flex:1">
+                        <div id="pixFields" style="display: none;">
+                            <label>Tipo de chave Pix</label>
+                            <select id="pixKeyTypeSelect">
+                                <option>Telefone</option><option>CPF</option><option>CNPJ</option>
+                                <option>Celular</option><option>E-mail</option><option>Chave aleatória</option>
+                                <option>QR Code</option>
+                            </select>
+                            <input type="text" id="pixKeyValue" placeholder="Digite a chave ou código do QR Code">
                         </div>
-                    </div>
-                    <div class="switch-container">
-                        <span class="switch-label">Modo de pagamento parcelado?</span>
-                        <label class="switch"><input type="checkbox" id="isParceledToggle"><span class="slider"></span></label>
-                    </div>
-                    <div id="parcelFields">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-                            <input type="number" id="parcelValue" placeholder="Valor parcela">
-                            <input type="number" id="parcelCount" placeholder="Qtd parcelas">
-                            <select id="periodicitySelect"><option value="mensal">Mensal</option><option value="semanal">Semanal</option><option value="diario">Diário</option></select>
+                        <label style="margin-top: 8px;">Qual é a data de criação dessa dívida?</label>
+                        <div class="radio-group" id="dateRadioGroup">
+                            <div class="radio-option active" data-value="today">📅 Hoje / Agora</div>
+                            <div class="radio-option" data-value="custom">✏️ Outra data</div>
                         </div>
-                    </div>
-                    <div id="lumpSumDiv" style="display: block; margin: 12px 0;">
-                        <label>Data limite de pagamento (vencimento único)</label>
-                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                            <input type="text" id="lumpSumDate" placeholder="dd/mm/aaaa" maxlength="10" style="flex: 2;">
-                            <div style="display: flex; align-items: center; gap: 8px; background: var(--switch-container-bg); padding: 6px 12px; border-radius: 40px;">
-                                <span style="font-size: 0.8rem;">Sem data</span>
-                                <label class="switch-small"><input type="checkbox" id="noDueDateToggle"><span class="slider-small"></span></label>
+                        <div id="customDateTimeDiv" style="display: none; margin: 12px 0;">
+                            <div style="display: flex; gap: 12px;">
+                                <input type="text" id="customDateInput" placeholder="dd/mm/aaaa" maxlength="10" style="flex:1">
+                                <input type="text" id="customTimeInput" placeholder="hh:mm:ss" maxlength="8" style="flex:1">
                             </div>
                         </div>
-                    </div>
-                    <div id="dailyExcludeDiv" style="display: none;">
-                        <label>Ignorar dias da semana:</label>
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" class="exclude-day" value="1"> Seg</label>
-                            <label><input type="checkbox" class="exclude-day" value="2"> Ter</label>
-                            <label><input type="checkbox" class="exclude-day" value="3"> Qua</label>
-                            <label><input type="checkbox" class="exclude-day" value="4"> Qui</label>
-                            <label><input type="checkbox" class="exclude-day" value="5"> Sex</label>
-                            <label><input type="checkbox" class="exclude-day" value="6"> Sáb</label>
-                            <label><input type="checkbox" class="exclude-day" value="0"> Dom</label>
+                        <div class="switch-container">
+                            <span class="switch-label">Modo de pagamento parcelado?</span>
+                            <label class="switch"><input type="checkbox" id="isParceledToggle"><span class="slider"></span></label>
                         </div>
-                        <input type="text" id="holidaysInput" placeholder="Feriados (ex: 01/01,25/12,15/11)">
+                        <div id="parcelFields">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                                <input type="number" id="parcelValue" placeholder="Valor parcela">
+                                <input type="number" id="parcelCount" placeholder="Qtd parcelas">
+                                <select id="periodicitySelect"><option value="mensal">Mensal</option><option value="semanal">Semanal</option><option value="diario">Diário</option></select>
+                            </div>
+                        </div>
+                        <div id="lumpSumDiv" style="display: block; margin: 12px 0;">
+                            <label>Data limite de pagamento (vencimento único)</label>
+                            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                <input type="text" id="lumpSumDate" placeholder="dd/mm/aaaa" maxlength="10" style="flex: 2;">
+                                <div style="display: flex; align-items: center; gap: 8px; background: var(--switch-container-bg); padding: 6px 12px; border-radius: 40px;">
+                                    <span style="font-size: 0.8rem;">Sem data</span>
+                                    <label class="switch-small"><input type="checkbox" id="noDueDateToggle"><span class="slider-small"></span></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dailyExcludeDiv" style="display: none;">
+                            <label>Ignorar dias da semana:</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="exclude-day" value="1"> Seg</label>
+                                <label><input type="checkbox" class="exclude-day" value="2"> Ter</label>
+                                <label><input type="checkbox" class="exclude-day" value="3"> Qua</label>
+                                <label><input type="checkbox" class="exclude-day" value="4"> Qui</label>
+                                <label><input type="checkbox" class="exclude-day" value="5"> Sex</label>
+                                <label><input type="checkbox" class="exclude-day" value="6"> Sáb</label>
+                                <label><input type="checkbox" class="exclude-day" value="0"> Dom</label>
+                            </div>
+                            <input type="text" id="holidaysInput" placeholder="Feriados (ex: 01/01,25/12,15/11)">
+                        </div>
                     </div>
                     <div class="switch-container">
                         <span class="switch-label">Apenas lembrete (não afeta os totais)</span>
@@ -662,14 +665,15 @@
     let renderTimeout = null;
     let listViewMode = 'debts';
     let isLightMode = false;
+    let isLoggingIn = false; // novo: trava de duplo clique no login
 
     function applyTheme() {
         if (isLightMode) {
             document.body.classList.add('light-mode');
-            document.getElementById('themeToggleBtn').innerHTML = '☀️';
+            document.getElementById('themeToggleBtn').innerHTML = '<i class="fas fa-sun"></i>';
         } else {
             document.body.classList.remove('light-mode');
-            document.getElementById('themeToggleBtn').innerHTML = '🌙';
+            document.getElementById('themeToggleBtn').innerHTML = '<i class="fas fa-moon"></i>';
         }
         localStorage.setItem('ambraTheme', isLightMode ? 'light' : 'dark');
     }
@@ -722,12 +726,19 @@
     }
     function getParcelDueDate(startDate, parcelIndex, periodicidade, excludedDays=[], holidays=[]) {
         let date = new Date(startDate);
+        const MAX_ITER = 365; // segurança contra loop infinito
         for(let i=0;i<parcelIndex;i++) {
             if(periodicidade==='mensal') date.setMonth(date.getMonth()+1);
             else if(periodicidade==='semanal') date.setDate(date.getDate()+7);
             else date.setDate(date.getDate()+1);
             let dow=date.getDay(), dm=`${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}`;
-            while(excludedDays.includes(dow)||holidays.includes(dm)) { date.setDate(date.getDate()+1); dow=date.getDay(); dm=`${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}`; }
+            let safety = 0;
+            while((excludedDays.includes(dow)||holidays.includes(dm)) && safety < MAX_ITER) {
+                date.setDate(date.getDate()+1);
+                dow=date.getDay();
+                dm=`${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}`;
+                safety++;
+            }
         }
         return date;
     }
@@ -740,6 +751,7 @@
     function getParcelasPendentes(debt) {
         if(!debt.isParceled) return '—';
         let totalParcelas = debt.parcelCount, valorParcela = debt.parcelValue;
+        if (!valorParcela || valorParcela <= 0) return '—'; // evita divisão por zero
         let totalPago = currentUserData.payments.filter(p=>p.debtId===debt.id).reduce((s,p)=>s+p.amount,0);
         let parcelasPagas = Math.floor(totalPago/valorParcela);
         let pendentes = totalParcelas - parcelasPagas;
@@ -753,7 +765,15 @@
         const hojeClean = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
         const recurrence = debt.reminderRecurrence || 'once';
         switch (recurrence) {
-            case 'once': if (debt.lumpSumDueDate) { const dueDate = new Date(debt.lumpSumDueDate); dueDate.setHours(0,0,0,0); return dueDate.getTime() === hojeClean.getTime(); } return startDate.getTime() === hojeClean.getTime();
+            case 'once':
+                // tenta usar lumpSumDueDate, senão originDateTime
+                const dueDateStr = debt.lumpSumDueDate;
+                if (dueDateStr) {
+                    const dueDate = new Date(dueDateStr); dueDate.setHours(0,0,0,0);
+                    return dueDate.getTime() === hojeClean.getTime();
+                }
+                // sem data específica: considera a data de criação
+                return startDate.getTime() === hojeClean.getTime();
             case 'daily': return true;
             case 'weekly': const days = debt.reminderDays || []; return days.includes(todayDay);
             case 'interval': const interval = debt.reminderInterval || 1; const diffTime = hojeClean.getTime() - startDate.getTime(); const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); return diffDays >= 0 && diffDays % interval === 0;
@@ -771,13 +791,34 @@
         document.getElementById('statTotalRemaining').innerHTML=formatMoney(totalRemaining);
         document.getElementById('statActiveCount').innerText=activeCount;
     }
+    // trava para evitar check duplo rápido
+    const reminderCheckLock = new Set();
     async function checkReminder(debtId) {
-        if (!debtId) { showToast('Erro: ID do lembrete não encontrado','danger'); return; }
-        if (!auth.currentUser) { showToast('Erro: usuário não autenticado','danger'); return; }
+        if (reminderCheckLock.has(debtId)) return; // já está processando
+        reminderCheckLock.add(debtId);
+        if (!debtId) { showToast('Erro: ID do lembrete não encontrado','danger'); reminderCheckLock.delete(debtId); return; }
+        if (!auth.currentUser) { showToast('Erro: usuário não autenticado','danger'); reminderCheckLock.delete(debtId); return; }
+        // já foi dado baixa hoje?
+        if (isReminderCheckedToday(debtId)) { showToast('Lembrete já foi baixado hoje','danger'); reminderCheckLock.delete(debtId); return; }
         const newCheck = { debtId: debtId, dateKey: todayKey() };
-        currentUserData.reminderChecks.push(newCheck); updateTodayDebtCard();
-        try { await db.collection('reminderChecks').add({ userId: auth.currentUser.uid, debtId: debtId, dateKey: todayKey(), createdAt: firebase.firestore.FieldValue.serverTimestamp() }); showToast('Baixa realizada!'); }
-        catch (error) { currentUserData.reminderChecks = currentUserData.reminderChecks.filter(c => c.debtId !== debtId || c.dateKey !== todayKey()); updateTodayDebtCard(); showToast('Erro ao salvar baixa. Tente novamente.','danger'); }
+        currentUserData.reminderChecks.push(newCheck);
+        updateTodayDebtCard();
+        try {
+            await db.collection('reminderChecks').add({
+                userId: auth.currentUser.uid,
+                debtId: debtId,
+                dateKey: todayKey(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showToast('Baixa realizada!');
+        } catch (error) {
+            // reverte local
+            currentUserData.reminderChecks = currentUserData.reminderChecks.filter(c => c.debtId !== debtId || c.dateKey !== todayKey());
+            updateTodayDebtCard();
+            showToast('Erro ao salvar baixa. Tente novamente.','danger');
+        } finally {
+            reminderCheckLock.delete(debtId);
+        }
     }
     function updateTodayDebtCard() {
         let hoje=new Date(); hoje.setHours(0,0,0,0); let total=0, detalhes=[];
@@ -835,17 +876,36 @@
 
     function renderPaymentsHistory(start=null,end=null) {
         let filtered=[...currentUserData.payments]; if(start&&end) { let s=new Date(start),e=new Date(end); e.setHours(23,59,59); filtered=filtered.filter(p=>{let d=new Date(p.date); return d>=s&&d<=e;}); }
-        let tbody=document.getElementById('paymentsHistoryBody'); if(!tbody) return; tbody.innerHTML=''; if(filtered.length===0) { tbody.innerHTML='<tr><td colspan="6">Nenhum pagamento</td></tr>'; return; }
-        filtered.sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(p=>{ let row=tbody.insertRow(); row.insertCell(0).innerText=new Date(p.date).toLocaleString('pt-BR'); row.insertCell(1).innerText=p.credor; row.insertCell(2).innerText=formatMoney(p.amount); row.insertCell(3).innerText=p.method; row.insertCell(4).innerText=p.pixKeyUsed||'—'; let act=row.insertCell(5); let delBtn=document.createElement('button'); delBtn.innerHTML='<i class="fas fa-trash-alt"></i>'; delBtn.className='btn-outline-light'; delBtn.onclick=async()=>{ if(confirm('Excluir pagamento?')) { await db.collection('payments').doc(p.id).delete(); showToast('Pagamento removido'); } }; act.appendChild(delBtn); });
+        // a tabela de histórico não existe mais, mas mantivemos a função para compatibilidade
     }
     function renderSelectDebts() { let select=document.getElementById('debtSelectPayment'); select.innerHTML='<option value="">-- selecione --</option>'; let activeDebts=currentUserData.debts.filter(d=>!d.reminderOnly && getRemaining(d.id)>0); if(activeDebts.length===0) { select.innerHTML='<option value="">Nenhuma dívida ativa</option>'; return; } activeDebts.forEach(d=>{ let remaining=getRemaining(d.id); let opt=document.createElement('option'); opt.value=d.id; opt.innerText=`${d.title} (${d.credor}) - saldo: ${remaining.toFixed(2)}`; select.appendChild(opt); }); select.dispatchEvent(new Event('change')); }
     function showDebtPaymentsModal(debtId) { const debt = currentUserData.debts.find(d => d.id === debtId); if (!debt) return; const payments = currentUserData.payments.filter(p => p.debtId === debtId).sort((a,b)=>new Date(b.date)-new Date(a.date)); const totalPaid = payments.reduce((s,p)=>s+p.amount,0); const remaining = getRemaining(debtId); document.getElementById('debtPaymentsInfo').innerHTML = `<strong>${debt.title}</strong> (${debt.credor})<br>Total financiado: ${formatMoney(debt.totalFinanciado)} | Pago: ${formatMoney(totalPaid)} | Restante: ${formatMoney(remaining)}`; let listHtml = ''; if (payments.length === 0) { listHtml = '<p>Nenhum pagamento registrado para esta dívida.</p>'; } else { payments.forEach(p => { const dateStr = p.date ? new Date(p.date).toLocaleString('pt-BR') : 'Data não informada'; const pixKey = p.pixKeyUsed || '—'; listHtml += `<div class="payment-row"><span>${dateStr}</span><span>${formatMoney(p.amount)}</span><span>${p.method}</span><span>${pixKey}</span><div class="payment-actions"><button class="btn-payment-action edit-payment-btn" data-paymentid="${p.id}" data-amount="${p.amount}" data-method="${p.method}" data-pixkey="${p.pixKeyUsed||''}" data-date="${p.date||''}"><i class="fas fa-edit"></i> Editar</button><button class="btn-payment-action delete-payment-btn" data-paymentid="${p.id}"><i class="fas fa-trash-alt"></i> Apagar</button></div></div>`; }); } document.getElementById('debtPaymentsList').innerHTML = listHtml; document.getElementById('debtPaymentsSummary').innerHTML = `<span>Total pago: ${formatMoney(totalPaid)}</span><span>Saldo restante: ${formatMoney(remaining)}</span>`; document.querySelectorAll('.edit-payment-btn').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); const paymentId = btn.dataset.paymentid; const amount = parseFloat(btn.dataset.amount); const method = btn.dataset.method; const pixKey = btn.dataset.pixkey; const dateStr = btn.dataset.date; document.getElementById('editPaymentId').value = paymentId; document.getElementById('editPaymentAmount').value = amount; document.getElementById('editPaymentMethod').value = method; document.getElementById('editPaymentPixKey').value = pixKey; if (dateStr) { const d = new Date(dateStr); document.getElementById('editPaymentDate').value = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; document.getElementById('editPaymentTime').value = d.toTimeString().slice(0,8); } else { document.getElementById('editPaymentDate').value = ''; document.getElementById('editPaymentTime').value = ''; } document.getElementById('editPaymentModal').classList.add('active'); }); }); document.querySelectorAll('.delete-payment-btn').forEach(btn => { btn.addEventListener('click', async (e) => { e.stopPropagation(); const paymentId = btn.dataset.paymentid; if (confirm('Excluir este pagamento?')) { await db.collection('payments').doc(paymentId).delete(); showToast('Pagamento removido'); showDebtPaymentsModal(debtId); } }); }); document.getElementById('debtPaymentsModal').classList.add('active'); }
     function updateUserAvatarInUI() { if(!auth.currentUser) return; db.collection('users').doc(auth.currentUser.uid).get().then(doc=>{ if(doc.exists) { const userData=doc.data(); if(userData.avatar) { document.getElementById('userAvatarImg').src=userData.avatar; document.getElementById('profileAvatarImg').src=userData.avatar; } } }); }
     function scheduleRender() { clearTimeout(renderTimeout); renderTimeout=setTimeout(()=>renderAll(),80); }
-    function renderAll() { if(!currentUser) return; updateStatsUI(); renderFullList(); renderPaymentsHistory(); renderSelectDebts(); updateTodayDebtCard(); updateUserAvatarInUI(); }
+    function renderAll() { if(!currentUser) return; updateStatsUI(); renderFullList(); renderSelectDebts(); updateTodayDebtCard(); updateUserAvatarInUI(); }
 
     async function registerWithFirebase(email,password,username) { try { const uc=await auth.createUserWithEmailAndPassword(email,password); await db.collection('users').doc(uc.user.uid).set({username,email,avatar:null,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); showToast('Conta criada com sucesso!'); return true; } catch(e) { showToast('Erro: '+e.message,'danger'); return false; } }
-    async function loginWithFirebase(email,password) { try { await auth.signInWithEmailAndPassword(email,password); showToast('Login realizado!'); return true; } catch(e) { showToast('Erro: '+e.message,'danger'); return false; } }
+    async function loginWithFirebase(email,password) {
+        if (isLoggingIn) return; // evita envio duplicado
+        isLoggingIn = true;
+        const loginBtn = document.getElementById('doLoginAction');
+        if (loginBtn) loginBtn.disabled = true;
+        document.getElementById('loginMsg').innerText = 'Entrando...';
+        try {
+            await auth.signInWithEmailAndPassword(email,password);
+            showToast('Login realizado!');
+            document.getElementById('loginMsg').innerText = '';
+            return true;
+        } catch(e) {
+            const msg = 'Erro: '+e.message;
+            showToast(msg,'danger');
+            document.getElementById('loginMsg').innerText = msg;
+            return false;
+        } finally {
+            isLoggingIn = false;
+            if (loginBtn) loginBtn.disabled = false;
+        }
+    }
     function logoutFirebase() { auth.signOut().then(()=>{ [unsubscribeDebts,unsubscribePayments,unsubscribeReminderChecks].forEach(u=>{ if(u) u(); }); unsubscribeDebts=unsubscribePayments=unsubscribeReminderChecks=null; currentUser=null; document.getElementById('dashboardApp').style.display='none'; document.getElementById('loginScreen').style.display='flex'; showToast('Deslogado com sucesso'); }); }
     function startListening() { if(!auth.currentUser) return; const uid=auth.currentUser.uid; if(unsubscribeDebts) { unsubscribeDebts(); unsubscribeDebts=null; } if(unsubscribePayments) { unsubscribePayments(); unsubscribePayments=null; } if(unsubscribeReminderChecks) { unsubscribeReminderChecks(); unsubscribeReminderChecks=null; } unsubscribeDebts=db.collection('debts').where('userId','==',uid).onSnapshot(snap=>{ const d=[]; snap.forEach(doc=>d.push({id:doc.id,...doc.data()})); currentUserData.debts=d; scheduleRender(); }); unsubscribePayments=db.collection('payments').where('userId','==',uid).onSnapshot(snap=>{ const p=[]; snap.forEach(doc=>p.push({id:doc.id,...doc.data()})); currentUserData.payments=p; scheduleRender(); }); unsubscribeReminderChecks=db.collection('reminderChecks').where('userId','==',uid).onSnapshot(snap=>{ const rc=[]; snap.forEach(doc=>rc.push({id:doc.id,...doc.data()})); currentUserData.reminderChecks=rc; scheduleRender(); }); db.collection('users').doc(uid).get().then(doc=>{ if(doc.exists){ const ud=doc.data(); document.getElementById('userNameDisplay').innerText=ud.username||''; if(ud.avatar) document.getElementById('userAvatarImg').src=ud.avatar; scheduleRender(); } }); }
     auth.onAuthStateChanged(user=>{ if(user) { currentUser=user; document.getElementById('loginScreen').style.display='none'; document.getElementById('dashboardApp').style.display='block'; startListening(); } else { [unsubscribeDebts,unsubscribePayments,unsubscribeReminderChecks].forEach(u=>{ if(u) u(); }); unsubscribeDebts=unsubscribePayments=unsubscribeReminderChecks=null; document.getElementById('dashboardApp').style.display='none'; document.getElementById('loginScreen').style.display='flex'; } });
@@ -857,10 +917,10 @@
         document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
         document.getElementById('switchToLogin').onclick=()=>{ document.getElementById('loginPanel').style.display='block'; document.getElementById('registerPanel').style.display='none'; document.getElementById('switchToLogin').classList.add('active'); document.getElementById('switchToRegister').classList.remove('active'); };
         document.getElementById('switchToRegister').onclick=()=>{ document.getElementById('loginPanel').style.display='none'; document.getElementById('registerPanel').style.display='block'; document.getElementById('switchToRegister').classList.add('active'); document.getElementById('switchToLogin').classList.remove('active'); };
-        document.getElementById('doLoginAction').onclick=()=>{ const e=document.getElementById('loginUser').value, p=document.getElementById('loginPass').value; loginWithFirebase(e,p); };
-        document.getElementById('doRegisterAction').onclick=()=>{ const u=document.getElementById('regUser').value, e=document.getElementById('regEmail').value, p=document.getElementById('regPass').value, c=document.getElementById('regConfirm').value; if(p!==c) { showToast('Senhas não coincidem','danger'); return; } if(p.length<6) { showToast('Senha deve ter no mínimo 6 caracteres','danger'); return; } registerWithFirebase(e,p,u); };
+        document.getElementById('doLoginAction').onclick=()=>{ if(isLoggingIn) return; const e=document.getElementById('loginUser').value.trim(), p=document.getElementById('loginPass').value.trim(); if(!e||!p) { showToast('Preencha e-mail e senha','danger'); document.getElementById('loginMsg').innerText='Preencha e-mail e senha'; return; } loginWithFirebase(e,p); };
+        document.getElementById('doRegisterAction').onclick=()=>{ const u=document.getElementById('regUser').value.trim(), e=document.getElementById('regEmail').value.trim(), p=document.getElementById('regPass').value.trim(), c=document.getElementById('regConfirm').value.trim(); if(p!==c) { showToast('Senhas não coincidem','danger'); return; } if(p.length<6) { showToast('Senha deve ter no mínimo 6 caracteres','danger'); return; } registerWithFirebase(e,p,u); };
         document.getElementById('logoutDashBtn').onclick=()=>logoutFirebase();
-        document.querySelectorAll('.sub-tab').forEach(tab => { tab.addEventListener('click', () => { document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const subSectionId = tab.dataset.subsection; document.querySelectorAll('#sectionDebts .sub-section').forEach(sec => sec.classList.remove('active-section')); document.getElementById(subSectionId).classList.add('active-section'); if (subSectionId === 'subLista') renderFullList(); if (subSectionId === 'subPagamentos') { renderSelectDebts(); renderPaymentsHistory(); } }); });
+        document.querySelectorAll('.sub-tab').forEach(tab => { tab.addEventListener('click', () => { document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const subSectionId = tab.dataset.subsection; document.querySelectorAll('#sectionDebts .sub-section').forEach(sec => sec.classList.remove('active-section')); document.getElementById(subSectionId).classList.add('active-section'); if (subSectionId === 'subLista') renderFullList(); if (subSectionId === 'subPagamentos') { renderSelectDebts(); } }); });
         document.querySelectorAll('.list-toggle-btn').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('.list-toggle-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); listViewMode = btn.dataset.listtype; renderFullList(); }); });
         const radioOptions=document.querySelectorAll('#dateRadioGroup .radio-option'), customDateDiv=document.getElementById('customDateTimeDiv');
         function setDateMode(value) { customDateDiv.style.display=value==='today'?'none':'block'; radioOptions.forEach(opt=>opt.classList.toggle('active',opt.dataset.value===value)); } radioOptions.forEach(opt=>opt.addEventListener('click',()=>setDateMode(opt.dataset.value))); setDateMode('today');
@@ -869,8 +929,60 @@
         if(noDueDateToggle) { noDueDateToggle.addEventListener('change',function(){ lumpSumDateField.disabled=noDueDateToggle.checked; if(noDueDateToggle.checked) lumpSumDateField.value=''; }); lumpSumDateField.disabled=false; }
         const paymentMethodSelect=document.getElementById('paymentMethodSelect'), pixFieldsDiv=document.getElementById('pixFields'); function togglePixFields(){ pixFieldsDiv.style.display=paymentMethodSelect.value==='Pix'?'block':'none'; } paymentMethodSelect.onchange=togglePixFields; togglePixFields();
         const reminderOnlyToggle = document.getElementById('reminderOnlyToggle'), reminderFields = document.getElementById('reminderFields'), reminderRecurrenceSelect = document.getElementById('reminderRecurrenceSelect'), reminderDaysDiv = document.getElementById('reminderDaysDiv'), reminderIntervalDiv = document.getElementById('reminderIntervalDiv');
-        function toggleReminderFields() { if (reminderOnlyToggle.checked) { reminderFields.style.display = 'block'; updateReminderSubFields(); } else { reminderFields.style.display = 'none'; } } function updateReminderSubFields() { const val = reminderRecurrenceSelect.value; reminderDaysDiv.style.display = val === 'weekly' ? 'block' : 'none'; reminderIntervalDiv.style.display = val === 'interval' ? 'block' : 'none'; } reminderOnlyToggle.addEventListener('change', toggleReminderFields); reminderRecurrenceSelect.addEventListener('change', updateReminderSubFields);
-        document.getElementById('createDebtBtn').onclick=async()=>{ let title=document.getElementById('newTitle').value, credor=document.getElementById('newCredor').value, capital=document.getElementById('newCapital').value; if(!title||!credor||!capital) { alert('Preencha todos os campos básicos'); return; } let originDateTime=null; if(document.querySelector('#dateRadioGroup .radio-option.active').dataset.value==='today') originDateTime=new Date(); else { let ds=document.getElementById('customDateInput').value, ts=document.getElementById('customTimeInput').value; if(!ds) { alert('Informe a data no formato dd/mm/aaaa'); return; } originDateTime=parseCustomDateTime(ds,ts); if(!originDateTime) { alert('Formato inválido. Use dd/mm/aaaa'); return; } } let isParceled=parcelToggle.checked, paymentMethod=paymentMethodSelect.value, pixKey=''; if(paymentMethod==='Pix') { let pt=document.getElementById('pixKeyTypeSelect').value, pv=document.getElementById('pixKeyValue').value; if(!pv) { alert('Informe a chave Pix'); return; } pixKey=`${pt}: ${pv}`; } let excludedDays=[], holidays=[]; if(isParceled&&document.getElementById('periodicitySelect').value==='diario') { excludedDays=Array.from(document.querySelectorAll('.exclude-day:checked')).map(cb=>parseInt(cb.value)); let hr=document.getElementById('holidaysInput').value; if(hr.trim()) holidays=hr.split(',').map(h=>h.trim()); } let tcn=parseFloat(capital), totalFinanciado=tcn, parcelValue=null, parcelCount=null, periodicity=null, lumpDateStr=null, noDueDate=false; if(isParceled) { parcelValue=parseFloat(document.getElementById('parcelValue').value); parcelCount=parseInt(document.getElementById('parcelCount').value); periodicity=document.getElementById('periodicitySelect').value; if(!parcelValue||!parcelCount) { alert('Preencha valor e quantidade de parcelas'); return; } totalFinanciado=parcelValue*parcelCount; } else { noDueDate=noDueDateToggle.checked; if(!noDueDate) { let ldr=document.getElementById('lumpSumDate').value; if(!ldr) { alert('Informe a data de vencimento único (dd/mm/aaaa) ou marque "Sem data"'); return; } let ldo=parseCustomDateTime(ldr,''); if(!ldo) { alert('Data de vencimento inválida. Use dd/mm/aaaa'); return; } lumpDateStr=ldo.toISOString().slice(0,10); } } const reminderOnly = reminderOnlyToggle.checked; let reminderData = {}; if (reminderOnly) { const recurrence = reminderRecurrenceSelect.value; reminderData.reminderRecurrence = recurrence; if (recurrence === 'weekly') { const days = Array.from(document.querySelectorAll('.reminder-day:checked')).map(cb=>parseInt(cb.value)); if (days.length === 0) { alert('Selecione pelo menos um dia da semana para o lembrete.'); return; } reminderData.reminderDays = days; } else if (recurrence === 'interval') { const interval = parseInt(document.getElementById('reminderIntervalDays').value); if (isNaN(interval) || interval < 1) { alert('Informe o intervalo de dias para o lembrete.'); return; } reminderData.reminderInterval = interval; } } await db.collection('debts').add({ userId:auth.currentUser.uid,title,credor,totalCapital:tcn,totalFinanciado, isParceled,paymentMethod,pixKey:pixKey||null, originDateTime:originDateTime.toISOString(), reminderOnly, ...reminderData, createdAt:firebase.firestore.FieldValue.serverTimestamp(), ...(isParceled&&{parcelValue,parcelCount,periodicity,excludedDays,holidays}), ...(!isParceled&&{lumpSumDueDate:lumpDateStr,noDueDate}) }); showToast(reminderOnly?'Lembrete criado!':'Dívida adicionada!'); ['newTitle','newCredor','newCapital','pixKeyValue','parcelValue','parcelCount','lumpSumDate','holidaysInput','customDateInput','customTimeInput','reminderIntervalDays'].forEach(id=>{ let el=document.getElementById(id); if(el) el.value=''; }); document.querySelectorAll('.exclude-day:checked').forEach(cb=>cb.checked=false); document.querySelectorAll('.reminder-day:checked').forEach(cb=>cb.checked=false); parcelToggle.checked=false; noDueDateToggle.checked=false; reminderOnlyToggle.checked=false; reminderRecurrenceSelect.value='once'; toggleParcelFields(); togglePixFields(); toggleReminderFields(); setDateMode('today'); };
+        function toggleReminderFields() {
+            const isReminder = reminderOnlyToggle.checked;
+            reminderFields.style.display = isReminder ? 'block' : 'none';
+            // oculta campos financeiros quando lembrete está ativo
+            const nonReminderDiv = document.getElementById('nonReminderFields');
+            if (nonReminderDiv) nonReminderDiv.style.display = isReminder ? 'none' : 'block';
+            if (isReminder) updateReminderSubFields();
+        }
+        function updateReminderSubFields() { const val = reminderRecurrenceSelect.value; reminderDaysDiv.style.display = val === 'weekly' ? 'block' : 'none'; reminderIntervalDiv.style.display = val === 'interval' ? 'block' : 'none'; }
+        reminderOnlyToggle.addEventListener('change', toggleReminderFields);
+        reminderRecurrenceSelect.addEventListener('change', updateReminderSubFields);
+        document.getElementById('createDebtBtn').onclick=async()=>{
+            let title=document.getElementById('newTitle').value.trim(), credor=document.getElementById('newCredor').value.trim(), capital=document.getElementById('newCapital').value.trim();
+            if(!title||!credor) { alert('Preencha descrição e credor'); return; }
+            const isReminder = reminderOnlyToggle.checked;
+            if (!isReminder && !capital) { alert('Informe o valor total do empréstimo'); return; }
+            let originDateTime=null;
+            if(document.querySelector('#dateRadioGroup .radio-option.active').dataset.value==='today') originDateTime=new Date();
+            else { let ds=document.getElementById('customDateInput').value, ts=document.getElementById('customTimeInput').value; if(!ds) { alert('Informe a data no formato dd/mm/aaaa'); return; } originDateTime=parseCustomDateTime(ds,ts); if(!originDateTime) { alert('Formato inválido. Use dd/mm/aaaa'); return; } }
+            let isParceled=parcelToggle.checked, paymentMethod=paymentMethodSelect.value, pixKey='';
+            if(!isReminder && paymentMethod==='Pix') { let pt=document.getElementById('pixKeyTypeSelect').value, pv=document.getElementById('pixKeyValue').value; if(!pv) { alert('Informe a chave Pix'); return; } pixKey=`${pt}: ${pv}`; }
+            let excludedDays=[], holidays=[];
+            if(isParceled&&document.getElementById('periodicitySelect').value==='diario') { excludedDays=Array.from(document.querySelectorAll('.exclude-day:checked')).map(cb=>parseInt(cb.value)); let hr=document.getElementById('holidaysInput').value; if(hr.trim()) holidays=hr.split(',').map(h=>h.trim()); }
+            let tcn=parseFloat(capital)||0, totalFinanciado=tcn, parcelValue=null, parcelCount=null, periodicity=null, lumpDateStr=null, noDueDate=false;
+            if(!isReminder) {
+                if(isParceled) { parcelValue=parseFloat(document.getElementById('parcelValue').value); parcelCount=parseInt(document.getElementById('parcelCount').value); periodicity=document.getElementById('periodicitySelect').value; if(!parcelValue||!parcelCount) { alert('Preencha valor e quantidade de parcelas'); return; } totalFinanciado=parcelValue*parcelCount; }
+                else { noDueDate=noDueDateToggle.checked; if(!noDueDate) { let ldr=document.getElementById('lumpSumDate').value; if(!ldr) { alert('Informe a data de vencimento único (dd/mm/aaaa) ou marque "Sem data"'); return; } let ldo=parseCustomDateTime(ldr,''); if(!ldo) { alert('Data de vencimento inválida. Use dd/mm/aaaa'); return; } lumpDateStr=ldo.toISOString().slice(0,10); } }
+            }
+            const reminderOnly = reminderOnlyToggle.checked;
+            let reminderData = {};
+            if (reminderOnly) {
+                const recurrence = reminderRecurrenceSelect.value;
+                reminderData.reminderRecurrence = recurrence;
+                if (recurrence === 'weekly') { const days = Array.from(document.querySelectorAll('.reminder-day:checked')).map(cb=>parseInt(cb.value)); if (days.length === 0) { alert('Selecione pelo menos um dia da semana para o lembrete.'); return; } reminderData.reminderDays = days; }
+                else if (recurrence === 'interval') { const interval = parseInt(document.getElementById('reminderIntervalDays').value); if (isNaN(interval) || interval < 1) { alert('Informe o intervalo de dias para o lembrete.'); return; } reminderData.reminderInterval = interval; }
+                // para lembrete, totalFinanciado pode ser 0 ou o valor informado
+                totalFinanciado = tcn; // mesmo que zero, ok
+            }
+            await db.collection('debts').add({
+                userId:auth.currentUser.uid,title,credor,totalCapital:tcn,totalFinanciado,
+                isParceled,paymentMethod: isReminder?null:paymentMethod,pixKey:pixKey||null,
+                originDateTime:originDateTime.toISOString(), reminderOnly,
+                ...reminderData,
+                createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+                ...(isParceled&&!isReminder&&{parcelValue,parcelCount,periodicity,excludedDays,holidays}),
+                ...(!isParceled&&!isReminder&&{lumpSumDueDate:lumpDateStr,noDueDate})
+            });
+            showToast(reminderOnly?'Lembrete criado!':'Dívida adicionada!');
+            ['newTitle','newCredor','newCapital','pixKeyValue','parcelValue','parcelCount','lumpSumDate','holidaysInput','customDateInput','customTimeInput','reminderIntervalDays'].forEach(id=>{ let el=document.getElementById(id); if(el) el.value=''; });
+            document.querySelectorAll('.exclude-day:checked').forEach(cb=>cb.checked=false);
+            document.querySelectorAll('.reminder-day:checked').forEach(cb=>cb.checked=false);
+            parcelToggle.checked=false; noDueDateToggle.checked=false; reminderOnlyToggle.checked=false; reminderRecurrenceSelect.value='once';
+            toggleParcelFields(); togglePixFields(); toggleReminderFields(); setDateMode('today');
+        };
         const debtSelect=document.getElementById('debtSelectPayment'), selectedDebtInfoDiv=document.getElementById('selectedDebtInfo'), paymentMethodInfoDiv=document.getElementById('paymentMethodInfo'), pixChangeDiv=document.getElementById('pixChangeDiv'), parcelQtyInput=document.getElementById('parcelQty'), paymentAmountInput=document.getElementById('paymentAmount'), useDifferentPixToggle=document.getElementById('useDifferentPixToggle'), differentPixFields=document.getElementById('differentPixFields'), newPixKeyType=document.getElementById('newPixKeyType'), newPixKeyValue=document.getElementById('newPixKeyValue');
         function updateSelectedDebtInfo(){ const debtId=debtSelect.value; let debt=currentUserData.debts.find(d=>d.id===debtId); if(!debt) { selectedDebtInfoDiv.innerHTML='<p class="text-muted">Selecione uma dívida</p>'; paymentMethodInfoDiv.innerHTML=''; pixChangeDiv.style.display='none'; return; } let remaining=getRemaining(debt.id); selectedDebtInfoDiv.innerHTML=`<div><strong>${debt.title}</strong> (${debt.credor})</div><div>Saldo devedor: ${formatMoney(remaining)}</div><div>Valor da parcela: ${debt.isParceled?formatMoney(debt.parcelValue):'À vista'}</div>`; let ph=`<div><strong>Forma de pagamento original:</strong> ${debt.paymentMethod}</div>`; if(debt.paymentMethod==='Pix'&&debt.pixKey) { ph+=`<div><strong>Chave Pix original:</strong> ${debt.pixKey}</div>`; pixChangeDiv.style.display='block'; } else pixChangeDiv.style.display='none'; paymentMethodInfoDiv.innerHTML=ph; useDifferentPixToggle.checked=false; differentPixFields.style.display='none'; newPixKeyValue.value=''; }
         function updateParcelTotal(){ const debtId=debtSelect.value; let debt=currentUserData.debts.find(d=>d.id===debtId), qty=parseInt(parcelQtyInput.value); if(debt&&debt.isParceled&&!isNaN(qty)&&qty>0) { let total=qty*debt.parcelValue, remaining=getRemaining(debt.id); if(total>remaining) total=remaining; document.getElementById('parcelTotalCalc').innerHTML=`Valor total: ${formatMoney(total)}`; } else document.getElementById('parcelTotalCalc').innerHTML='Valor total: R$ 0,00'; } debtSelect.addEventListener('change',()=>{updateSelectedDebtInfo();updateParcelTotal();}); parcelQtyInput.addEventListener('input',updateParcelTotal);
@@ -879,7 +991,9 @@
         document.getElementById('registerPaymentAction').onclick=async()=>{ const debtId=debtSelect.value; let debt=currentUserData.debts.find(d=>d.id===debtId); if(!debt) { alert('Selecione uma dívida'); return; } if(debt.reminderOnly) { alert('Esta dívida é apenas um lembrete e não aceita pagamentos.'); return; } let amount=0; const paymentType=document.querySelector('#paymentTypeGroup .radio-option.active').dataset.value; if(paymentType==='parcela') { let qty=parseInt(parcelQtyInput.value); if(isNaN(qty)||qty<=0) { alert('Informe a quantidade de parcelas'); return; } amount=qty*debt.parcelValue; let remaining=getRemaining(debt.id); if(amount>remaining) amount=remaining; } else { let mv=parseFloat(paymentAmountInput.value); if(isNaN(mv)||mv<=0) { alert('Informe um valor válido'); return; } amount=mv; } let pixKeyUsed=null; if(debt.paymentMethod==='Pix') { if(useDifferentPixToggle.checked) { let nt=newPixKeyType.value, nv=newPixKeyValue.value; if(!nv) { alert('Informe a nova chave Pix'); return; } pixKeyUsed=`${nt}: ${nv}`; } else pixKeyUsed=debt.pixKey||'Chave original não informada'; } let paymentDate=null; const pm=document.querySelector('#paymentDateGroup .radio-option.active').dataset.value; if(pm==='today') paymentDate=new Date(); else { const ds=paymentDateCustom.value, ts=paymentTimeCustom.value; if(!ds) { alert('Informe a data do pagamento no formato dd/mm/aaaa'); return; } paymentDate=parseCustomDateTime(ds,ts); if(!paymentDate) { alert('Data/hora inválida'); return; } } await db.collection('payments').add({userId:auth.currentUser.uid,debtId:debt.id,credor:debt.credor,amount,method:debt.paymentMethod,date:paymentDate.toISOString(),pixKeyUsed}); showToast('Pagamento registrado!'); parcelQtyInput.value=''; paymentAmountInput.value=''; useDifferentPixToggle.checked=false; differentPixFields.style.display='none'; newPixKeyValue.value=''; setPaymentDateMode('today'); };
         const calcTypeOptions=document.querySelectorAll('#calcTypeGroup .radio-option'), calcParcelaDiv=document.getElementById('calcParcelaDiv'), calcPercentualDiv=document.getElementById('calcPercentualDiv'); calcTypeOptions.forEach(opt=>opt.addEventListener('click',()=>{ calcTypeOptions.forEach(o=>o.classList.remove('active')); opt.classList.add('active'); calcParcelaDiv.style.display=opt.dataset.value==='parcela'?'block':'none'; calcPercentualDiv.style.display=opt.dataset.value==='percentual'?'block':'none'; })); document.getElementById('calcInterestBtn').onclick=()=>{ const ct=document.querySelector('#calcTypeGroup .radio-option.active').dataset.value; let rh=''; if(ct==='parcela') { let cap=parseFloat(document.getElementById('calcCapitalParcela').value), par=parseFloat(document.getElementById('calcParcelVal').value), qtd=parseInt(document.getElementById('calcQtd').value); if(isNaN(cap)||isNaN(par)||isNaN(qtd)) rh='Preencha todos os campos corretamente.'; else { let total=par*qtd, juros=total-cap, perc=(juros/cap)*100; rh=`Capital: ${formatMoney(cap)}<br>${qtd}x ${formatMoney(par)}<br>Total: ${formatMoney(total)}<br>Juros: ${formatMoney(juros)} (${perc.toFixed(2)}%)`; } } else { let cap=parseFloat(document.getElementById('calcCapitalPercent').value), perc=parseFloat(document.getElementById('calcInterestPercent').value), qtd=parseInt(document.getElementById('calcQtdPercent').value); if(isNaN(cap)||isNaN(perc)||isNaN(qtd)||qtd<=0) rh='Preencha todos os campos corretamente.'; else { let tj=cap*(perc/100), total=cap+tj, par=total/qtd; rh=`Capital: ${formatMoney(cap)}<br>Taxa de juros total: ${perc}%<br>Valor dos juros: ${formatMoney(tj)}<br>Total a pagar: ${formatMoney(total)}<br>${qtd}x de ${formatMoney(par)} (com juros)`; } } document.getElementById('calcResultBox').innerHTML=rh; }; document.getElementById('resetCalculatorBtn').onclick=()=>{ ['calcCapitalParcela','calcParcelVal','calcQtd','calcCapitalPercent','calcInterestPercent','calcQtdPercent'].forEach(id=>{ let el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('calcResultBox').innerHTML=''; };
         document.getElementById('editProfileBtn').addEventListener('click',()=>{ const uid=auth.currentUser?.uid; if(!uid) return; db.collection('users').doc(uid).get().then(doc=>{ if(doc.exists){ const ud=doc.data(); document.getElementById('profileUsername').value=ud.username; document.getElementById('profileEmail').value=ud.email; document.getElementById('profilePassword').value=''; document.getElementById('profileConfirmPassword').value=''; document.getElementById('profileModal').classList.add('active'); } }); }); document.getElementById('closeProfileModalBtn').addEventListener('click',()=>{ document.getElementById('profileModal').classList.remove('active'); }); document.getElementById('saveProfileBtn').addEventListener('click',async()=>{ const nu=document.getElementById('profileUsername').value.trim(), ne=document.getElementById('profileEmail').value.trim(), np=document.getElementById('profilePassword').value, cp=document.getElementById('profileConfirmPassword').value; if(!nu) { showToast('Nome de usuário não pode ficar vazio','danger'); return; } const uid=auth.currentUser?.uid; if(!uid) return; const ur=db.collection('users').doc(uid); if(!(await ur.get()).exists) return; if(np&&np.trim()!=='') { if(np.length<6) { showToast('Senha deve ter no mínimo 6 caracteres','danger'); return; } if(np!==cp) { showToast('Senhas não coincidem','danger'); return; } await auth.currentUser.updatePassword(np); } await ur.update({username:nu,email:ne}); showToast('Perfil atualizado!'); document.getElementById('profileModal').classList.remove('active'); }); document.getElementById('changeAvatarBtn').addEventListener('click',()=>document.getElementById('avatarUpload').click()); document.getElementById('avatarUpload').addEventListener('change',(event)=>{ const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=async function(e){ const ab=e.target.result, uid=auth.currentUser?.uid; if(uid) { await db.collection('users').doc(uid).update({avatar:ab}); updateUserAvatarInUI(); showToast('Foto de perfil atualizada!'); } }; reader.readAsDataURL(file); }); window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('debtPaymentsModal')) document.getElementById('debtPaymentsModal').classList.remove('active'); if(e.target===document.getElementById('editPaymentModal')) document.getElementById('editPaymentModal').classList.remove('active'); }; document.getElementById('closeDebtPaymentsModalBtn').addEventListener('click',()=>{ document.getElementById('debtPaymentsModal').classList.remove('active'); }); document.getElementById('closeEditPaymentModalBtn').addEventListener('click',()=>{ document.getElementById('editPaymentModal').classList.remove('active'); }); document.getElementById('saveEditPaymentBtn').addEventListener('click', async ()=>{ const paymentId=document.getElementById('editPaymentId').value; const amount=parseFloat(document.getElementById('editPaymentAmount').value); const method=document.getElementById('editPaymentMethod').value; const pixKey=document.getElementById('editPaymentPixKey').value.trim(); const dateStr=document.getElementById('editPaymentDate').value; const timeStr=document.getElementById('editPaymentTime').value; if(isNaN(amount)||amount<=0) { showToast('Valor inválido','danger'); return; } let paymentDate=null; if(dateStr) { paymentDate=parseCustomDateTime(dateStr,timeStr); if(!paymentDate) { showToast('Data/hora inválida','danger'); return; } } const updateData={amount,method}; if(pixKey) updateData.pixKeyUsed=pixKey; if(paymentDate) updateData.date=paymentDate.toISOString(); await db.collection('payments').doc(paymentId).update(updateData); showToast('Pagamento atualizado!'); document.getElementById('editPaymentModal').classList.remove('active'); const debtId=currentUserData.payments.find(p=>p.id===paymentId)?.debtId; if(debtId) showDebtPaymentsModal(debtId); }); const editDateInput=document.getElementById('editPaymentDate'), editTimeInput=document.getElementById('editPaymentTime'); if(editDateInput) editDateInput.addEventListener('input',function(){applyDateMask(this);}); if(editTimeInput) editTimeInput.addEventListener('input',function(){applyTimeMask(this);});
-        function setActiveSection(sectionId) { document.querySelectorAll('.section-page').forEach(s=>s.classList.remove('active-page')); document.getElementById(sectionId).classList.add('active-page'); document.querySelectorAll('.nav-item').forEach(nav=>nav.classList.remove('active')); let an=Array.from(document.querySelectorAll('.nav-item')).find(btn=>btn.dataset.section===sectionId); if(an) an.classList.add('active'); if (sectionId === 'sectionDebts') { document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); document.querySelector('.sub-tab[data-subsection="subRegistrar"]').classList.add('active'); document.querySelectorAll('#sectionDebts .sub-section').forEach(sec => sec.classList.remove('active-section')); document.getElementById('subRegistrar').classList.add('active-section'); } } document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>setActiveSection(btn.dataset.section))); document.getElementById('goToPaymentsBtn').addEventListener('click',()=>{ setActiveSection('sectionDebts'); document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); document.querySelector('.sub-tab[data-subsection="subPagamentos"]').classList.add('active'); document.querySelectorAll('#sectionDebts .sub-section').forEach(sec => sec.classList.remove('active-section')); document.getElementById('subPagamentos').classList.add('active-section'); renderSelectDebts(); renderPaymentsHistory(); });
+        function setActiveSection(sectionId) { document.querySelectorAll('.section-page').forEach(s=>s.classList.remove('active-page')); document.getElementById(sectionId).classList.add('active-page'); document.querySelectorAll('.nav-item').forEach(nav=>nav.classList.remove('active')); let an=Array.from(document.querySelectorAll('.nav-item')).find(btn=>btn.dataset.section===sectionId); if(an) an.classList.add('active'); if (sectionId === 'sectionDebts') { document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); document.querySelector('.sub-tab[data-subsection="subRegistrar"]').classList.add('active'); document.querySelectorAll('#sectionDebts .sub-section').forEach(sec => sec.classList.remove('active-section')); document.getElementById('subRegistrar').classList.add('active-section'); } } document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>setActiveSection(btn.dataset.section))); document.getElementById('goToPaymentsBtn').addEventListener('click',()=>{ setActiveSection('sectionDebts'); document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); document.querySelector('.sub-tab[data-subsection="subPagamentos"]').classList.add('active'); document.querySelectorAll('#sectionDebts .sub-section').forEach(sec => sec.classList.remove('active-section')); document.getElementById('subPagamentos').classList.add('active-section'); renderSelectDebts(); });
+        // Inicializa campos de lembrete ocultando os financeiros se já estiver marcado (default false)
+        toggleReminderFields();
     };
 </script>
 </body>
