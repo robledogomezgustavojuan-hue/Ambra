@@ -194,7 +194,7 @@
             background: var(--reminder-btn-bg);
             border: 1px solid var(--reminder-btn-border);
             color: var(--reminder-btn-color);
-            border-radius: 6px; /* quadrado */
+            border-radius: 6px;
             padding: 4px 12px;
             cursor: pointer;
             font-size: 0.7rem;
@@ -914,7 +914,7 @@
                 const tipos = { once:'Lembrete único', daily:'Diário', weekly:'Semanal', interval:`A cada ${debt.reminderInterval||1} dias` };
                 total += valorMostrar;
                 detalhes.push({
-                    texto: `🔔 ${debt.title} (${debt.credor}) - ${tipos[tipoRecorrencia]||'Lembrete'} - ${formatMoney(valorMostrar)}`,
+                    texto: `${debt.title} (${debt.credor}) - ${tipos[tipoRecorrencia]||'Lembrete'} - ${formatMoney(valorMostrar)}`,
                     debtId: debt.id,
                     type: 'reminder',
                     dueTime: debt.dueTime || null
@@ -944,11 +944,9 @@
                     div.innerHTML = `<i class="fas fa-circle"></i> ${item.texto}`;
                 }
 
-                // Container para os elementos da direita (horário e botão)
                 let rightContainer = document.createElement('div');
                 rightContainer.className = 'debt-detail-right';
 
-                // Badge de horário
                 if (item.dueTime) {
                     let timeBadge = document.createElement('span');
                     timeBadge.className = 'time-badge';
@@ -956,11 +954,10 @@
                     rightContainer.appendChild(timeBadge);
                 }
 
-                // Botão "Dar baixa" para lembretes
                 if (item.type === 'reminder') {
                     let checkBtn = document.createElement('button');
                     checkBtn.className = 'reminder-check-btn';
-                    checkBtn.innerHTML = '✅ Dar baixa';
+                    checkBtn.innerHTML = 'Dar baixa'; // removido ✅
                     checkBtn.addEventListener('click', (function(id) { return function(e) { e.stopPropagation(); checkReminder(id); }; })(item.debtId));
                     rightContainer.appendChild(checkBtn);
                 }
