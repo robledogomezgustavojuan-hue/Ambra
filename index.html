@@ -258,7 +258,7 @@
         .value-large { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .badge-amber { background: var(--badge-amber-bg); color: var(--badge-amber-color); border-radius: 40px; padding: 4px 12px; display: inline-block; }
         .badge-blue { background: var(--badge-blue-bg); color: var(--badge-blue-color); border-radius: 40px; padding: 4px 12px; display: inline-block; font-size: 0.75rem; }
-        .login-card { max-width: 460px; width: 100%; padding: 2rem; margin: auto; }
+        .login-card { max-width: 520px; width: 100%; padding: 2.5rem; margin: auto; }
         .switch-mode { display: flex; gap: 1rem; background: rgba(0,0,0,0.4); border-radius: 40px; padding: 6px; margin-bottom: 2rem; }
         .switch-btn { flex: 1; text-align: center; padding: 8px; border-radius: 40px; cursor: pointer; font-weight: 600; color: rgba(255,255,255,0.6); }
         .switch-btn.active { background: #FF7A1A; color: black; }
@@ -266,59 +266,16 @@
         .toast-msg.show { transform: translateX(0); }
         @media (max-width: 680px) { .value-large { font-size: 28px; } .stat-block { padding: 1rem; } .today-debt-value { font-size: 1.8rem; } }
 
-        /* HEADER */
-        .header-bar {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .header-logo-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .header-logo {
-            font-size: 2rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #FFB066, #FF7A1A);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: -1px;
-        }
-        .header-avatar-col {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .header-avatar-col .avatar-top {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #FF7A1A;
-        }
-        .header-avatar-col .badge-amber {
-            background: var(--badge-amber-bg);
-            color: var(--badge-amber-color);
-            border-radius: 40px;
-            padding: 6px 18px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        .header-actions-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
+        .header-bar { text-align: center; margin-bottom: 30px; }
+        .header-logo-row { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
+        .header-logo { font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -1px; }
+        .header-avatar-col { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .header-avatar-col .avatar-top { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #FF7A1A; }
+        .header-avatar-col .badge-amber { background: var(--badge-amber-bg); color: var(--badge-amber-color); border-radius: 40px; padding: 6px 18px; font-size: 0.9rem; font-weight: 500; }
+        .header-actions-row { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
         .header-actions { display: none; }
         .header-avatar-row { display: none; }
 
-        /* BOTÃO DE TEMA */
         .theme-toggle-btn {
             background: var(--theme-toggle-bg);
             border: 2px solid var(--card-border);
@@ -358,7 +315,6 @@
         }
         .theme-toggle-btn span { display: none; }
 
-        /* MODAL E OUTROS */
         .modal-aura { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal-aura.active { display: flex; }
         .modal-inner { background: var(--modal-bg); border-radius: 40px; max-width: 550px; width: 95%; max-height: 85vh; overflow-y: auto; padding: 1.8rem; border: 1px solid var(--modal-border); color: var(--text-color); }
@@ -417,9 +373,7 @@
 
 <div id="dashboardApp" style="display: none; width: 100%; max-width: 950px; margin: 0 auto;">
     <div class="header-bar">
-        <div class="header-logo-row">
-            <span class="header-logo">ÂMBRA</span>
-        </div>
+        <div class="header-logo-row"><span class="header-logo">ÂMBRA</span></div>
         <div class="header-avatar-col">
             <img id="userAvatarImg" class="avatar-top" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF7A1A'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="avatar">
             <span id="userNameDisplay" class="badge-amber">Usuário</span>
@@ -431,7 +385,6 @@
         </div>
     </div>
 
-    <!-- DASHBOARD -->
     <div id="sectionDashboard" class="section-page active-page">
         <div class="section-centered">
             <div class="stats-grid">
@@ -449,7 +402,6 @@
         </div>
     </div>
 
-    <!-- DÍVIDAS -->
     <div id="sectionDebts" class="section-page">
         <div class="section-centered">
             <div class="sub-tabs">
@@ -512,6 +464,10 @@
                                 <label class="switch-small"><input type="checkbox" id="noDueDateToggle"><span class="slider-small"></span></label>
                             </div>
                         </div>
+                    </div>
+                    <div style="margin: 12px 0;">
+                        <label>⏰ Horário limite de pagamento (opcional)</label>
+                        <input type="time" id="newDueTime" style="max-width: 200px;">
                     </div>
                     <div id="dailyExcludeDiv" style="display: none;">
                         <label>Ignorar dias da semana:</label>
@@ -653,7 +609,34 @@
     </div>
 </div>
 
-<!-- MODAL PERFIL -->
+<div id="editDebtModal" class="modal-aura">
+    <div class="modal-inner">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <h3><i class="fas fa-edit"></i> Editar dívida</h3>
+            <span id="closeEditDebtModalBtn" style="font-size: 28px; cursor: pointer;">&times;</span>
+        </div>
+        <input type="hidden" id="editDebtId">
+        <label>Descrição</label><input type="text" id="editDebtTitle" placeholder="Descrição da dívida">
+        <label>Credor</label><input type="text" id="editDebtCredor" placeholder="Nome ou referência">
+        <label>Método de pagamento</label>
+        <select id="editDebtMethod">
+            <option value="Dinheiro">Dinheiro</option><option value="Pix">Pix</option>
+            <option value="Débito">Débito</option><option value="Crédito">Crédito</option>
+            <option value="Boleto">Boleto</option><option value="Transação bancária">Transação bancária</option>
+        </select>
+        <div id="editDebtPixFields" style="display: none;">
+            <label>Chave Pix</label><input type="text" id="editDebtPixKey" placeholder="Chave Pix">
+        </div>
+        <div id="editDebtDueDateDiv" style="display: none;">
+            <label>Data de vencimento (dd/mm/aaaa)</label>
+            <input type="text" id="editDebtDueDate" placeholder="dd/mm/aaaa" maxlength="10">
+        </div>
+        <label>⏰ Horário limite (opcional)</label>
+        <input type="time" id="editDebtDueTime" style="max-width: 200px;">
+        <button id="saveEditDebtBtn" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-save"></i> Salvar alterações</button>
+    </div>
+</div>
+
 <div id="profileModal" class="modal-aura">
     <div class="modal-inner">
         <div style="display: flex; justify-content: space-between;"><h2><i class="fas fa-user-edit"></i> Editar Perfil</h2><span id="closeProfileModalBtn" style="font-size: 28px; cursor: pointer;">&times;</span></div>
@@ -670,7 +653,6 @@
     </div>
 </div>
 
-<!-- MODAL HISTÓRICO DE PAGAMENTOS -->
 <div id="debtPaymentsModal" class="modal-aura">
     <div class="modal-inner">
         <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
@@ -683,7 +665,6 @@
     </div>
 </div>
 
-<!-- MODAL EDITAR PAGAMENTO -->
 <div id="editPaymentModal" class="modal-aura">
     <div class="modal-inner">
         <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
@@ -705,7 +686,6 @@
     </div>
 </div>
 
-<!-- NAVBAR -->
 <div class="bottom-nav" id="bottomNav">
     <button class="nav-item active" data-section="sectionDashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
     <button class="nav-item" data-section="sectionDebts"><i class="fas fa-file-invoice"></i><span>Dívidas</span></button>
@@ -883,11 +863,32 @@
                         let valorParcela=debt.parcelValue;
                         let accumulatedDue=valorParcela*(i+1);
                         let remainingForThis=Math.max(0,accumulatedDue-paidUpTo);
-                        if(remainingForThis>0) { let valorParcelaDevido=Math.min(valorParcela,remainingForThis); total+=valorParcelaDevido; detalhes.push({texto:`${debt.title} (${debt.credor}) - parcela ${i+1}: ${formatMoney(valorParcelaDevido)}`, debtId: debt.id, type: 'debt'}); }
+                        if(remainingForThis>0) {
+                            let valorParcelaDevido=Math.min(valorParcela,remainingForThis);
+                            total+=valorParcelaDevido;
+                            detalhes.push({
+                                texto: `${debt.title} (${debt.credor}) - parcela ${i+1}: ${formatMoney(valorParcelaDevido)}`,
+                                debtId: debt.id,
+                                type: 'debt',
+                                dueTime: debt.dueTime || null
+                            });
+                        }
                     }
                 }
             } else {
-                if(debt.lumpSumDueDate&&!debt.noDueDate) { let dueDate=new Date(debt.lumpSumDueDate); dueDate.setHours(0,0,0,0); if(dueDate.getTime()===hoje.getTime()) { total+=remaining; detalhes.push({texto:`${debt.title} (${debt.credor}) - vencimento hoje: ${formatMoney(remaining)}`, debtId: debt.id, type: 'debt'}); } }
+                if(debt.lumpSumDueDate&&!debt.noDueDate) {
+                    let dueDate=new Date(debt.lumpSumDueDate);
+                    dueDate.setHours(0,0,0,0);
+                    if(dueDate.getTime()===hoje.getTime()) {
+                        total+=remaining;
+                        detalhes.push({
+                            texto: `${debt.title} (${debt.credor}) - vencimento hoje: ${formatMoney(remaining)}`,
+                            debtId: debt.id,
+                            type: 'debt',
+                            dueTime: debt.dueTime || null
+                        });
+                    }
+                }
             }
         });
         currentUserData.debts.forEach(debt=>{
@@ -897,9 +898,22 @@
                 const tipoRecorrencia = debt.reminderRecurrence || 'once';
                 const tipos = { once:'Lembrete único', daily:'Diário', weekly:'Semanal', interval:`A cada ${debt.reminderInterval||1} dias` };
                 total += valorMostrar;
-                detalhes.push({texto:`🔔 ${debt.title} (${debt.credor}) - ${tipos[tipoRecorrencia]||'Lembrete'} - ${formatMoney(valorMostrar)}`, debtId: debt.id, type: 'reminder'});
+                detalhes.push({
+                    texto: `🔔 ${debt.title} (${debt.credor}) - ${tipos[tipoRecorrencia]||'Lembrete'} - ${formatMoney(valorMostrar)}`,
+                    debtId: debt.id,
+                    type: 'reminder',
+                    dueTime: debt.dueTime || null
+                });
             }
         });
+
+        detalhes.sort((a, b) => {
+            if (a.dueTime && !b.dueTime) return -1;
+            if (!a.dueTime && b.dueTime) return 1;
+            if (a.dueTime && b.dueTime) return a.dueTime.localeCompare(b.dueTime);
+            return 0;
+        });
+
         document.getElementById('todayTotalValue').innerHTML=formatMoney(total);
         let container=document.getElementById('todayDebtDetails');
         container.innerHTML='';
@@ -908,12 +922,16 @@
         } else {
             detalhes.forEach(item=>{
                 let div=document.createElement('div'); div.className='debt-detail-item';
+                let timeStr = item.dueTime ? ` ⏰ ${item.dueTime}` : '';
                 if (item.type === 'reminder') {
-                    div.classList.add('reminder-item'); div.innerHTML=`<i class="fas fa-bell"></i> ${item.texto}`;
+                    div.classList.add('reminder-item');
+                    div.innerHTML = `<i class="fas fa-bell"></i> ${item.texto}${timeStr}`;
                     let checkBtn = document.createElement('button'); checkBtn.className = 'reminder-check-btn'; checkBtn.innerHTML = '✅ Dar baixa';
                     checkBtn.addEventListener('click', (function(id) { return function(e) { e.stopPropagation(); checkReminder(id); }; })(item.debtId));
                     div.appendChild(checkBtn);
-                } else { div.innerHTML=`<i class="fas fa-circle"></i> ${item.texto}`; }
+                } else {
+                    div.innerHTML = `<i class="fas fa-circle"></i> ${item.texto}${timeStr}`;
+                }
                 container.appendChild(div);
             });
         }
@@ -940,10 +958,17 @@
                 row.insertCell(8).innerHTML=pgStr;
                 row.insertCell(9).innerHTML=d.pixKey?`<i class="fas fa-copy copy-pix" data-pix="${d.pixKey}" style="cursor:pointer;"></i> ${d.pixKey}`:'—';
                 let vencimentoStr;
-                if (d.isParceled) { try { vencimentoStr = getParcelDueDate(new Date(d.originDateTime), d.parcelCount, d.periodicity, d.excludedDays||[], d.holidays||[]).toLocaleDateString('pt-BR'); } catch(e) { vencimentoStr = '—'; } }
-                else { vencimentoStr = d.noDueDate ? 'Sem data' : (d.lumpSumDueDate || '—'); }
+                if (d.isParceled) {
+                    try { vencimentoStr = getParcelDueDate(new Date(d.originDateTime), d.parcelCount, d.periodicity, d.excludedDays||[], d.holidays||[]).toLocaleDateString('pt-BR'); } catch(e) { vencimentoStr = '—'; }
+                } else {
+                    vencimentoStr = d.noDueDate ? 'Sem data' : (d.lumpSumDueDate || '—');
+                }
+                if (d.dueTime) vencimentoStr += ` às ${d.dueTime}`;
                 row.insertCell(10).innerHTML = vencimentoStr;
                 let act=row.insertCell(11); act.style.display='flex'; act.style.gap='6px'; act.style.alignItems='center';
+                let editBtn=document.createElement('button'); editBtn.innerHTML='<i class="fas fa-edit"></i>'; editBtn.className='btn-outline-light'; editBtn.style.padding='4px 10px';
+                editBtn.onclick=(e)=>{ e.stopPropagation(); showEditDebtModal(d.id); };
+                act.appendChild(editBtn);
                 let histBtn=document.createElement('button'); histBtn.className='btn-history'; histBtn.innerHTML='<i class="fas fa-eye"></i> Histórico';
                 histBtn.onclick=(e)=>{ e.stopPropagation(); showDebtPaymentsModal(d.id); };
                 act.appendChild(histBtn);
@@ -1014,6 +1039,60 @@
     function updateUserAvatarInUI() {
         if(!auth.currentUser) return;
         db.collection('users').doc(auth.currentUser.uid).get().then(doc=>{ if(doc.exists) { const userData=doc.data(); if(userData.avatar) { document.getElementById('userAvatarImg').src=userData.avatar; document.getElementById('profileAvatarImg').src=userData.avatar; } } });
+    }
+
+    function showEditDebtModal(debtId) {
+        const debt = currentUserData.debts.find(d => d.id === debtId);
+        if (!debt) return;
+        document.getElementById('editDebtId').value = debtId;
+        document.getElementById('editDebtTitle').value = debt.title || '';
+        document.getElementById('editDebtCredor').value = debt.credor || '';
+        document.getElementById('editDebtMethod').value = debt.paymentMethod || 'Dinheiro';
+        document.getElementById('editDebtDueTime').value = debt.dueTime || '';
+        const pixFields = document.getElementById('editDebtPixFields');
+        const dueDateDiv = document.getElementById('editDebtDueDateDiv');
+        if (debt.paymentMethod === 'Pix') {
+            pixFields.style.display = 'block';
+            document.getElementById('editDebtPixKey').value = debt.pixKey || '';
+        } else {
+            pixFields.style.display = 'none';
+        }
+        if (!debt.isParceled && debt.lumpSumDueDate) {
+            dueDateDiv.style.display = 'block';
+            const d = new Date(debt.lumpSumDueDate);
+            document.getElementById('editDebtDueDate').value = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+        } else {
+            dueDateDiv.style.display = 'none';
+        }
+        document.getElementById('editDebtModal').classList.add('active');
+    }
+
+    async function saveEditDebt() {
+        const debtId = document.getElementById('editDebtId').value;
+        const title = document.getElementById('editDebtTitle').value.trim();
+        const credor = document.getElementById('editDebtCredor').value.trim();
+        const method = document.getElementById('editDebtMethod').value;
+        const dueTime = document.getElementById('editDebtDueTime').value;
+        if (!title || !credor) { showToast('Preencha título e credor', 'danger'); return; }
+        const updateData = { title, credor, paymentMethod: method, dueTime: dueTime || null };
+        if (method === 'Pix') {
+            updateData.pixKey = document.getElementById('editDebtPixKey').value.trim() || null;
+        } else {
+            updateData.pixKey = null;
+        }
+        const debt = currentUserData.debts.find(d => d.id === debtId);
+        if (debt && !debt.isParceled) {
+            const dateStr = document.getElementById('editDebtDueDate').value;
+            if (dateStr) {
+                const parsed = parseCustomDateTime(dateStr, '');
+                if (parsed) {
+                    updateData.lumpSumDueDate = parsed.toISOString().slice(0,10);
+                }
+            }
+        }
+        await db.collection('debts').doc(debtId).update(updateData);
+        showToast('Dívida atualizada!');
+        document.getElementById('editDebtModal').classList.remove('active');
     }
 
     function scheduleRender() { clearTimeout(renderTimeout); renderTimeout=setTimeout(()=>renderAll(),80); }
@@ -1107,12 +1186,13 @@
             let tcn=parseFloat(capital), totalFinanciado=tcn, parcelValue=null, parcelCount=null, periodicity=null, lumpDateStr=null, noDueDate=false;
             if(isParceled) { parcelValue=parseFloat(document.getElementById('parcelValue').value); parcelCount=parseInt(document.getElementById('parcelCount').value); periodicity=document.getElementById('periodicitySelect').value; if(!parcelValue||!parcelCount) { alert('Preencha valor e quantidade de parcelas'); return; } totalFinanciado=parcelValue*parcelCount; }
             else { noDueDate=noDueDateToggle.checked; if(!noDueDate) { let ldr=document.getElementById('lumpSumDate').value; if(!ldr) { alert('Informe a data de vencimento único (dd/mm/aaaa) ou marque "Sem data"'); return; } let ldo=parseCustomDateTime(ldr,''); if(!ldo) { alert('Data de vencimento inválida. Use dd/mm/aaaa'); return; } lumpDateStr=ldo.toISOString().slice(0,10); } }
+            const dueTime = document.getElementById('newDueTime').value || null;
             const reminderOnly = reminderOnlyToggle.checked;
             let reminderData = {};
             if (reminderOnly) { const recurrence = reminderRecurrenceSelect.value; reminderData.reminderRecurrence = recurrence; if (recurrence === 'weekly') { const days = Array.from(document.querySelectorAll('.reminder-day:checked')).map(cb=>parseInt(cb.value)); if (days.length === 0) { alert('Selecione pelo menos um dia da semana para o lembrete.'); return; } reminderData.reminderDays = days; } else if (recurrence === 'interval') { const interval = parseInt(document.getElementById('reminderIntervalDays').value); if (isNaN(interval) || interval < 1) { alert('Informe o intervalo de dias para o lembrete.'); return; } reminderData.reminderInterval = interval; } }
-            await db.collection('debts').add({ userId:auth.currentUser.uid,title,credor,totalCapital:tcn,totalFinanciado, isParceled,paymentMethod,pixKey:pixKey||null, originDateTime:originDateTime.toISOString(), reminderOnly, ...reminderData, createdAt:firebase.firestore.FieldValue.serverTimestamp(), ...(isParceled&&{parcelValue,parcelCount,periodicity,excludedDays,holidays}), ...(!isParceled&&{lumpSumDueDate:lumpDateStr,noDueDate}) });
+            await db.collection('debts').add({ userId:auth.currentUser.uid,title,credor,totalCapital:tcn,totalFinanciado, isParceled,paymentMethod,pixKey:pixKey||null, originDateTime:originDateTime.toISOString(), dueTime, reminderOnly, ...reminderData, createdAt:firebase.firestore.FieldValue.serverTimestamp(), ...(isParceled&&{parcelValue,parcelCount,periodicity,excludedDays,holidays}), ...(!isParceled&&{lumpSumDueDate:lumpDateStr,noDueDate}) });
             showToast(reminderOnly?'Lembrete criado!':'Dívida adicionada!');
-            ['newTitle','newCredor','newCapital','pixKeyValue','parcelValue','parcelCount','lumpSumDate','holidaysInput','customDateInput','customTimeInput','reminderIntervalDays'].forEach(id=>{ let el=document.getElementById(id); if(el) el.value=''; });
+            ['newTitle','newCredor','newCapital','pixKeyValue','parcelValue','parcelCount','lumpSumDate','holidaysInput','customDateInput','customTimeInput','reminderIntervalDays','newDueTime'].forEach(id=>{ let el=document.getElementById(id); if(el) el.value=''; });
             document.querySelectorAll('.exclude-day:checked').forEach(cb=>cb.checked=false); document.querySelectorAll('.reminder-day:checked').forEach(cb=>cb.checked=false);
             parcelToggle.checked=false; noDueDateToggle.checked=false; reminderOnlyToggle.checked=false; reminderRecurrenceSelect.value='once';
             toggleParcelFields(); togglePixFields(); toggleReminderFields(); setDateMode('today');
@@ -1151,11 +1231,22 @@
         document.getElementById('saveProfileBtn').addEventListener('click',async()=>{ const nu=document.getElementById('profileUsername').value.trim(), ne=document.getElementById('profileEmail').value.trim(), np=document.getElementById('profilePassword').value, cp=document.getElementById('profileConfirmPassword').value; if(!nu) { showToast('Nome de usuário não pode ficar vazio','danger'); return; } const uid=auth.currentUser?.uid; if(!uid) return; const ur=db.collection('users').doc(uid); if(!(await ur.get()).exists) return; if(np&&np.trim()!=='') { if(np.length<6) { showToast('Senha deve ter no mínimo 6 caracteres','danger'); return; } if(np!==cp) { showToast('Senhas não coincidem','danger'); return; } await auth.currentUser.updatePassword(np); } await ur.update({username:nu,email:ne}); showToast('Perfil atualizado!'); document.getElementById('profileModal').classList.remove('active'); });
         document.getElementById('changeAvatarBtn').addEventListener('click',()=>document.getElementById('avatarUpload').click());
         document.getElementById('avatarUpload').addEventListener('change',(event)=>{ const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=async function(e){ const ab=e.target.result, uid=auth.currentUser?.uid; if(uid) { await db.collection('users').doc(uid).update({avatar:ab}); updateUserAvatarInUI(); showToast('Foto de perfil atualizada!'); } }; reader.readAsDataURL(file); });
-        window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('debtPaymentsModal')) document.getElementById('debtPaymentsModal').classList.remove('active'); if(e.target===document.getElementById('editPaymentModal')) document.getElementById('editPaymentModal').classList.remove('active'); };
+        window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('debtPaymentsModal')) document.getElementById('debtPaymentsModal').classList.remove('active'); if(e.target===document.getElementById('editPaymentModal')) document.getElementById('editPaymentModal').classList.remove('active'); if(e.target===document.getElementById('editDebtModal')) document.getElementById('editDebtModal').classList.remove('active'); };
         document.getElementById('closeDebtPaymentsModalBtn').addEventListener('click',()=>{ document.getElementById('debtPaymentsModal').classList.remove('active'); });
         document.getElementById('closeEditPaymentModalBtn').addEventListener('click',()=>{ document.getElementById('editPaymentModal').classList.remove('active'); });
+        document.getElementById('closeEditDebtModalBtn').addEventListener('click',()=>{ document.getElementById('editDebtModal').classList.remove('active'); });
         document.getElementById('saveEditPaymentBtn').addEventListener('click', async ()=>{ const paymentId=document.getElementById('editPaymentId').value; const amount=parseFloat(document.getElementById('editPaymentAmount').value); const method=document.getElementById('editPaymentMethod').value; const pixKey=document.getElementById('editPaymentPixKey').value.trim(); const dateStr=document.getElementById('editPaymentDate').value; const timeStr=document.getElementById('editPaymentTime').value; if(isNaN(amount)||amount<=0) { showToast('Valor inválido','danger'); return; } let paymentDate=null; if(dateStr) { paymentDate=parseCustomDateTime(dateStr,timeStr); if(!paymentDate) { showToast('Data/hora inválida','danger'); return; } } const updateData={amount,method}; if(pixKey) updateData.pixKeyUsed=pixKey; if(paymentDate) updateData.date=paymentDate.toISOString(); await db.collection('payments').doc(paymentId).update(updateData); showToast('Pagamento atualizado!'); document.getElementById('editPaymentModal').classList.remove('active'); const debtId=currentUserData.payments.find(p=>p.id===paymentId)?.debtId; if(debtId) showDebtPaymentsModal(debtId); });
+        document.getElementById('saveEditDebtBtn').addEventListener('click', saveEditDebt);
         const editDateInput=document.getElementById('editPaymentDate'), editTimeInput=document.getElementById('editPaymentTime'); if(editDateInput) editDateInput.addEventListener('input',function(){applyDateMask(this);}); if(editTimeInput) editTimeInput.addEventListener('input',function(){applyTimeMask(this);});
+        const editDebtDueDate=document.getElementById('editDebtDueDate'); if(editDebtDueDate) editDebtDueDate.addEventListener('input',function(){applyDateMask(this);});
+
+        document.getElementById('editDebtMethod').addEventListener('change', ()=>{
+            if (document.getElementById('editDebtMethod').value === 'Pix') {
+                document.getElementById('editDebtPixFields').style.display = 'block';
+            } else {
+                document.getElementById('editDebtPixFields').style.display = 'none';
+            }
+        });
 
         function setActiveSection(sectionId) {
             document.querySelectorAll('.section-page').forEach(s=>s.classList.remove('active-page'));
