@@ -185,7 +185,6 @@
         .today-debt-info { flex: 1; min-width: 200px; }
         .today-debt-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
         .today-debt-value { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1.2; margin-bottom: 12px; }
-        /* AQUI: aumentei o max-height de 130px para 170px */
         .today-debt-details { max-height: 170px; overflow-y: auto; padding-right: 8px; margin-top: 8px; }
         .debt-detail-item { font-size: 0.75rem; color: var(--debt-detail-color); padding: 7px 0; border-bottom: 1px solid var(--debt-detail-item-bg); display: flex; align-items: center; gap: 8px; }
         .debt-detail-item:last-child { border-bottom: none; }
@@ -195,7 +194,7 @@
             background: var(--reminder-btn-bg);
             border: 1px solid var(--reminder-btn-border);
             color: var(--reminder-btn-color);
-            border-radius: 16px;
+            border-radius: 6px; /* quadrado */
             padding: 4px 12px;
             cursor: pointer;
             font-size: 0.7rem;
@@ -204,6 +203,21 @@
             margin-left: auto;
         }
         .reminder-check-btn:hover { background: #87CEEB; color: black; }
+        .time-badge {
+            border: 1px solid var(--btn-outline-border);
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: var(--switch-container-bg);
+            white-space: nowrap;
+        }
+        .debt-detail-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+        }
         .today-debt-btn { background: rgba(255,122,26,0.2); border: 1px solid #FF7A1A; border-radius: 40px; padding: 10px 24px; color: #FFB066; font-weight: 500; cursor: pointer; transition: 0.2s; white-space: nowrap; font-size: 0.9rem; }
         .today-debt-btn:hover { background: #FF7A1A; color: black; }
         .btn-amber {
@@ -923,15 +937,36 @@
         } else {
             detalhes.forEach(item=>{
                 let div=document.createElement('div'); div.className='debt-detail-item';
-                let timeStr = item.dueTime ? ` ⏰ ${item.dueTime}` : '';
                 if (item.type === 'reminder') {
                     div.classList.add('reminder-item');
-                    div.innerHTML = `<i class="fas fa-bell"></i> ${item.texto}${timeStr}`;
-                    let checkBtn = document.createElement('button'); checkBtn.className = 'reminder-check-btn'; checkBtn.innerHTML = '✅ Dar baixa';
-                    checkBtn.addEventListener('click', (function(id) { return function(e) { e.stopPropagation(); checkReminder(id); }; })(item.debtId));
-                    div.appendChild(checkBtn);
+                    div.innerHTML = `<i class="fas fa-bell"></i> ${item.texto}`;
                 } else {
-                    div.innerHTML = `<i class="fas fa-circle"></i> ${item.texto}${timeStr}`;
+                    div.innerHTML = `<i class="fas fa-circle"></i> ${item.texto}`;
+                }
+
+                // Container para os elementos da direita (horário e botão)
+                let rightContainer = document.createElement('div');
+                rightContainer.className = 'debt-detail-right';
+
+                // Badge de horário
+                if (item.dueTime) {
+                    let timeBadge = document.createElement('span');
+                    timeBadge.className = 'time-badge';
+                    timeBadge.textContent = item.dueTime;
+                    rightContainer.appendChild(timeBadge);
+                }
+
+                // Botão "Dar baixa" para lembretes
+                if (item.type === 'reminder') {
+                    let checkBtn = document.createElement('button');
+                    checkBtn.className = 'reminder-check-btn';
+                    checkBtn.innerHTML = '✅ Dar baixa';
+                    checkBtn.addEventListener('click', (function(id) { return function(e) { e.stopPropagation(); checkReminder(id); }; })(item.debtId));
+                    rightContainer.appendChild(checkBtn);
+                }
+
+                if (rightContainer.children.length > 0) {
+                    div.appendChild(rightContainer);
                 }
                 container.appendChild(div);
             });
