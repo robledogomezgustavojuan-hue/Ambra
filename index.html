@@ -25,6 +25,8 @@
             --stat-border: 1px solid rgba(200,170,90,0.5);
             --today-bg: #000;
             --today-border: 1px solid rgba(200,170,90,0.5);
+            --paid-bg: #000;
+            --paid-border: 1px solid rgba(0,200,100,0.5);
             --table-bg: rgba(0,0,0,0.2);
             --table-header-bg: rgba(255,255,255,0.02);
             --table-border: rgba(255,255,255,0.05);
@@ -83,6 +85,8 @@
             --stat-border: 1px solid rgba(180,150,70,0.5);
             --today-bg: #fff;
             --today-border: 1px solid rgba(180,150,70,0.5);
+            --paid-bg: #fff;
+            --paid-border: 1px solid rgba(0,180,100,0.5);
             --table-bg: rgba(0,0,0,0.02);
             --table-header-bg: rgba(0,0,0,0.03);
             --table-border: rgba(0,0,0,0.06);
@@ -142,10 +146,22 @@
             transition: background 0.3s ease, color 0.3s ease;
         }
 
-        /* Animação platinada pulsante para a logo */
         @keyframes platinumPulse {
             0% { text-shadow: 0 0 5px #e0c080, 0 0 10px #c0a060; }
             100% { text-shadow: 0 0 20px #ffe0b0, 0 0 35px #d0b070, 0 0 50px #b09050; }
+        }
+        @keyframes borderPulse {
+            0% { border-color: rgba(255,180,50,0.6); box-shadow: 0 0 5px rgba(255,180,50,0.2); }
+            50% { border-color: rgba(255,220,100,0.9); box-shadow: 0 0 15px rgba(255,200,80,0.4); }
+            100% { border-color: rgba(255,150,30,0.6); box-shadow: 0 0 5px rgba(255,150,30,0.2); }
+        }
+        @keyframes greenPulse {
+            0% { color: #00cc66; text-shadow: 0 0 5px #00cc66; }
+            100% { color: #00ff88; text-shadow: 0 0 15px #00ff88; }
+        }
+        @keyframes redBlink {
+            0%, 100% { color: var(--debt-detail-color); }
+            50% { color: #ff4444; text-shadow: 0 0 8px #ff0000; }
         }
         .header-logo {
             font-size: 2rem;
@@ -157,17 +173,9 @@
             letter-spacing: -1px;
             animation: platinumPulse 2s ease-in-out infinite alternate;
         }
-
-        /* Animação pulsante de bordas */
-        @keyframes borderPulse {
-            0% { border-color: rgba(255,180,50,0.6); box-shadow: 0 0 5px rgba(255,180,50,0.2); }
-            50% { border-color: rgba(255,220,100,0.9); box-shadow: 0 0 15px rgba(255,200,80,0.4); }
-            100% { border-color: rgba(255,150,30,0.6); box-shadow: 0 0 5px rgba(255,150,30,0.2); }
-        }
-        .card-premium, .login-card, .stat-block, .today-debt-card, .modal-inner {
+        .card-premium, .login-card, .stat-block, .today-debt-card, .today-paid-card, .modal-inner {
             animation: borderPulse 3s ease-in-out infinite;
         }
-
         .card-premium, .login-card {
             background: var(--card-bg);
             border: var(--card-border);
@@ -195,8 +203,7 @@
         .stat-block .text-muted { color: var(--text-muted); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.5px; margin-bottom: 8px; }
         .stat-block .value-large { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .stat-block.red-glow .value-large { background: linear-gradient(135deg, #FF6666, #FF2222); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .today-debt-card {
-            background: var(--today-bg);
+        .today-debt-card, .today-paid-card {
             border-radius: 28px;
             padding: 1.5rem 1.8rem;
             margin-bottom: 1.8rem;
@@ -205,18 +212,29 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 1.5rem;
-            border: var(--today-border);
             box-shadow: var(--card-shadow);
             transition: none;
         }
-        .today-debt-info { flex: 1; min-width: 200px; }
-        .today-debt-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
+        .today-debt-card {
+            background: var(--today-bg);
+            border: var(--today-border);
+        }
+        .today-paid-card {
+            background: var(--paid-bg);
+            border: var(--paid-border);
+        }
+        .today-debt-info, .today-paid-info { flex: 1; min-width: 200px; }
+        .today-debt-label, .today-paid-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
         .today-debt-value { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1.2; margin-bottom: 12px; }
-        .today-debt-details { max-height: 170px; overflow-y: auto; padding-right: 8px; margin-top: 8px; }
-        .debt-detail-item { font-size: 0.75rem; color: var(--debt-detail-color); padding: 7px 0; border-bottom: 1px solid var(--debt-detail-item-bg); display: flex; align-items: center; gap: 8px; }
-        .debt-detail-item:last-child { border-bottom: none; }
+        .today-paid-value { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #00cc66, #00ff88); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1.2; margin-bottom: 12px; }
+        .today-debt-details, .today-paid-details { max-height: 170px; overflow-y: auto; padding-right: 8px; margin-top: 8px; }
+        .debt-detail-item, .paid-detail-item { font-size: 0.75rem; color: var(--debt-detail-color); padding: 7px 0; border-bottom: 1px solid var(--debt-detail-item-bg); display: flex; align-items: center; gap: 8px; }
+        .debt-detail-item:last-child, .paid-detail-item:last-child { border-bottom: none; }
         .debt-detail-item i { color: #FF7A1A; font-size: 0.7rem; width: 16px; }
+        .paid-detail-item i { color: #00cc66; font-size: 0.7rem; width: 16px; animation: greenPulse 1.5s ease-in-out infinite alternate; }
+        .paid-detail-item span { animation: greenPulse 1.5s ease-in-out infinite alternate; }
         .debt-detail-item.reminder-item { color: var(--reminder-item-color); }
+        .debt-detail-item.urgent { animation: redBlink 1s infinite; }
         .reminder-check-btn {
             background: var(--reminder-btn-bg);
             border: 1px solid var(--reminder-btn-border);
@@ -306,7 +324,7 @@
         .switch-btn.active { background: #FF7A1A; color: black; }
         .toast-msg { position: fixed; bottom: 100px; right: 20px; background: var(--toast-bg); backdrop-filter: blur(16px); border-left: 4px solid #FF7A1A; border-radius: 24px; padding: 12px 24px; z-index: 1200; transform: translateX(120%); transition: 0.25s; }
         .toast-msg.show { transform: translateX(0); }
-        @media (max-width: 680px) { .value-large { font-size: 28px; } .stat-block { padding: 1rem; } .today-debt-value { font-size: 1.8rem; } }
+        @media (max-width: 680px) { .value-large { font-size: 28px; } .stat-block { padding: 1rem; } .today-debt-value, .today-paid-value { font-size: 1.8rem; } }
 
         .header-bar { text-align: center; margin-bottom: 30px; }
         .header-logo-row { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
@@ -438,7 +456,13 @@
                     <div class="today-debt-value" id="todayTotalValue">R$ 0,00</div>
                     <div class="today-debt-details" id="todayDebtDetails"></div>
                 </div>
-                <!-- Botão Pagamentos removido -->
+            </div>
+            <div class="today-paid-card" id="todayPaidCard">
+                <div class="today-paid-info">
+                    <div class="today-paid-label"><i class="fas fa-check-circle"></i> Pagamentos de hoje</div>
+                    <div class="today-paid-value" id="todayPaidValue">R$ 0,00</div>
+                    <div class="today-paid-details" id="todayPaidDetails"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -650,7 +674,6 @@
     </div>
 </div>
 
-<!-- Modais mantidos sem alteração -->
 <div id="editDebtModal" class="modal-aura">
     <div class="modal-inner">
         <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
@@ -734,7 +757,6 @@
 </div>
 
 <script>
-    // JavaScript mantido igual ao último código completo, sem alterações
     const firebaseConfig = {
         apiKey: "AIzaSyAxf7jolAEoXdT7ipAp-Sd1oEYyeFVU9fk",
         authDomain: "ambra-controle.firebaseapp.com",
@@ -881,14 +903,25 @@
         const newCheck = { debtId: debtId, dateKey: todayKey() };
         currentUserData.reminderChecks.push(newCheck);
         updateTodayDebtCard();
+        updateTodayPaidCard();
         try {
             await db.collection('reminderChecks').add({ userId: auth.currentUser.uid, debtId: debtId, dateKey: todayKey(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
             showToast('Baixa realizada!');
         } catch (error) {
             currentUserData.reminderChecks = currentUserData.reminderChecks.filter(c => c.debtId !== debtId || c.dateKey !== todayKey());
             updateTodayDebtCard();
+            updateTodayPaidCard();
             showToast('Erro ao salvar baixa. Tente novamente.','danger');
         }
+    }
+
+    function isNearDueTime(dueTime) {
+        if (!dueTime) return false;
+        const now = new Date();
+        const [hours, minutes] = dueTime.split(':').map(Number);
+        const dueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+        const diffMs = dueDate - now;
+        return diffMs <= 30 * 60 * 1000 && diffMs > 0;
     }
 
     function updateTodayDebtCard() {
@@ -971,6 +1004,9 @@
                 } else {
                     div.innerHTML = `<i class="fas fa-circle"></i> ${item.texto}`;
                 }
+                if (item.dueTime && isNearDueTime(item.dueTime)) {
+                    div.classList.add('urgent');
+                }
                 let rightContainer = document.createElement('div');
                 rightContainer.className = 'debt-detail-right';
                 if (item.dueTime) {
@@ -989,6 +1025,31 @@
                 if (rightContainer.children.length > 0) {
                     div.appendChild(rightContainer);
                 }
+                container.appendChild(div);
+            });
+        }
+    }
+
+    function updateTodayPaidCard() {
+        const hoje = new Date();
+        const hojeStr = hoje.toISOString().slice(0,10);
+        const todayPayments = currentUserData.payments.filter(p => {
+            const payDate = new Date(p.date);
+            return payDate.toISOString().slice(0,10) === hojeStr;
+        });
+        const totalPaid = todayPayments.reduce((s,p) => s + p.amount, 0);
+        document.getElementById('todayPaidValue').innerHTML = formatMoney(totalPaid);
+        let container = document.getElementById('todayPaidDetails');
+        container.innerHTML = '';
+        if (todayPayments.length === 0) {
+            container.innerHTML = '<div class="paid-detail-item"><i class="fas fa-info-circle"></i> Nenhum pagamento realizado hoje.</div>';
+        } else {
+            todayPayments.sort((a,b)=> new Date(b.date) - new Date(a.date)).forEach(p => {
+                let div = document.createElement('div');
+                div.className = 'paid-detail-item';
+                const debt = currentUserData.debts.find(d => d.id === p.debtId);
+                const title = debt ? `${debt.title} (${debt.credor})` : 'Dívida não encontrada';
+                div.innerHTML = `<i class="fas fa-check-circle"></i> <span>${new Date(p.date).toLocaleTimeString('pt-BR')} - ${title}: ${formatMoney(p.amount)}</span>`;
                 container.appendChild(div);
             });
         }
@@ -1156,7 +1217,7 @@
     function renderAll() {
         if(!currentUser) return;
         updateStatsUI(); renderFullList(); renderPaymentsHistory(); renderSelectDebts();
-        updateTodayDebtCard(); updateUserAvatarInUI();
+        updateTodayDebtCard(); updateTodayPaidCard(); updateUserAvatarInUI();
     }
 
     async function registerWithFirebase(email,password,username) {
@@ -1275,6 +1336,7 @@
             let paymentDate=null; const pm=document.querySelector('#paymentDateGroup .radio-option.active').dataset.value;
             if(pm==='today') paymentDate=new Date(); else { const ds=paymentDateCustom.value, ts=paymentTimeCustom.value; if(!ds) { alert('Informe a data do pagamento no formato dd/mm/aaaa'); return; } paymentDate=parseCustomDateTime(ds,ts); if(!paymentDate) { alert('Data/hora inválida'); return; } }
             await db.collection('payments').add({userId:auth.currentUser.uid,debtId:debt.id,credor:debt.credor,amount,method:debt.paymentMethod,date:paymentDate.toISOString(),pixKeyUsed}); showToast('Pagamento registrado!');
+            updateTodayPaidCard();
             parcelQtyInput.value=''; paymentAmountInput.value=''; useDifferentPixToggle.checked=false; differentPixFields.style.display='none'; newPixKeyValue.value=''; setPaymentDateMode('today');
         };
 
@@ -1319,8 +1381,6 @@
             }
         }
         document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>setActiveSection(btn.dataset.section)));
-        // O botão "goToPaymentsBtn" foi removido, então precisamos comentar ou remover seu evento
-        // document.getElementById('goToPaymentsBtn').addEventListener... foi removido do código.
     };
 </script>
 </body>
