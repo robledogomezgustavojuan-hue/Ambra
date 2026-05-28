@@ -231,8 +231,11 @@
         .debt-detail-item, .paid-detail-item { font-size: 0.75rem; color: var(--debt-detail-color); padding: 7px 0; border-bottom: 1px solid var(--debt-detail-item-bg); display: flex; align-items: center; gap: 8px; }
         .debt-detail-item:last-child, .paid-detail-item:last-child { border-bottom: none; }
         .debt-detail-item i { color: #FF7A1A; font-size: 0.7rem; width: 16px; }
-        /* Itens pendentes em vermelho */
-        .today-debt-details .debt-detail-item { color: #ff4444 !important; }
+        /* Itens pendentes em branco luminoso */
+        .today-debt-details .debt-detail-item {
+            color: #ffffff;
+            text-shadow: 0 0 6px rgba(255,255,255,0.7);
+        }
         .paid-detail-item i { color: #00cc66; font-size: 0.7rem; width: 16px; animation: greenPulse 1.5s ease-in-out infinite alternate; }
         .paid-detail-item span { animation: greenPulse 1.5s ease-in-out infinite alternate; }
         .debt-detail-item.reminder-item { color: var(--reminder-item-color); }
