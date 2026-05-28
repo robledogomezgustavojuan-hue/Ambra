@@ -160,8 +160,8 @@
             100% { color: #00ff88; text-shadow: 0 0 15px #00ff88; }
         }
         @keyframes redBlink {
-            0%, 100% { color: var(--debt-detail-color); }
-            50% { color: #ff4444; text-shadow: 0 0 8px #ff0000; }
+            0%, 100% { color: #ff4444; }
+            50% { color: #ff0000; text-shadow: 0 0 8px #ff0000; }
         }
         .header-logo {
             font-size: 2rem;
@@ -231,6 +231,8 @@
         .debt-detail-item, .paid-detail-item { font-size: 0.75rem; color: var(--debt-detail-color); padding: 7px 0; border-bottom: 1px solid var(--debt-detail-item-bg); display: flex; align-items: center; gap: 8px; }
         .debt-detail-item:last-child, .paid-detail-item:last-child { border-bottom: none; }
         .debt-detail-item i { color: #FF7A1A; font-size: 0.7rem; width: 16px; }
+        /* Itens pendentes em vermelho */
+        .today-debt-details .debt-detail-item { color: #ff4444 !important; }
         .paid-detail-item i { color: #00cc66; font-size: 0.7rem; width: 16px; animation: greenPulse 1.5s ease-in-out infinite alternate; }
         .paid-detail-item span { animation: greenPulse 1.5s ease-in-out infinite alternate; }
         .debt-detail-item.reminder-item { color: var(--reminder-item-color); }
@@ -452,14 +454,14 @@
             </div>
             <div class="today-debt-card" id="todayDebtCard">
                 <div class="today-debt-info">
-                    <div class="today-debt-label"><i class="fas fa-calendar-day"></i> Compromissos de hoje</div>
+                    <div class="today-debt-label"><i class="fas fa-calendar-day"></i> Compromissos de pagamentos de hoje pendentes</div>
                     <div class="today-debt-value" id="todayTotalValue">R$ 0,00</div>
                     <div class="today-debt-details" id="todayDebtDetails"></div>
                 </div>
             </div>
             <div class="today-paid-card" id="todayPaidCard">
                 <div class="today-paid-info">
-                    <div class="today-paid-label"><i class="fas fa-check-circle"></i> Pagamentos / Baixas de hoje</div>
+                    <div class="today-paid-label"><i class="fas fa-check-circle"></i> Pagamentos e baixas de hoje já realizados</div>
                     <div class="today-paid-value" id="todayPaidValue">R$ 0,00</div>
                     <div class="today-paid-details" id="todayPaidDetails"></div>
                 </div>
@@ -674,6 +676,7 @@
     </div>
 </div>
 
+<!-- Modais mantidos sem alterações -->
 <div id="editDebtModal" class="modal-aura">
     <div class="modal-inner">
         <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
@@ -1039,7 +1042,6 @@
         });
         const todayReminderChecks = currentUserData.reminderChecks.filter(c => c.dateKey === todayKey());
         let totalPaid = todayPayments.reduce((s,p) => s + p.amount, 0);
-        // adicionar valores dos lembretes baixados
         todayReminderChecks.forEach(c => {
             const debt = currentUserData.debts.find(d => d.id === c.debtId);
             if (debt) {
@@ -1049,7 +1051,6 @@
         document.getElementById('todayPaidValue').innerHTML = formatMoney(totalPaid);
         let container = document.getElementById('todayPaidDetails');
         container.innerHTML = '';
-        // exibir pagamentos
         todayPayments.sort((a,b)=> new Date(b.date) - new Date(a.date)).forEach(p => {
             let div = document.createElement('div');
             div.className = 'paid-detail-item';
@@ -1058,7 +1059,6 @@
             div.innerHTML = `<i class="fas fa-check-circle"></i> <span>${new Date(p.date).toLocaleTimeString('pt-BR')} - ${title}: ${formatMoney(p.amount)}</span>`;
             container.appendChild(div);
         });
-        // exibir baixas de lembrete
         todayReminderChecks.forEach(c => {
             const debt = currentUserData.debts.find(d => d.id === c.debtId);
             if (debt) {
