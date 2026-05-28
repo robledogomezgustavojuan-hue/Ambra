@@ -459,7 +459,7 @@
             </div>
             <div class="today-paid-card" id="todayPaidCard">
                 <div class="today-paid-info">
-                    <div class="today-paid-label"><i class="fas fa-check-circle"></i> Pagamentos de hoje</div>
+                    <div class="today-paid-label"><i class="fas fa-check-circle"></i> Pagamentos / Baixas de hoje</div>
                     <div class="today-paid-value" id="todayPaidValue">R$ 0,00</div>
                     <div class="today-paid-details" id="todayPaidDetails"></div>
                 </div>
@@ -1037,21 +1037,39 @@
             const payDate = new Date(p.date);
             return payDate.toISOString().slice(0,10) === hojeStr;
         });
-        const totalPaid = todayPayments.reduce((s,p) => s + p.amount, 0);
+        const todayReminderChecks = currentUserData.reminderChecks.filter(c => c.dateKey === todayKey());
+        let totalPaid = todayPayments.reduce((s,p) => s + p.amount, 0);
+        // adicionar valores dos lembretes baixados
+        todayReminderChecks.forEach(c => {
+            const debt = currentUserData.debts.find(d => d.id === c.debtId);
+            if (debt) {
+                totalPaid += debt.totalFinanciado || 0;
+            }
+        });
         document.getElementById('todayPaidValue').innerHTML = formatMoney(totalPaid);
         let container = document.getElementById('todayPaidDetails');
         container.innerHTML = '';
-        if (todayPayments.length === 0) {
-            container.innerHTML = '<div class="paid-detail-item"><i class="fas fa-info-circle"></i> Nenhum pagamento realizado hoje.</div>';
-        } else {
-            todayPayments.sort((a,b)=> new Date(b.date) - new Date(a.date)).forEach(p => {
+        // exibir pagamentos
+        todayPayments.sort((a,b)=> new Date(b.date) - new Date(a.date)).forEach(p => {
+            let div = document.createElement('div');
+            div.className = 'paid-detail-item';
+            const debt = currentUserData.debts.find(d => d.id === p.debtId);
+            const title = debt ? `${debt.title} (${debt.credor})` : 'Dívida não encontrada';
+            div.innerHTML = `<i class="fas fa-check-circle"></i> <span>${new Date(p.date).toLocaleTimeString('pt-BR')} - ${title}: ${formatMoney(p.amount)}</span>`;
+            container.appendChild(div);
+        });
+        // exibir baixas de lembrete
+        todayReminderChecks.forEach(c => {
+            const debt = currentUserData.debts.find(d => d.id === c.debtId);
+            if (debt) {
                 let div = document.createElement('div');
                 div.className = 'paid-detail-item';
-                const debt = currentUserData.debts.find(d => d.id === p.debtId);
-                const title = debt ? `${debt.title} (${debt.credor})` : 'Dívida não encontrada';
-                div.innerHTML = `<i class="fas fa-check-circle"></i> <span>${new Date(p.date).toLocaleTimeString('pt-BR')} - ${title}: ${formatMoney(p.amount)}</span>`;
+                div.innerHTML = `<i class="fas fa-check-circle"></i> <span>${debt.title} (${debt.credor}) - Lembrete baixado: ${formatMoney(debt.totalFinanciado || 0)}</span>`;
                 container.appendChild(div);
-            });
+            }
+        });
+        if (todayPayments.length === 0 && todayReminderChecks.length === 0) {
+            container.innerHTML = '<div class="paid-detail-item"><i class="fas fa-info-circle"></i> Nenhum pagamento ou baixa realizado hoje.</div>';
         }
     }
 
