@@ -322,7 +322,8 @@
         .value-large { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .badge-amber { background: var(--badge-amber-bg); color: var(--badge-amber-color); border-radius: 40px; padding: 4px 12px; display: inline-block; }
         .badge-blue { background: var(--badge-blue-bg); color: var(--badge-blue-color); border-radius: 40px; padding: 4px 12px; display: inline-block; font-size: 0.75rem; }
-        .login-card { max-width: 520px; width: 100%; padding: 2.5rem; margin: auto; }
+        /* Aumentei a largura máxima e o padding lateral para o quadro ficar mais largo e equilibrado */
+        .login-card { max-width: 600px; width: 100%; padding: 2.5rem 3rem; margin: auto; }
         .switch-mode { display: flex; gap: 1rem; background: rgba(0,0,0,0.4); border-radius: 40px; padding: 6px; margin-bottom: 2rem; }
         .switch-btn { flex: 1; text-align: center; padding: 8px; border-radius: 40px; cursor: pointer; font-weight: 600; color: rgba(255,255,255,0.6); }
         .switch-btn.active { background: #FF7A1A; color: black; }
@@ -1280,6 +1281,32 @@
         document.getElementById('doRegisterAction').onclick=()=>{ const u=document.getElementById('regUser').value, e=document.getElementById('regEmail').value, p=document.getElementById('regPass').value, c=document.getElementById('regConfirm').value; if(p!==c) { showToast('Senhas não coincidem','danger'); return; } if(p.length<6) { showToast('Senha deve ter no mínimo 6 caracteres','danger'); return; } registerWithFirebase(e,p,u); };
         document.getElementById('logoutDashBtn').onclick=()=>logoutFirebase();
 
+        // Enter nos campos de login
+        const loginUser = document.getElementById('loginUser');
+        const loginPass = document.getElementById('loginPass');
+        function triggerLogin() {
+            const e = loginUser.value;
+            const p = loginPass.value;
+            loginWithFirebase(e, p);
+        }
+        loginUser.addEventListener('keypress', (e) => { if (e.key === 'Enter') triggerLogin(); });
+        loginPass.addEventListener('keypress', (e) => { if (e.key === 'Enter') triggerLogin(); });
+
+        // Enter nos campos de cadastro
+        const regPass = document.getElementById('regPass');
+        const regConfirm = document.getElementById('regConfirm');
+        function triggerRegister() {
+            const u = document.getElementById('regUser').value;
+            const e = document.getElementById('regEmail').value;
+            const p = regPass.value;
+            const c = regConfirm.value;
+            if(p !== c) { showToast('Senhas não coincidem','danger'); return; }
+            if(p.length < 6) { showToast('Senha deve ter no mínimo 6 caracteres','danger'); return; }
+            registerWithFirebase(e, p, u);
+        }
+        regPass.addEventListener('keypress', (e) => { if (e.key === 'Enter') triggerRegister(); });
+        regConfirm.addEventListener('keypress', (e) => { if (e.key === 'Enter') triggerRegister(); });
+
         document.querySelectorAll('.sub-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active');
@@ -1353,7 +1380,7 @@
             let paymentDate=null; const pm=document.querySelector('#paymentDateGroup .radio-option.active').dataset.value;
             if(pm==='today') paymentDate=new Date(); else { const ds=paymentDateCustom.value, ts=paymentTimeCustom.value; if(!ds) { alert('Informe a data do pagamento no formato dd/mm/aaaa'); return; } paymentDate=parseCustomDateTime(ds,ts); if(!paymentDate) { alert('Data/hora inválida'); return; } }
             await db.collection('payments').add({userId:auth.currentUser.uid,debtId:debt.id,credor:debt.credor,amount,method:debt.paymentMethod,date:paymentDate.toISOString(),pixKeyUsed}); showToast('Pagamento registrado!');
-            updateTodayPaidCard(); // atualiza imediatamente
+            updateTodayPaidCard();
             parcelQtyInput.value=''; paymentAmountInput.value=''; useDifferentPixToggle.checked=false; differentPixFields.style.display='none'; newPixKeyValue.value=''; setPaymentDateMode('today');
         };
 
