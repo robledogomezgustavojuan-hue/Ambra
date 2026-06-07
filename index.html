@@ -149,6 +149,7 @@
             justify-content: center;
             transition: background 0.3s ease, color 0.3s ease;
         }
+
         @keyframes platinumPulse {
             0% { text-shadow: 0 0 5px #e0c080, 0 0 10px #c0a060; }
             100% { text-shadow: 0 0 20px #ffe0b0, 0 0 35px #d0b070, 0 0 50px #b09050; }
@@ -185,6 +186,7 @@
             border-radius: 28px;
             box-shadow: var(--card-shadow);
             backdrop-filter: blur(4px);
+            transition: none;
         }
         .card-premium { padding: 1.5rem; margin-bottom: 1.5rem; }
         .card-premium h3 { color: var(--text-color); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; font-size: 1.3rem; }
@@ -196,6 +198,7 @@
             text-align: center;
             border: var(--stat-border);
             box-shadow: var(--stat-shadow);
+            transition: none;
         }
         .stat-block.red-glow {
             border-color: var(--red-glow-border);
@@ -204,7 +207,6 @@
         .stat-block .text-muted { color: var(--text-muted); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.5px; margin-bottom: 8px; }
         .stat-block .value-large { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .stat-block.red-glow .value-large { background: linear-gradient(135deg, #FF6666, #FF2222); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .stat-block.savings-glow .value-large { background: linear-gradient(135deg, #00aaff, #0066cc); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .today-debt-card, .today-paid-card, .today-savings-card {
             border-radius: 28px;
             padding: 1.5rem 1.8rem;
@@ -215,19 +217,11 @@
             flex-wrap: wrap;
             gap: 1.5rem;
             box-shadow: var(--card-shadow);
+            transition: none;
         }
-        .today-debt-card {
-            background: var(--today-bg);
-            border: var(--today-border);
-        }
-        .today-paid-card {
-            background: var(--paid-bg);
-            border: var(--paid-border);
-        }
-        .today-savings-card {
-            background: var(--savings-bg);
-            border: var(--savings-border);
-        }
+        .today-debt-card { background: var(--today-bg); border: var(--today-border); }
+        .today-paid-card { background: var(--paid-bg); border: var(--paid-border); }
+        .today-savings-card { background: var(--savings-bg); border: var(--savings-border); }
         .today-debt-info, .today-paid-info, .today-savings-info { flex: 1; min-width: 200px; }
         .today-debt-label, .today-paid-label, .today-savings-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
         .today-debt-value { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1.2; margin-bottom: 12px; }
@@ -244,63 +238,25 @@
         .debt-detail-item.reminder-item { color: var(--reminder-item-color); }
         .debt-detail-item.urgent { animation: redBlink 1s infinite; }
         .reminder-check-btn {
-            background: var(--reminder-btn-bg);
-            border: 1px solid var(--reminder-btn-border);
-            color: var(--reminder-btn-color);
-            border-radius: 6px;
-            padding: 4px 12px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            transition: 0.2s;
-            white-space: nowrap;
-            margin-left: auto;
+            background: var(--reminder-btn-bg); border: 1px solid var(--reminder-btn-border); color: var(--reminder-btn-color);
+            border-radius: 6px; padding: 4px 12px; cursor: pointer; font-size: 0.7rem; transition: 0.2s; white-space: nowrap; margin-left: auto;
         }
         .reminder-check-btn:hover { background: #87CEEB; color: black; }
         .time-badge {
-            border: 1px solid var(--btn-outline-border);
-            border-radius: 6px;
-            padding: 2px 8px;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            background: var(--switch-container-bg);
-            white-space: nowrap;
+            border: 1px solid var(--btn-outline-border); border-radius: 6px; padding: 2px 8px;
+            font-size: 0.7rem; color: var(--text-muted); background: var(--switch-container-bg); white-space: nowrap;
         }
-        .debt-detail-right {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-left: auto;
-        }
-        .progress-bar-container {
-            background: var(--progress-bg);
-            border-radius: 10px;
-            height: 10px;
-            margin: 5px 0;
-            overflow: hidden;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
+        .debt-detail-right { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+        .progress-bar-container { background: var(--progress-bg); border-radius: 10px; height: 10px; margin: 5px 0; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 10px; transition: width 0.3s ease; }
         .progress-bar-fill.green { background: linear-gradient(90deg, #00cc66, #00ff88); }
         .progress-bar-fill.yellow { background: linear-gradient(90deg, #ffaa00, #ffcc00); }
         .progress-bar-fill.red { background: linear-gradient(90deg, #ff4444, #ff0000); }
         .today-debt-btn { background: rgba(255,122,26,0.2); border: 1px solid #FF7A1A; border-radius: 40px; padding: 10px 24px; color: #FFB066; font-weight: 500; cursor: pointer; transition: 0.2s; white-space: nowrap; font-size: 0.9rem; }
         .today-debt-btn:hover { background: #FF7A1A; color: black; }
         .btn-amber {
-            background: linear-gradient(180deg, #FF8A2B, #E76300);
-            border: none;
-            border-radius: 18px;
-            padding: 12px 24px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: white;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: 0.2s;
+            background: linear-gradient(180deg, #FF8A2B, #E76300); border: none; border-radius: 18px; padding: 12px 24px;
+            font-weight: 600; font-size: 0.9rem; color: white; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s;
         }
         .btn-amber:active { transform: scale(0.97); }
         .btn-outline-light { background: transparent; border: 1px solid var(--btn-outline-border); border-radius: 18px; padding: 10px 20px; color: var(--btn-outline-color); font-weight: 500; cursor: pointer; }
@@ -339,505 +295,4 @@
         .section-page.active-page { display: block; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
         .value-large { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #FFB066, #FF7A1A); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .badge-amber { background: var(--badge-amber-bg); color: var(--badge-amber-color); border-radius: 40px; padding: 4px 12px; display: inline-block; }
-        .badge-blue { background: var(--badge-blue-bg); color: var(--badge-blue-color); border-radius: 40px; padding: 4px 12px; display: inline-block; font-size: 0.75rem; }
-        .login-card { max-width: 750px; width: 100%; padding: 2.5rem 3.5rem; margin: auto; }
-        .switch-mode { display: flex; gap: 1rem; background: rgba(0,0,0,0.4); border-radius: 40px; padding: 6px; margin-bottom: 2rem; }
-        .switch-btn { flex: 1; text-align: center; padding: 8px; border-radius: 40px; cursor: pointer; font-weight: 600; color: rgba(255,255,255,0.6); }
-        .switch-btn.active { background: #FF7A1A; color: black; }
-        .toast-msg { position: fixed; bottom: 100px; right: 20px; background: var(--toast-bg); backdrop-filter: blur(16px); border-left: 4px solid #FF7A1A; border-radius: 24px; padding: 12px 24px; z-index: 1200; transform: translateX(120%); transition: 0.25s; }
-        .toast-msg.show { transform: translateX(0); }
-        @media (max-width: 680px) { .value-large { font-size: 28px; } .stat-block { padding: 1rem; } .today-debt-value, .today-paid-value, .today-savings-value { font-size: 1.8rem; } }
-
-        .header-bar { text-align: center; margin-bottom: 30px; }
-        .header-logo-row { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
-        .header-avatar-col { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 20px; }
-        .header-avatar-col .avatar-top { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #FF7A1A; }
-        .header-avatar-col .badge-amber { background: var(--badge-amber-bg); color: var(--badge-amber-color); border-radius: 40px; padding: 6px 18px; font-size: 0.9rem; font-weight: 500; }
-        .header-actions-row { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
-        .header-actions { display: none; }
-        .header-avatar-row { display: none; }
-
-        .theme-toggle-btn {
-            background: var(--theme-toggle-bg);
-            border: 2px solid var(--card-border);
-            border-radius: 60px;
-            width: 64px;
-            height: 32px;
-            padding: 0;
-            position: relative;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            transition: background 0.3s ease, border-color 0.3s;
-        }
-        .theme-toggle-btn::before {
-            content: "🌙";
-            position: absolute;
-            left: 4px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 24px;
-            background: var(--theme-toggle-thumb);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            line-height: 1;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            transition: transform 0.3s ease, background 0.3s;
-        }
-        .light-mode .theme-toggle-btn::before {
-            content: "☀️";
-            transform: translate(32px, -50%);
-            background: #FF7A1A;
-            box-shadow: 0 2px 8px rgba(255,122,26,0.5);
-        }
-        .theme-toggle-btn span { display: none; }
-
-        .modal-aura { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        .modal-aura.active { display: flex; }
-        .modal-inner { background: var(--modal-bg); border-radius: 40px; max-width: 550px; width: 95%; max-height: 85vh; overflow-y: auto; padding: 1.8rem; border: var(--modal-border); color: var(--text-color); }
-        .avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #0a0a0a; border: 2px solid #FF7A1A; margin-bottom: 12px; }
-        .sub-tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; }
-        .sub-tab { padding: 8px 16px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; background: var(--subtab-bg); color: var(--subtab-color); border: 1px solid var(--subtab-border); transition: 0.2s; }
-        .sub-tab.active { background: #FF7A1A; color: black; border-color: #FF7A1A; font-weight: 600; }
-        .sub-section { display: none; }
-        .sub-section.active-section { display: block; }
-        .section-centered { max-width: 850px; margin: 0 auto; }
-        .clickable-debt { color: #FFB066; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; transition: color 0.2s; }
-        .clickable-debt:hover { color: #FF7A1A; }
-        .payment-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--debt-detail-item-bg); font-size: 0.85rem; gap: 8px; color: var(--text-color); }
-        .payment-row:last-child { border-bottom: none; }
-        .payment-row span { flex: 1; }
-        .payment-row .payment-actions { display: flex; gap: 6px; }
-        .payment-summary { margin-top: 1rem; padding-top: 1rem; border-top: 2px solid rgba(255,122,26,0.3); display: flex; justify-content: space-between; font-weight: 600; }
-        .btn-history { background: transparent; border: 1px solid rgba(255,122,26,0.3); color: #FFB066; border-radius: 18px; padding: 6px 12px; cursor: pointer; font-size: 0.75rem; transition: 0.2s; }
-        .btn-history:hover { background: #FF7A1A; color: black; }
-        .btn-payment-action { background: transparent; border: 1px solid var(--btn-outline-border); color: #FFB066; border-radius: 16px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; transition: 0.2s; }
-        .btn-payment-action:hover { background: #FF7A1A; color: black; }
-        .reminder-fields { margin-top: 12px; padding: 12px; background: var(--reminder-fields-bg); border-radius: 20px; border: 1px solid var(--reminder-fields-border); }
-        .reminder-fields label { color: var(--reminder-fields-label); }
-        .list-toggle { display: flex; gap: 8px; margin-bottom: 1rem; }
-        .list-toggle-btn { padding: 8px 16px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; background: var(--subtab-bg); color: var(--subtab-color); border: 1px solid var(--subtab-border); transition: 0.2s; }
-        .list-toggle-btn.active { background: #FF7A1A; color: black; border-color: #FF7A1A; font-weight: 600; }
-    </style>
-</head>
-<body>
-<div id="loginScreen" style="min-height: 90vh; display: flex; align-items: center; justify-content: center;">
-    <div class="login-card">
-        <div style="text-align: center; margin-bottom: 1.5rem;">
-            <i class="fas fa-chart-line" style="font-size: 48px; color: #FF7A1A;"></i>
-            <h1 style="font-size: 28px;">ÂMBRA</h1>
-            <p style="color: rgba(255,255,255,0.6);">controle de dívidas premium</p>
-        </div>
-        <div class="switch-mode">
-            <div id="switchToLogin" class="switch-btn active">LOGIN</div>
-            <div id="switchToRegister" class="switch-btn">CADASTRO</div>
-        </div>
-        <div id="loginPanel">
-            <div><label>E-MAIL</label><input type="email" id="loginUser" placeholder="seu@email.com"></div>
-            <div><label>SENHA</label><input type="password" id="loginPass" placeholder="••••••"></div>
-            <button id="doLoginAction" class="btn-amber" style="width:100%; justify-content: center; margin-top: 1rem;"><i class="fas fa-arrow-right"></i> Acessar</button>
-        </div>
-        <div id="registerPanel" style="display: none;">
-            <div><label>USUÁRIO</label><input type="text" id="regUser"></div>
-            <div><label>E-MAIL</label><input type="email" id="regEmail"></div>
-            <div><label>SENHA</label><input type="password" id="regPass"></div>
-            <div><label>CONFIRMAR</label><input type="password" id="regConfirm"></div>
-            <button id="doRegisterAction" class="btn-amber" style="width:100%; justify-content: center; margin-top: 1rem;"><i class="fas fa-user-plus"></i> Criar conta</button>
-        </div>
-        <div id="loginMsg" style="margin-top: 1rem; text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.6);"></div>
-    </div>
-</div>
-
-<div id="dashboardApp" style="display: none; width: 100%; max-width: 950px; margin: 0 auto;">
-    <div class="header-bar">
-        <div class="header-logo-row"><span class="header-logo">ÂMBRA</span></div>
-        <div class="header-avatar-col">
-            <img id="userAvatarImg" class="avatar-top" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF7A1A'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="avatar">
-            <span id="userNameDisplay" class="badge-amber">Usuário</span>
-        </div>
-        <div class="header-actions-row">
-            <button id="themeToggleBtn" class="theme-toggle-btn" title="Alternar tema"><span></span></button>
-            <button id="editProfileBtn" class="btn-outline-light"><i class="fas fa-user-edit"></i> Perfil</button>
-            <button id="logoutDashBtn" class="btn-outline-light"><i class="fas fa-sign-out-alt"></i> Sair</button>
-        </div>
-    </div>
-
-    <!-- DASHBOARD -->
-    <div id="sectionDashboard" class="section-page active-page">
-        <div class="section-centered">
-            <div class="stats-grid" id="dashboardStatsGrid">
-                <div class="stat-block red-glow"><div class="text-muted">Saldo restante total</div><div class="value-large" id="statTotalRemaining">R$ 0</div></div>
-                <div class="stat-block"><div class="text-muted">Dívidas ativas</div><div class="value-large" id="statActiveCount">0</div></div>
-                <div class="stat-block savings-glow"><div class="text-muted">Total guardado</div><div class="value-large" id="statTotalSavings">R$ 0</div></div>
-            </div>
-            <div class="today-debt-card" id="todayDebtCard">
-                <div class="today-debt-info">
-                    <div class="today-debt-label"><i class="fas fa-calendar-day"></i> Compromissos de pagamentos de hoje pendentes</div>
-                    <div class="today-debt-value" id="todayTotalValue">R$ 0,00</div>
-                    <div class="today-debt-details" id="todayDebtDetails"></div>
-                </div>
-            </div>
-            <div class="today-paid-card" id="todayPaidCard">
-                <div class="today-paid-info">
-                    <div class="today-paid-label"><i class="fas fa-check-circle"></i> Pagamentos e baixas de hoje já realizados</div>
-                    <div class="today-paid-value" id="todayPaidValue">R$ 0,00</div>
-                    <div class="today-paid-details" id="todayPaidDetails"></div>
-                </div>
-            </div>
-            <div class="today-savings-card" id="todaySavingsCard">
-                <div class="today-savings-info">
-                    <div class="today-savings-label"><i class="fas fa-piggy-bank"></i> Total guardado (todas as contas)</div>
-                    <div class="today-savings-value" id="todaySavingsValue">R$ 0,00</div>
-                    <div class="today-savings-details" id="todaySavingsDetails"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- DÍVIDAS -->
-    <div id="sectionDebts" class="section-page">
-        <div class="section-centered">
-            <div class="sub-tabs">
-                <button class="sub-tab active" data-subsection="subRegistrar">📝 Registrar</button>
-                <button class="sub-tab" data-subsection="subLista">📋 Lista</button>
-                <button class="sub-tab" data-subsection="subPagamentos">💳 Pagamentos</button>
-                <button class="sub-tab" data-subsection="subJuros">🧮 Juros</button>
-            </div>
-            <div id="subRegistrar" class="sub-section active-section">
-                <div class="card-premium">
-                    <h3><i class="fas fa-hand-holding-usd"></i> Registrar nova dívida</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 12px;">
-                        <input type="text" id="newTitle" placeholder="Descrição da dívida">
-                        <input type="text" id="newCredor" placeholder="Nome ou referência do credor">
-                        <input type="number" id="newCapital" placeholder="Valor total do empréstimo (R$)" step="0.01">
-                    </div>
-                    <label style="margin-top: 8px;">Qual vai ser a forma de pagamento?</label>
-                    <select id="paymentMethodSelect">
-                        <option value="Dinheiro">Dinheiro</option><option value="Pix">Pix</option>
-                        <option value="Débito">Débito</option><option value="Crédito">Crédito</option>
-                        <option value="Boleto">Boleto</option><option value="Transação bancária">Transação bancária</option>
-                    </select>
-                    <div id="pixFields" style="display: none;">
-                        <label>Tipo de chave Pix</label>
-                        <select id="pixKeyTypeSelect">
-                            <option>Telefone</option><option>CPF</option><option>CNPJ</option>
-                            <option>Celular</option><option>E-mail</option><option>Chave aleatória</option>
-                            <option>QR Code</option>
-                        </select>
-                        <input type="text" id="pixKeyValue" placeholder="Digite a chave ou código do QR Code">
-                    </div>
-                    <label style="margin-top: 8px;">Qual é a data de criação dessa dívida?</label>
-                    <div class="radio-group" id="dateRadioGroup">
-                        <div class="radio-option active" data-value="today">📅 Hoje / Agora</div>
-                        <div class="radio-option" data-value="custom">✏️ Outra data</div>
-                    </div>
-                    <div id="customDateTimeDiv" style="display: none; margin: 12px 0;">
-                        <div style="display: flex; gap: 12px;">
-                            <input type="text" id="customDateInput" placeholder="dd/mm/aaaa" maxlength="10" style="flex:1">
-                            <input type="text" id="customTimeInput" placeholder="hh:mm:ss" maxlength="8" style="flex:1">
-                        </div>
-                    </div>
-                    <div class="switch-container">
-                        <span class="switch-label">Modo de pagamento parcelado?</span>
-                        <label class="switch"><input type="checkbox" id="isParceledToggle"><span class="slider"></span></label>
-                    </div>
-                    <div id="parcelFields">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-                            <input type="number" id="parcelValue" placeholder="Valor parcela">
-                            <input type="number" id="parcelCount" placeholder="Qtd parcelas">
-                            <select id="periodicitySelect"><option value="mensal">Mensal</option><option value="semanal">Semanal</option><option value="diario">Diário</option></select>
-                        </div>
-                    </div>
-                    <div id="lumpSumDiv" style="display: block; margin: 12px 0;">
-                        <label>Data limite de pagamento (vencimento único)</label>
-                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                            <input type="text" id="lumpSumDate" placeholder="dd/mm/aaaa" maxlength="10" style="flex: 2;">
-                            <div style="display: flex; align-items: center; gap: 8px; background: var(--switch-container-bg); padding: 6px 12px; border-radius: 40px;">
-                                <span style="font-size: 0.8rem;">Sem data</span>
-                                <label class="switch-small"><input type="checkbox" id="noDueDateToggle"><span class="slider-small"></span></label>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="margin: 12px 0;">
-                        <label>⏰ Horário limite de pagamento (opcional)</label>
-                        <input type="time" id="newDueTime" style="max-width: 200px;">
-                    </div>
-                    <div id="dailyExcludeDiv" style="display: none;">
-                        <label>Ignorar dias da semana:</label>
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" class="exclude-day" value="1"> Seg</label>
-                            <label><input type="checkbox" class="exclude-day" value="2"> Ter</label>
-                            <label><input type="checkbox" class="exclude-day" value="3"> Qua</label>
-                            <label><input type="checkbox" class="exclude-day" value="4"> Qui</label>
-                            <label><input type="checkbox" class="exclude-day" value="5"> Sex</label>
-                            <label><input type="checkbox" class="exclude-day" value="6"> Sáb</label>
-                            <label><input type="checkbox" class="exclude-day" value="0"> Dom</label>
-                        </div>
-                        <input type="text" id="holidaysInput" placeholder="Feriados (ex: 01/01,25/12,15/11)">
-                    </div>
-                    <div class="switch-container">
-                        <span class="switch-label">Apenas lembrete (não afeta os totais)</span>
-                        <label class="switch"><input type="checkbox" id="reminderOnlyToggle"><span class="slider"></span></label>
-                    </div>
-                    <div id="reminderFields" class="reminder-fields" style="display: none;">
-                        <label>Recorrência do lembrete</label>
-                        <select id="reminderRecurrenceSelect">
-                            <option value="once">Apenas uma vez</option>
-                            <option value="daily">Todos os dias</option>
-                            <option value="weekly">Dias específicos da semana</option>
-                            <option value="interval">A cada X dias</option>
-                        </select>
-                        <div id="reminderDaysDiv" style="display: none; margin-top: 8px;">
-                            <label>Dias da semana</label>
-                            <div class="checkbox-group">
-                                <label><input type="checkbox" class="reminder-day" value="1"> Seg</label>
-                                <label><input type="checkbox" class="reminder-day" value="2"> Ter</label>
-                                <label><input type="checkbox" class="reminder-day" value="3"> Qua</label>
-                                <label><input type="checkbox" class="reminder-day" value="4"> Qui</label>
-                                <label><input type="checkbox" class="reminder-day" value="5"> Sex</label>
-                                <label><input type="checkbox" class="reminder-day" value="6"> Sáb</label>
-                                <label><input type="checkbox" class="reminder-day" value="0"> Dom</label>
-                            </div>
-                        </div>
-                        <div id="reminderIntervalDiv" style="display: none; margin-top: 8px;">
-                            <label>A cada quantos dias</label>
-                            <input type="number" id="reminderIntervalDays" placeholder="Ex: 3" step="1" min="1" value="1">
-                        </div>
-                    </div>
-                    <button id="createDebtBtn" class="btn-amber" style="width:100%; margin-top: 12px;"><i class="fas fa-plus-circle"></i> Adicionar dívida</button>
-                </div>
-            </div>
-            <div id="subLista" class="sub-section">
-                <div class="card-premium">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                        <h3><i class="fas fa-table-list"></i> Lista</h3>
-                        <div class="list-toggle">
-                            <button class="list-toggle-btn active" data-listtype="debts">Dívidas ativas</button>
-                            <button class="list-toggle-btn" data-listtype="reminders">🔔 Lembretes</button>
-                        </div>
-                    </div>
-                    <div class="table-wrapper">
-                        <table class="table-dark-premium" id="fullDebtsTable">
-                            <thead id="listTableHead">
-                                <tr><th>Data/Hora</th><th>Credor</th><th>Descrição</th><th>Total (c/ juros)</th><th>Capital</th><th>Parcela</th><th>Restante</th><th>Parcelas Pend.</th><th>Forma pag.</th><th>Chave Pix</th><th>Vencimento</th><th></th></tr>
-                            </thead>
-                            <tbody id="debtsTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div id="subPagamentos" class="sub-section">
-                <div class="card-premium">
-                    <h3><i class="fas fa-receipt"></i> Registrar pagamento</h3>
-                    <select id="debtSelectPayment"></select>
-                    <div id="selectedDebtInfo" style="background: var(--checkbox-bg); border-radius: 24px; padding: 12px; margin-bottom: 16px;"><p class="text-muted">Selecione uma dívida</p></div>
-                    <label>Esse pagamento corresponde ao dia de hoje?</label>
-                    <div class="radio-group" id="paymentDateGroup">
-                        <div class="radio-option active" data-value="today">✅ Sim, hoje</div>
-                        <div class="radio-option" data-value="custom">📅 Não, outra data</div>
-                    </div>
-                    <div id="customPaymentDateDiv" style="display: none; margin: 12px 0;">
-                        <div style="display: flex; gap: 12px;">
-                            <input type="text" id="paymentDateCustom" placeholder="dd/mm/aaaa" maxlength="10" style="flex:1">
-                            <input type="text" id="paymentTimeCustom" placeholder="hh:mm:ss" maxlength="8" style="flex:1">
-                        </div>
-                    </div>
-                    <div class="radio-group" id="paymentTypeGroup">
-                        <div class="radio-option active" data-value="parcela">📦 Pagar por parcela</div>
-                        <div class="radio-option" data-value="manual">✏️ Pagar valor manual</div>
-                    </div>
-                    <div id="parcelCountDiv" style="display: block; margin-bottom: 12px;">
-                        <label>Quantidade de parcelas a pagar</label>
-                        <input type="number" id="parcelQty" placeholder="Ex: 2" step="1" min="1">
-                        <div id="parcelTotalCalc" class="text-muted" style="font-size: 0.75rem; margin-top: 4px;">Valor total: R$ 0,00</div>
-                    </div>
-                    <div id="manualAmountDiv" style="display: none; margin-bottom: 12px;">
-                        <label>Valor a pagar (R$)</label>
-                        <input type="number" id="paymentAmount" placeholder="0,00" step="0.01">
-                    </div>
-                    <div id="paymentMethodInfo" style="background: var(--checkbox-bg); border-radius: 24px; padding: 12px; margin: 12px 0;"></div>
-                    <div id="pixChangeDiv" style="display: none; margin-top: 12px;">
-                        <div class="switch-container" style="margin: 8px 0;">
-                            <span class="switch-label">Usei outra chave Pix</span>
-                            <label class="switch"><input type="checkbox" id="useDifferentPixToggle"><span class="slider"></span></label>
-                        </div>
-                        <div id="differentPixFields" style="display: none; margin-top: 12px;">
-                            <label>Novo tipo de chave</label>
-                            <select id="newPixKeyType">
-                                <option>Telefone</option><option>CPF</option><option>CNPJ</option>
-                                <option>Celular</option><option>E-mail</option><option>Chave aleatória</option>
-                                <option>QR Code</option>
-                            </select>
-                            <input type="text" id="newPixKeyValue" placeholder="Digite a nova chave">
-                        </div>
-                    </div>
-                    <button id="registerPaymentAction" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-check-circle"></i> Registrar pagamento</button>
-                </div>
-            </div>
-            <div id="subJuros" class="sub-section">
-                <div class="card-premium">
-                    <h3><i class="fas fa-calculator"></i> Simulador de juros</h3>
-                    <div class="radio-group" id="calcTypeGroup">
-                        <div class="radio-option active" data-value="parcela">Por parcela e quantidade</div>
-                        <div class="radio-option" data-value="percentual">Por percentual de juros (%)</div>
-                    </div>
-                    <div id="calcParcelaDiv" style="display: block;">
-                        <input type="number" id="calcCapitalParcela" placeholder="Capital (R$)" step="0.01">
-                        <input type="number" id="calcParcelVal" placeholder="Valor da parcela (R$)" step="0.01">
-                        <input type="number" id="calcQtd" placeholder="Quantidade de parcelas" step="1">
-                    </div>
-                    <div id="calcPercentualDiv" style="display: none;">
-                        <input type="number" id="calcCapitalPercent" placeholder="Capital (R$)" step="0.01">
-                        <input type="number" id="calcInterestPercent" placeholder="Taxa de juros total (%)" step="0.01">
-                        <input type="number" id="calcQtdPercent" placeholder="Quantidade de parcelas" step="1">
-                    </div>
-                    <div style="display: flex; gap: 12px; margin-top: 8px;">
-                        <button id="calcInterestBtn" class="btn-amber">Calcular</button>
-                        <button id="resetCalculatorBtn" class="btn-outline-light">Zerar</button>
-                    </div>
-                    <div id="calcResultBox" style="margin-top:1rem; background:var(--checkbox-bg); border-radius:28px; padding:1rem;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- BANCOS -->
-    <div id="sectionBanks" class="section-page">
-        <div class="section-centered">
-            <div class="sub-tabs">
-                <button class="sub-tab active" data-subsection="subBankRegister">🏦 Registrar conta</button>
-                <button class="sub-tab" data-subsection="subBankDeposit">💰 Novo depósito</button>
-                <button class="sub-tab" data-subsection="subBankAccounts">📊 Minhas contas</button>
-                <button class="sub-tab" data-subsection="subBankHistory">📋 Histórico</button>
-            </div>
-            <div id="subBankRegister" class="sub-section active-section">
-                <div class="card-premium">
-                    <h3><i class="fas fa-university"></i> Registrar nova conta bancária</h3>
-                    <label>Nome do banco / conta</label>
-                    <input type="text" id="bankNameInput" placeholder="Ex: Itaú, Carteira, Caixa...">
-                    <label>Tipo de conta (opcional)</label>
-                    <input type="text" id="bankTypeInput" placeholder="Ex: Corrente, Poupança, Investimento...">
-                    <label>Meta (opcional)</label>
-                    <input type="number" id="bankGoalInput" placeholder="R$ 0,00" step="0.01">
-                    <button id="createBankAccountBtn" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-plus-circle"></i> Criar conta</button>
-                </div>
-            </div>
-            <div id="subBankDeposit" class="sub-section">
-                <div class="card-premium">
-                    <h3><i class="fas fa-coins"></i> Registrar novo depósito</h3>
-                    <select id="bankAccountSelect"><option value="">-- selecione uma conta --</option></select>
-                    <label>Valor do depósito</label>
-                    <input type="number" id="depositAmount" placeholder="R$ 0,00" step="0.01">
-                    <label>Data do depósito</label>
-                    <div class="radio-group" id="depositDateGroup">
-                        <div class="radio-option active" data-value="today">Hoje</div>
-                        <div class="radio-option" data-value="custom">Outra data</div>
-                    </div>
-                    <div id="customDepositDateDiv" style="display: none; margin: 12px 0;">
-                        <input type="text" id="depositDateCustom" placeholder="dd/mm/aaaa" maxlength="10">
-                    </div>
-                    <label>Descrição (opcional)</label>
-                    <input type="text" id="depositDescription" placeholder="Ex: depósito inicial, reserva...">
-                    <button id="registerDepositBtn" class="btn-amber" style="width:100%; margin-top:12px;"><i class="fas fa-check-circle"></i> Registrar depósito</button>
-                </div>
-            </div>
-            <div id="subBankAccounts" class="sub-section">
-                <div class="card-premium">
-                    <h3><i class="fas fa-chart-bar"></i> Minhas contas</h3>
-                    <div id="accountsListContainer"></div>
-                </div>
-            </div>
-            <div id="subBankHistory" class="sub-section">
-                <div class="card-premium">
-                    <h3><i class="fas fa-history"></i> Histórico de depósitos</h3>
-                    <div class="table-wrapper">
-                        <table class="table-dark-premium">
-                            <thead><tr><th>Data</th><th>Conta</th><th>Valor</th><th>Descrição</th></tr></thead>
-                            <tbody id="depositsHistoryBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modais existentes mantidos iguais -->
-<div id="editDebtModal" class="modal-aura"><div class="modal-inner"><!-- ... --></div></div>
-<div id="profileModal" class="modal-aura"><div class="modal-inner"><!-- ... --></div></div>
-<div id="debtPaymentsModal" class="modal-aura"><div class="modal-inner"><!-- ... --></div></div>
-<div id="editPaymentModal" class="modal-aura"><div class="modal-inner"><!-- ... --></div></div>
-
-<div class="bottom-nav" id="bottomNav">
-    <button class="nav-item active" data-section="sectionDashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
-    <button class="nav-item" data-section="sectionDebts"><i class="fas fa-file-invoice"></i><span>Dívidas</span></button>
-    <button class="nav-item" data-section="sectionBanks"><i class="fas fa-piggy-bank"></i><span>Bancos</span></button>
-</div>
-
-<script>
-    // Firebase config mantida
-    const firebaseConfig = { /* ... */ };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-
-    let currentUser = null;
-    let currentUserData = { debts: [], payments: [], reminderChecks: [], bankAccounts: [], deposits: [] };
-    let unsubscribeDebts = null, unsubscribePayments = null, unsubscribeReminderChecks = null;
-    let unsubscribeBankAccounts = null, unsubscribeDeposits = null;
-    let renderTimeout = null;
-    let listViewMode = 'debts';
-    let isLightMode = false;
-
-    // funções auxiliares (applyTheme, formatMoney, etc.) mantidas sem alteração
-    // ...
-
-    // Novas funções bancárias
-    async function createBankAccount() { /* ... */ }
-    async function registerDeposit() { /* ... */ }
-    function updateBankUI() { /* renderiza contas e progresso */ }
-    function updateSavingsCard() { /* card do dashboard */ }
-
-    // Modificada renderAll para incluir novas funções
-    function renderAll() {
-        if(!currentUser) return;
-        updateStatsUI(); renderFullList(); renderPaymentsHistory(); renderSelectDebts();
-        updateTodayDebtCard(); updateTodayPaidCard(); updateSavingsCard();
-        updateBankUI();
-        updateUserAvatarInUI();
-    }
-
-    // Listeners para novas coleções
-    function startListening() {
-        // ... mantendo existentes
-        // Adicionar:
-        unsubscribeBankAccounts = db.collection('bankAccounts').where('userId','==',uid).onSnapshot(snap => {
-            const accounts = []; snap.forEach(doc => accounts.push({id: doc.id, ...doc.data()}));
-            currentUserData.bankAccounts = accounts;
-            scheduleRender();
-        });
-        unsubscribeDeposits = db.collection('deposits').where('userId','==',uid).onSnapshot(snap => {
-            const deps = []; snap.forEach(doc => deps.push({id: doc.id, ...doc.data()}));
-            currentUserData.deposits = deps;
-            scheduleRender();
-        });
-    }
-
-    // Inicialização dos eventos dos novos botões e abas
-    window.onload = () => {
-        // ... código existente ...
-        // Novos eventos:
-        document.getElementById('createBankAccountBtn').addEventListener('click', createBankAccount);
-        document.getElementById('registerDepositBtn').addEventListener('click', registerDeposit);
-        // Controle de abas de bancos
-        document.querySelectorAll('#sectionBanks .sub-tab').forEach(tab => { /* ... */ });
-        // ...
-    };
-</script>
-</body>
-</html>
+        .badge-amb
