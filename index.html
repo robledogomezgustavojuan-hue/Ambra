@@ -688,4 +688,39 @@
         document.getElementById('editProfileBtn').addEventListener('click',()=>{ const uid=auth.currentUser?.uid; if(!uid) return; db.collection('users').doc(uid).get().then(doc=>{ if(doc.exists){ const ud=doc.data(); document.getElementById('profileUsername').value=ud.username; document.getElementById('profileEmail').value=ud.email; document.getElementById('profilePassword').value=''; document.getElementById('profileConfirmPassword').value=''; document.getElementById('profileModal').classList.add('active'); } }); });
         document.getElementById('closeProfileModalBtn').addEventListener('click',()=>{ document.getElementById('profileModal').classList.remove('active'); });
         document.getElementById('saveProfileBtn').addEventListener('click',async()=>{ const nu=document.getElementById('profileUsername').value.trim(), ne=document.getElementById('profileEmail').value.trim(), np=document.getElementById('profilePassword').value, cp=document.getElementById('profileConfirmPassword').value; if(!nu) { showToast('Nome de usuário não pode ficar vazio','danger'); return; } const uid=auth.currentUser?.uid; if(!uid) return; const ur=db.collection('users').doc(uid); if(!(await ur.get()).exists) return; if(np&&np.trim()!=='') { if(np.length<6) { showToast('Senha deve ter no mínimo 6 caracteres','danger'); return; } if(np!==cp) { showToast('Senhas não coincidem','danger'); return; } await auth.currentUser.updatePassword(np); } await ur.update({username:nu,email:ne}); showToast('Perfil atualizado!'); document.getElementById('profileModal').classList.remove('active'); });
-        document
+        document.getElementById('changeAvatarBtn').addEventListener('click',()=>document.getElementById('avatarUpload').click());
+        document.getElementById('avatarUpload').addEventListener('change',(event)=>{ const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=async function(e){ const ab=e.target.result, uid=auth.currentUser?.uid; if(uid) { await db.collection('users').doc(uid).update({avatar:ab}); updateUserAvatarInUI(); showToast('Foto de perfil atualizada!'); } }; reader.readAsDataURL(file); });
+        window.onclick=(e)=>{ if(e.target===document.getElementById('profileModal')) document.getElementById('profileModal').classList.remove('active'); if(e.target===document.getElementById('debtPaymentsModal')) document.getElementById('debtPaymentsModal').classList.remove('active'); if(e.target===document.getElementById('editPaymentModal')) document.getElementById('editPaymentModal').classList.remove('active'); if(e.target===document.getElementById('editDebtModal')) document.getElementById('editDebtModal').classList.remove('active'); if(e.target===document.getElementById('editBankModal')) document.getElementById('editBankModal').classList.remove('active'); };
+        document.getElementById('closeDebtPaymentsModalBtn').addEventListener('click',()=>{ document.getElementById('debtPaymentsModal').classList.remove('active'); });
+        document.getElementById('closeEditPaymentModalBtn').addEventListener('click',()=>{ document.getElementById('editPaymentModal').classList.remove('active'); });
+        document.getElementById('closeEditDebtModalBtn').addEventListener('click',()=>{ document.getElementById('editDebtModal').classList.remove('active'); });
+        document.getElementById('closeEditBankModalBtn').addEventListener('click',()=>{ document.getElementById('editBankModal').classList.remove('active'); });
+        document.getElementById('saveEditPaymentBtn').addEventListener('click', async ()=>{ const paymentId=document.getElementById('editPaymentId').value; const amount=parseFloat(document.getElementById('editPaymentAmount').value); const method=document.getElementById('editPaymentMethod').value; const pixKey=document.getElementById('editPaymentPixKey').value.trim(); const dateStr=document.getElementById('editPaymentDate').value; const timeStr=document.getElementById('editPaymentTime').value; if(isNaN(amount)||amount<=0) { showToast('Valor inválido','danger'); return; } let paymentDate=null; if(dateStr) { paymentDate=parseCustomDateTime(dateStr,timeStr); if(!paymentDate) { showToast('Data/hora inválida','danger'); return; } } const updateData={amount,method}; if(pixKey) updateData.pixKeyUsed=pixKey; if(paymentDate) updateData.date=paymentDate.toISOString(); await db.collection('payments').doc(paymentId).update(updateData); showToast('Pagamento atualizado!'); document.getElementById('editPaymentModal').classList.remove('active'); const debtId=currentUserData.payments.find(p=>p.id===paymentId)?.debtId; if(debtId) showDebtPaymentsModal(debtId); });
+        document.getElementById('saveEditDebtBtn').addEventListener('click', saveEditDebt);
+        const editDateInput=document.getElementById('editPaymentDate'), editTimeInput=document.getElementById('editPaymentTime'); if(editDateInput) editDateInput.addEventListener('input',function(){applyDateMask(this);}); if(editTimeInput) editTimeInput.addEventListener('input',function(){applyTimeMask(this);});
+        const editDebtDueDate=document.getElementById('editDebtDueDate'); if(editDebtDueDate) editDebtDueDate.addEventListener('input',function(){applyDateMask(this);});
+        document.getElementById('editDebtMethod').addEventListener('change', ()=>{ if (document.getElementById('editDebtMethod').value === 'Pix') document.getElementById('editDebtPixFields').style.display = 'block'; else document.getElementById('editDebtPixFields').style.display = 'none'; });
+
+        document.getElementById('createBankAccountBtn').addEventListener('click', createBankAccount);
+        document.getElementById('registerDepositBtn').addEventListener('click', registerDeposit);
+        const depositDateOptions = document.querySelectorAll('#depositDateGroup .radio-option');
+        depositDateOptions.forEach(opt => opt.addEventListener('click', () => { depositDateOptions.forEach(o => o.classList.remove('active')); opt.classList.add('active'); document.getElementById('customDepositDateDiv').style.display = opt.dataset.value === 'today' ? 'none' : 'block'; }));
+        const depositDateCustom = document.getElementById('depositDateCustom');
+        if (depositDateCustom) depositDateCustom.addEventListener('input', function(){applyDateMask(this);});
+
+        document.getElementById('saveEditBankBtn').addEventListener('click', saveEditBank);
+
+        function setActiveSection(sectionId) {
+            document.querySelectorAll('.section-page').forEach(s=>s.classList.remove('active-page'));
+            document.getElementById(sectionId).classList.add('active-page');
+            document.querySelectorAll('.nav-item').forEach(nav=>nav.classList.remove('active'));
+            let an=Array.from(document.querySelectorAll('.nav-item')).find(btn=>btn.dataset.section===sectionId);
+            if(an) an.classList.add('active');
+            if (sectionId === 'sectionDebts') { document.querySelectorAll('#sectionDebts .sub-tab').forEach(t => t.classList.remove('active')); document.querySelector('#sectionDebts .sub-tab[data-subsection="subRegistrar"]').classList.add('active'); document.querySelectorAll('#sectionDebts .sub-section').forEach(sec => sec.classList.remove('active-section')); document.getElementById('subRegistrar').classList.add('active-section'); }
+            if (sectionId === 'sectionBanks') { document.querySelectorAll('#sectionBanks .sub-tab').forEach(t => t.classList.remove('active')); document.querySelector('#sectionBanks .sub-tab[data-subsection="subBankRegister"]').classList.add('active'); document.querySelectorAll('#sectionBanks .sub-section').forEach(sec => sec.classList.remove('active-section')); document.getElementById('subBankRegister').classList.add('active-section'); updateBankUI(); }
+        }
+        document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>setActiveSection(btn.dataset.section)));
+    };
+</script>
+</body>
+</html>
