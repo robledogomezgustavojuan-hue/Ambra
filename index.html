@@ -226,7 +226,7 @@
         </div>
     </div>
 
-    <!-- DASHBOARD PRINCIPAL -->
+    <!-- DASHBOARD -->
     <div id="sectionDashboard" class="section-page active-page">
         <div class="section-centered">
             <div class="today-debt-card" id="todayDebtCard">
@@ -506,77 +506,11 @@
     function showEditDebtModal(debtId) { const debt = currentUserData.debts.find(d => d.id === debtId); if (!debt) return; document.getElementById('editDebtId').value = debtId; document.getElementById('editDebtTitle').value = debt.title || ''; document.getElementById('editDebtCredor').value = debt.credor || ''; document.getElementById('editDebtMethod').value = debt.paymentMethod || 'Dinheiro'; document.getElementById('editDebtDueTime').value = debt.dueTime || ''; const pixFields = document.getElementById('editDebtPixFields'); const dueDateDiv = document.getElementById('editDebtDueDateDiv'); if (debt.paymentMethod === 'Pix') { pixFields.style.display = 'block'; document.getElementById('editDebtPixKey').value = debt.pixKey || ''; } else pixFields.style.display = 'none'; if (!debt.isParceled && debt.lumpSumDueDate) { dueDateDiv.style.display = 'block'; const d = new Date(debt.lumpSumDueDate); document.getElementById('editDebtDueDate').value = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; } else dueDateDiv.style.display = 'none'; document.getElementById('editDebtModal').classList.add('active'); }
     async function saveEditDebt() { const debtId = document.getElementById('editDebtId').value; const title = document.getElementById('editDebtTitle').value.trim(); const credor = document.getElementById('editDebtCredor').value.trim(); const method = document.getElementById('editDebtMethod').value; const dueTime = document.getElementById('editDebtDueTime').value; if (!title || !credor) { showToast('Preencha título e credor', 'danger'); return; } const updateData = { title, credor, paymentMethod: method, dueTime: dueTime || null }; if (method === 'Pix') updateData.pixKey = document.getElementById('editDebtPixKey').value.trim() || null; else updateData.pixKey = null; const debt = currentUserData.debts.find(d => d.id === debtId); if (debt && !debt.isParceled) { const dateStr = document.getElementById('editDebtDueDate').value; if (dateStr) { const parsed = parseCustomDateTime(dateStr, ''); if (parsed) updateData.lumpSumDueDate = parsed.toISOString().slice(0,10); } } await db.collection('debts').doc(debtId).update(updateData); showToast('Dívida atualizada!'); document.getElementById('editDebtModal').classList.remove('active'); }
 
-    async function createBankAccount() {
-        const name = document.getElementById('bankNameInput').value.trim();
-        if (!name) { showToast('Informe o nome do cofre','danger'); return; }
-        const type = document.getElementById('bankTypeInput').value.trim();
-        const goal = parseFloat(document.getElementById('bankGoalInput').value) || null;
-        const pixType = document.getElementById('bankPixType').value;
-        const pixKey = document.getElementById('bankPixKey').value.trim();
-        const data = { userId: auth.currentUser.uid, name, type, goal, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
-        if (pixType && pixKey) { data.pixType = pixType; data.pixKey = pixKey; }
-        try {
-            await db.collection('bankAccounts').add(data);
-            showToast('Cofre criado!');
-            ['bankNameInput','bankTypeInput','bankGoalInput','bankPixKey'].forEach(id=>{ const el = document.getElementById(id); if (el) el.value = ''; });
-            document.getElementById('bankPixType').value = '';
-        } catch (e) { showToast('Erro ao criar cofre: '+e.message,'danger'); }
-    }
-
-    async function registerDeposit() {
-        const accountId = document.getElementById('bankAccountSelect').value;
-        const amount = parseFloat(document.getElementById('depositAmount').value);
-        if (!accountId) { showToast('Selecione um cofre','danger'); return; }
-        if (isNaN(amount) || amount <= 0) { showToast('Informe um valor válido','danger'); return; }
-        const desc = document.getElementById('depositDescription').value.trim();
-        let date = new Date();
-        const dateMode = document.querySelector('#depositDateGroup .radio-option.active').dataset.value;
-        if (dateMode === 'custom') { const ds = document.getElementById('depositDateCustom').value; if (ds) { const parsed = parseCustomDateTime(ds,''); if (parsed) date = parsed; } }
-        try {
-            await db.collection('deposits').add({ userId: auth.currentUser.uid, accountId, amount, description: desc || null, date: date.toISOString(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-            showToast('Depósito registrado!');
-            ['depositAmount','depositDescription','depositDateCustom'].forEach(id=>{ const el = document.getElementById(id); if (el) el.value = ''; });
-        } catch (e) { showToast('Erro ao registrar depósito: '+e.message,'danger'); }
-    }
-
-    function showEditBankModal(accountId) {
-        const account = currentUserData.bankAccounts.find(a => a.id === accountId);
-        if (!account) return;
-        document.getElementById('editBankId').value = accountId;
-        document.getElementById('editBankName').value = account.name || '';
-        document.getElementById('editBankType').value = account.type || '';
-        document.getElementById('editBankGoal').value = account.goal || '';
-        document.getElementById('editBankPixType').value = account.pixType || '';
-        document.getElementById('editBankPixKey').value = account.pixKey || '';
-        document.getElementById('editBankModal').classList.add('active');
-    }
-
-    async function saveEditBank() {
-        const id = document.getElementById('editBankId').value;
-        const name = document.getElementById('editBankName').value.trim();
-        const type = document.getElementById('editBankType').value.trim();
-        const goal = parseFloat(document.getElementById('editBankGoal').value) || null;
-        const pixType = document.getElementById('editBankPixType').value;
-        const pixKey = document.getElementById('editBankPixKey').value.trim();
-        if (!name) { showToast('Nome do cofre é obrigatório','danger'); return; }
-        const data = { name, type, goal };
-        if (pixType && pixKey) { data.pixType = pixType; data.pixKey = pixKey; } else { data.pixType = null; data.pixKey = null; }
-        try {
-            await db.collection('bankAccounts').doc(id).update(data);
-            showToast('Cofre atualizado!');
-            document.getElementById('editBankModal').classList.remove('active');
-        } catch (e) { showToast('Erro ao atualizar: '+e.message,'danger'); }
-    }
-
-    async function deleteBankAccount(accountId) {
-        if (!confirm('Tem certeza que deseja excluir este cofre? Todos os depósitos associados serão removidos.')) return;
-        try {
-            const deposits = currentUserData.deposits.filter(d => d.accountId === accountId);
-            for (const dep of deposits) { await db.collection('deposits').doc(dep.id).delete(); }
-            await db.collection('bankAccounts').doc(accountId).delete();
-            showToast('Cofre excluído!');
-        } catch (e) { showToast('Erro ao excluir: '+e.message,'danger'); }
-    }
+    async function createBankAccount() { const name = document.getElementById('bankNameInput').value.trim(); if (!name) { showToast('Informe o nome do cofre','danger'); return; } const type = document.getElementById('bankTypeInput').value.trim(); const goal = parseFloat(document.getElementById('bankGoalInput').value) || null; const pixType = document.getElementById('bankPixType').value; const pixKey = document.getElementById('bankPixKey').value.trim(); const data = { userId: auth.currentUser.uid, name, type, goal, createdAt: firebase.firestore.FieldValue.serverTimestamp() }; if (pixType && pixKey) { data.pixType = pixType; data.pixKey = pixKey; } try { await db.collection('bankAccounts').add(data); showToast('Cofre criado!'); ['bankNameInput','bankTypeInput','bankGoalInput','bankPixKey'].forEach(id=>{ const el = document.getElementById(id); if (el) el.value = ''; }); document.getElementById('bankPixType').value = ''; } catch (e) { showToast('Erro ao criar cofre: '+e.message,'danger'); } }
+    async function registerDeposit() { const accountId = document.getElementById('bankAccountSelect').value; const amount = parseFloat(document.getElementById('depositAmount').value); if (!accountId) { showToast('Selecione um cofre','danger'); return; } if (isNaN(amount) || amount <= 0) { showToast('Informe um valor válido','danger'); return; } const desc = document.getElementById('depositDescription').value.trim(); let date = new Date(); const dateMode = document.querySelector('#depositDateGroup .radio-option.active').dataset.value; if (dateMode === 'custom') { const ds = document.getElementById('depositDateCustom').value; if (ds) { const parsed = parseCustomDateTime(ds,''); if (parsed) date = parsed; } } try { await db.collection('deposits').add({ userId: auth.currentUser.uid, accountId, amount, description: desc || null, date: date.toISOString(), createdAt: firebase.firestore.FieldValue.serverTimestamp() }); showToast('Depósito registrado!'); ['depositAmount','depositDescription','depositDateCustom'].forEach(id=>{ const el = document.getElementById(id); if (el) el.value = ''; }); } catch (e) { showToast('Erro ao registrar depósito: '+e.message,'danger'); } }
+    function showEditBankModal(accountId) { const account = currentUserData.bankAccounts.find(a => a.id === accountId); if (!account) return; document.getElementById('editBankId').value = accountId; document.getElementById('editBankName').value = account.name || ''; document.getElementById('editBankType').value = account.type || ''; document.getElementById('editBankGoal').value = account.goal || ''; document.getElementById('editBankPixType').value = account.pixType || ''; document.getElementById('editBankPixKey').value = account.pixKey || ''; document.getElementById('editBankModal').classList.add('active'); }
+    async function saveEditBank() { const id = document.getElementById('editBankId').value; const name = document.getElementById('editBankName').value.trim(); const type = document.getElementById('editBankType').value.trim(); const goal = parseFloat(document.getElementById('editBankGoal').value) || null; const pixType = document.getElementById('editBankPixType').value; const pixKey = document.getElementById('editBankPixKey').value.trim(); if (!name) { showToast('Nome do cofre é obrigatório','danger'); return; } const data = { name, type, goal }; if (pixType && pixKey) { data.pixType = pixType; data.pixKey = pixKey; } else { data.pixType = null; data.pixKey = null; } try { await db.collection('bankAccounts').doc(id).update(data); showToast('Cofre atualizado!'); document.getElementById('editBankModal').classList.remove('active'); } catch (e) { showToast('Erro ao atualizar: '+e.message,'danger'); } }
+    async function deleteBankAccount(accountId) { if (!confirm('Tem certeza que deseja excluir este cofre? Todos os depósitos associados serão removidos.')) return; try { const deposits = currentUserData.deposits.filter(d => d.accountId === accountId); for (const dep of deposits) { await db.collection('deposits').doc(dep.id).delete(); } await db.collection('bankAccounts').doc(accountId).delete(); showToast('Cofre excluído!'); } catch (e) { showToast('Erro ao excluir: '+e.message,'danger'); } }
 
     function scheduleRender() { clearTimeout(renderTimeout); renderTimeout=setTimeout(()=>renderAll(),80); }
     function renderAll() { if(!currentUser) return; updateStatsUI(); renderFullList(); renderPaymentsHistory(); renderSelectDebts(); updateTodayDebtCard(); updateTodayPaidCard(); updateBankUI(); updateUserAvatarInUI(); }
